@@ -19,20 +19,33 @@ link_within_block <- function(dfA, dfB,
   embeddings <- get_embeddings(all_unique_strings)
   if(verbose) print('Embeddings retrieved. Computing pairwise similarities...')
 
+  # similarity matrix from crossproduct (matrix operations *much* faster)
+  emb <- do.call(rbind, embeddings)
+  emb_A <- emb[strings_A,]
+  emb_B <- emb[strings_B,]
+  similarity_matrix <- tcrossprod(emb_A, emb_B)
+
+
   # Compute all pairwise similarity scores
   df <- expand.grid(string_A = strings_A,
                     string_B = strings_B,
                     stringsAsFactors = FALSE)
 
-  df$embedding_score <- mapply(function(a, b) dot(embeddings[[a]],
-                                                  embeddings[[b]]),
-                               df$string_A, df$string_B)
+
+  # this is a lot slower than matrix multiplication
+  # df$embedding_score <- mapply(function(a, b) dot(embeddings[[a]],
+  #                                                 embeddings[[b]]),
+  #                              df$string_A, df$string_B)
 
   if(verbose) print('JW')
   # Compute lexical string distance measures
-  df$jw <- RecordLinkage::jarowinkler(str1 = tolower(df$string_A),
-                                     str2 = tolower(df$string_B),
-                                     r = 0.1)
+  # df$jw <- RecordLinkage::jarowinkler(str1 = tolower(df$string_A),
+  #                                    str2 = tolower(df$string_B),
+  #                                    r = 0.1)
+  df$jw <- stringdist::stringsim(tolower(df$string_A),
+                                 tolower(df$string_B),
+                                 method = 'jw',
+                                 p = 0.1)
 
   if(verbose) print('Jaccard')
   df$jaccard <- stringdist::stringsim(tolower(df$string_A),
