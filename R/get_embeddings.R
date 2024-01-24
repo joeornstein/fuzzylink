@@ -7,13 +7,13 @@
 #' @param text A character vector
 #' @param model Which variant of the GPT-3 embedding model to use. Defaults to 'text-embedding-ada-002'.
 #'
-#' @return A named list of embedding vectors, the same length as the text input.
+#' @return A matrix of embedding vectors (one per row), the same length as the text input.
 #' @export
 #'
 #' @examples
 #' embeddings <- get_embeddings(c('dog', 'cat', 'canine', 'feline'))
-#' embeddings[['dog']] |> dot(embeddings[['canine']])
-#' embeddings[['dog']] |> dot(embeddings[['feline']])
+#' embeddings['dog',] |> dot(embeddings['canine',])
+#' embeddings['dog',] |> dot(embeddings['feline',])
 get_embeddings <- function(text, model = 'text-embedding-ada-002'){
 
   # initialize empty list
@@ -45,6 +45,9 @@ get_embeddings <- function(text, model = 'text-embedding-ada-002'){
     index <- index + chunk_size
 
   }
+
+  # bind into a matrix
+  embeddings <- do.call(rbind, embeddings)
 
   return(embeddings)
 

@@ -12,13 +12,13 @@ get_embeddings(text, model = "text-embedding-ada-002")
 \item{model}{Which variant of the GPT-3 embedding model to use. Defaults to 'text-embedding-ada-002'.}
 }
 \value{
-A named list of embedding vectors, the same length as the text input.
+A matrix of embedding vectors (one per row), the same length as the text input.
 }
 \description{
 Get pretrained text embeddings from the OpenAI API. Automatically batches requests to handle rate limits.
 }
 \examples{
 embeddings <- get_embeddings(c('dog', 'cat', 'canine', 'feline'))
-embeddings[['dog']] |> dot(embeddings[['canine']])
-embeddings[['dog']] |> dot(embeddings[['feline']])
+embeddings['dog',] |> dot(embeddings['canine',])
+embeddings['dog',] |> dot(embeddings['feline',])
 }
