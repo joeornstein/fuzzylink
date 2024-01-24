@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_embeddings.R
 \name{get_embeddings}
 \alias{get_embeddings}
-\title{Get pre-trained text embeddings from OpenAI API}
+\title{Get pretrained GPT-3 text embeddings}
 \usage{
 get_embeddings(text, model = "text-embedding-ada-002")
 }
@@ -12,13 +12,13 @@ get_embeddings(text, model = "text-embedding-ada-002")
 \item{model}{Which variant of the GPT-3 embedding model to use. Defaults to 'text-embedding-ada-002'.}
 }
 \value{
-A named list of embedding vectors, of the same length as the text input.
+A named list of embedding vectors, the same length as the text input.
 }
 \description{
-Get pre-trained text embeddings from OpenAI API
+Get pretrained text embeddings from the OpenAI API. Automatically batches requests to handle rate limits.
 }
 \examples{
 embeddings <- get_embeddings(c('dog', 'cat', 'canine', 'feline'))
-dot(embeddings[['dog']], embeddings[['canine']])
-dot(embeddings[['dog']], embeddings[['feline']])
+embeddings[['dog']] |> dot(embeddings[['canine']])
+embeddings[['dog']] |> dot(embeddings[['feline']])
 }

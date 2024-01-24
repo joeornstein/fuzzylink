@@ -1,15 +1,19 @@
-#' Get pre-trained text embeddings from OpenAI API
+#' Get pretrained GPT-3 text embeddings
+#'
+#' @description
+#' Get pretrained text embeddings from the OpenAI API. Automatically batches requests to handle rate limits.
+#'
 #'
 #' @param text A character vector
 #' @param model Which variant of the GPT-3 embedding model to use. Defaults to 'text-embedding-ada-002'.
 #'
-#' @return A named list of embedding vectors, of the same length as the text input.
+#' @return A named list of embedding vectors, the same length as the text input.
 #' @export
 #'
 #' @examples
 #' embeddings <- get_embeddings(c('dog', 'cat', 'canine', 'feline'))
-#' dot(embeddings[['dog']], embeddings[['canine']])
-#' dot(embeddings[['dog']], embeddings[['feline']])
+#' embeddings[['dog']] |> dot(embeddings[['canine']])
+#' embeddings[['dog']] |> dot(embeddings[['feline']])
 get_embeddings <- function(text, model = 'text-embedding-ada-002'){
 
   # initialize empty list
