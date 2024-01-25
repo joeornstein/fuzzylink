@@ -27,7 +27,7 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 5){
     dplyr::select(-bin)
 
   # label each name pair using zero-shot GPT-3.5 prompt
-
+  train$match_gpt <- check_match(train$A, train$B)
 
   return(train)
 

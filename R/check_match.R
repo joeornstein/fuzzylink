@@ -2,6 +2,7 @@
 #'
 #' @param string1 A string or vector of strings
 #' @param string2 A string or vector of strings
+#' @param batch_size The number of string pairs to include in each prompt
 #'
 #' @return A string or vector of strings the same length as `string1` and `string2`. "Yes" if the pair of strings match, "No" otherwise.
 #' @export
@@ -16,7 +17,7 @@ check_match <- function(string1, string2, batch_size = 50){
     stop('Inputs must have the same number of elements.')
   }
 
-  # empty vector of labels
+  # create an empty vector of labels
   labels <- character(length = length(string1))
 
   # submit prompts in batches
