@@ -22,7 +22,7 @@ check_match <- function(string1, string2, batch_size = 50){
 
   # submit prompts in batches
   start_index <- 1
-  while(start_index < length(string1)){
+  while(start_index <= length(string1)){
     end_index <- min(c(start_index + batch_size - 1, length(string1)))
     substring1 <- string1[start_index:end_index]
     substring2 <- string2[start_index:end_index]
