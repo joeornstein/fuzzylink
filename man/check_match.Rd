@@ -2,7 +2,7 @@
 % Please edit documentation in R/check_match.R
 \name{check_match}
 \alias{check_match}
-\title{Test whether two strings match with a zero-shot LLM prompt.}
+\title{Test whether two strings match with an LLM prompt.}
 \usage{
 check_match(string1, string2)
 }
@@ -12,8 +12,13 @@ check_match(string1, string2)
 \item{string2}{A string or vector of strings}
 }
 \value{
-"Yes" if the pair of strings match, "No" otherwise.
+A string or vector of strings the same length as \code{string1} and \code{string2}. "Yes" if the pair of strings match, "No" otherwise.
 }
 \description{
-Test whether two strings match with a zero-shot LLM prompt.
+Test whether two strings match with an LLM prompt.
+}
+\examples{
+check_match('UPS', 'United Parcel Service')
+check_match('UPS', 'United States Postal Service')
+check_match(c('USPS', 'USPS'), c('Post Office', 'United Parcel'))
 }
