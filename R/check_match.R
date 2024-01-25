@@ -10,41 +10,56 @@
 #' check_match('UPS', 'United Parcel Service')
 #' check_match('UPS', 'United States Postal Service')
 #' check_match(c('USPS', 'USPS'), c('Post Office', 'United Parcel'))
-check_match <- function(string1, string2){
-
-  ## TODO: submit in batches of 100
+check_match <- function(string1, string2, batch_size = 50){
 
   if(length(string1) != length(string2)){
     stop('Inputs must have the same number of elements.')
   }
 
-  # format GPT prompt
-  p <- list()
-  p[[1]] <- list(role = 'user',
-                 content = 'I am trying to merge two datasets, but the names do not always match exactly. Below is a list of name pairs.')
+  # empty vector of labels
+  labels <- character(length = length(string1))
 
-  # format content as a numbered list of string pairs
-  p[[2]] <- list(role = 'user',
-                 content = paste0(
-                   1:length(string1), '. \"', string1,
-                   '\" and \"', string2, '\"',
-                   collapse = '\n'))
+  # submit prompts in batches
+  start_index <- 1
+  while(start_index < length(string1)){
+    end_index <- min(c(start_index + batch_size - 1, length(string1)))
+    substring1 <- string1[start_index:end_index]
+    substring2 <- string2[start_index:end_index]
 
-  # provide instructions
-  p[[3]] <- list(role = 'user',
-                 content = 'For each pair of names, decide whether they probably refer to the same entity. Nicknames, acronyms, abbreviations, and misspellings are all acceptable matches. Respond with "Yes" or "No".')
+    # format GPT prompt
+    p <- list()
+    p[[1]] <- list(role = 'user',
+                   content = 'I am trying to merge two datasets, but the names do not always match exactly. Below is a list of name pairs.')
 
-  # submit to OpenAI API
-  resp <- openai::create_chat_completion(model = 'gpt-3.5-turbo',
-                                         messages = p,
-                                         temperature = 0)
+    # format content as a numbered list of string pairs
+    p[[2]] <- list(role = 'user',
+                   content = paste0(
+                     1:length(substring1), '. \"', substring1,
+                     '\" and \"', substring2, '\"',
+                     collapse = '\n'))
 
-  # convert response into vector
-  labels <- gsub('[0-9]+. ', '',
-                 unlist(strsplit(resp$choices$message.content, '\n')))
+    # provide instructions
+    p[[3]] <- list(role = 'user',
+                   content = 'For each pair of names, decide whether they probably refer to the same entity. Nicknames, acronyms, abbreviations, and misspellings are all acceptable matches. Respond with "Yes" or "No".')
 
-  if(length(labels) != length(string1)){
-    stop('Problem with the API response: labels not the same length as input. Try smaller batch size.')
+    # submit to OpenAI API
+    resp <- openai::create_chat_completion(model = 'gpt-3.5-turbo',
+                                           messages = p,
+                                           temperature = 0)
+
+    # convert response into vector
+    response_vector <- gsub('[0-9]+. ', '',
+                   unlist(strsplit(resp$choices$message.content, '\n')))
+
+    if(length(response_vector) != length(substring1)){
+      stop('Problem with the API response: labels not the same length as input. Try smaller batch size.')
+    }
+
+    labels[start_index:end_index] <- response_vector
+
+    # update start_index
+    start_index <- start_index + batch_size
+
   }
 
   return(labels)
