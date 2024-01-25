@@ -1,0 +1,35 @@
+#' Create a training set
+#'
+#' @description
+#' Creates a training set from an embedding similarity matrix and labels it using a zero-shot GPT prompt.
+#'
+#'
+#' @param sim A matrix of similarity scores
+#' @param num_bins Number of bins to split similarity scores for stratified random sampling (defaults to 50)
+#' @param samples_per_bin Number of string pairs to sample from each bin (defaults to 5)
+#'
+#' @return A dataset with string pairs and a `match` column indicating whether they match.
+#' @export
+#'
+get_training_set <- function(sim, num_bins = 50, samples_per_bin = 5){
+
+  # convert similarity matrix to long dataframe
+  sim <- reshape2::melt(sim)
+  names(sim) <- c('A', 'B', 'sim')
+
+  # split embedding distance into equal-sized bins
+  sim$bin <- cut(sim$sim, breaks = num_bins)
+
+  # draw randomly from each bin to create the training set
+  train <- sim |>
+    dplyr::group_by(bin) |>
+    dplyr::slice_sample(n = samples_per_bin) |>
+    dplyr::ungroup() |>
+    dplyr::select(-bin)
+
+  # label each name pair using zero-shot GPT-3.5 prompt
+
+
+  return(train)
+
+}
