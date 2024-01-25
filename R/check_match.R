@@ -1,9 +1,9 @@
 #' Test whether two strings match with a zero-shot LLM prompt.
 #'
-#' @param name1 A string
-#' @param name2 A string
+#' @param string1 A string or vector of strings
+#' @param string2 A string or vector of strings
 #'
-#' @return "Yes" if the two strings match, "No" otherwise.
+#' @return "Yes" if the pair of strings match, "No" otherwise.
 #' @export
 #'
 #' @examples
@@ -12,20 +12,43 @@
 #' check_match('USPS', 'United Parcel Service')
 #' check_match('USPS', 'United States Postal Service')
 #' check_match('USPS', 'Post Office')
-check_match <- function(name1, name2){
+check_match <- function(string1, string2){
+
+  ## TODO: submit in batches of 100
+
+  if(length(string1) != length(string2)){
+    stop('Inputs must have the same number of elements.')
+  }
 
   # format GPT prompt
   p <- list()
   p[[1]] <- list(role = 'user',
-                 content = 'Decide whether the two names below probably refer to the same entity (nicknames, typos, acronyms, and abbreviations are acceptable matches). Respond "Yes" or "No".')
-  p[[2]] <- list(role = 'user', content = paste0('\"', name1, '\" and \"', name2, '\"'))
+                 content = 'I am trying to merge two datasets, but the names do not always match exactly. Below is a list of name pairs:')
+
+  # format content as a numbered list of string pairs
+  p[[2]] <- list(role = 'user',
+                 content = paste0(
+                   1:length(string1), '. \"', string1,
+                   '\" and \"', string2, '\"',
+                   collapse = '\n'))
+
+  # provide instructions
+  p[[3]] <- list(role = 'user',
+                 content = 'For each pair of names, decide whether they probably refer to the same entity. Nicknames, acronyms, and abbreviations are all acceptable matches. Also match reasonable misspellings and typos. Respond with "Yes" or "No".')
 
   # submit to OpenAI API
   resp <- openai::create_chat_completion(model = 'gpt-3.5-turbo',
                                          messages = p,
-                                         temperature = 0,
-                                         max_tokens = 1)
+                                         temperature = 0)
 
-  return(resp$choices$message.content)
+  # convert response into vector
+  labels <- gsub('[0-9]+. ', '',
+                 unlist(strsplit(resp$choices$message.content, '\n')))
+
+  if(length(labels) != length(string1)){
+    stop('Problem with the API response: labels not the same length as input. Try smaller batch size.')
+  }
+
+  return(labels)
 
 }

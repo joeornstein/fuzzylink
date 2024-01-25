@@ -17,11 +17,10 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 5){
   sim <- reshape2::melt(sim)
   names(sim) <- c('A', 'B', 'sim')
 
-  # split embedding distance into equal-sized bins
-  sim$bin <- cut(sim$sim, breaks = num_bins)
-
-  # draw randomly from each bin to create the training set
   train <- sim |>
+    # split embedding distance into equal-sized bins
+    dplyr::mutate(bin = cut(sim, breaks = num_bins)) |>
+    # draw randomly from each bin to create the training set
     dplyr::group_by(bin) |>
     dplyr::slice_sample(n = samples_per_bin) |>
     dplyr::ungroup() |>

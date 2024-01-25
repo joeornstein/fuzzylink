@@ -4,23 +4,16 @@
 \alias{check_match}
 \title{Test whether two strings match with a zero-shot LLM prompt.}
 \usage{
-check_match(name1, name2)
+check_match(string1, string2)
 }
 \arguments{
-\item{name1}{A string}
+\item{string1}{A string or vector of strings}
 
-\item{name2}{A string}
+\item{string2}{A string or vector of strings}
 }
 \value{
-"Yes" if the two strings match, "No" otherwise.
+"Yes" if the pair of strings match, "No" otherwise.
 }
 \description{
 Test whether two strings match with a zero-shot LLM prompt.
-}
-\examples{
-check_match('UPS', 'United Parcel Service')
-check_match('UPS', 'United States Postal Service')
-check_match('USPS', 'United Parcel Service')
-check_match('USPS', 'United States Postal Service')
-check_match('USPS', 'Post Office')
 }
