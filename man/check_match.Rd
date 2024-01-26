@@ -4,12 +4,16 @@
 \alias{check_match}
 \title{Test whether two strings match with an LLM prompt.}
 \usage{
-check_match(string1, string2)
+check_match(string1, string2, batch_size = 50, model = "gpt-4-turbo-preview")
 }
 \arguments{
 \item{string1}{A string or vector of strings}
 
 \item{string2}{A string or vector of strings}
+
+\item{batch_size}{The number of string pairs to include in each prompt}
+
+\item{model}{Which OpenAI model to prompt; defaults to 'gpt-4-turbo-preview'}
 }
 \value{
 A string or vector of strings the same length as \code{string1} and \code{string2}. "Yes" if the pair of strings match, "No" otherwise.
@@ -20,5 +24,6 @@ Test whether two strings match with an LLM prompt.
 \examples{
 check_match('UPS', 'United Parcel Service')
 check_match('UPS', 'United States Postal Service')
-check_match(c('USPS', 'USPS'), c('Post Office', 'United Parcel'))
+check_match(c('USPS', 'USPS', 'USPS'),
+            c('Post Office', 'United Parcel', 'US Postal Service'))
 }
