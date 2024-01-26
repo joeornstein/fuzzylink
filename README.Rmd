@@ -159,4 +159,5 @@ matches <- df |>
   # join with match labels for those pairs in the training set
   left_join(train)
 
+matches
 ```
