@@ -4,12 +4,12 @@
 \alias{get_embeddings}
 \title{Get pretrained GPT-3 text embeddings}
 \usage{
-get_embeddings(text, model = "text-embedding-ada-002")
+get_embeddings(text, model = "text-embedding-3-large")
 }
 \arguments{
 \item{text}{A character vector}
 
-\item{model}{Which variant of the GPT-3 embedding model to use. Defaults to 'text-embedding-ada-002'.}
+\item{model}{Which variant of the GPT-3 embedding model to use. Defaults to 'text-embedding-3-large'.}
 }
 \value{
 A matrix of embedding vectors (one per row), the same length as the text input.
