@@ -97,9 +97,9 @@ train
 ### Step 4: Fit Model
 
 ```{r}
-model <- glm(as.numeric(match == 'Yes') ~ sim, data = train)
-train$match_prob <- predict(model, train, type = 'response')
-train
+model <- glm(as.numeric(match == 'Yes') ~ sim, 
+             data = train,
+             family = 'binomial')
 ```
 
 ### Step 5: Create Matched Dataset
@@ -111,8 +111,52 @@ df <- sim |>
 
 df$match_probability <- predict(model, df, type = 'response')
 
-df |> 
-  filter(match_probability > 0.5) |> 
+head(df)
+
+matches <- df |> 
+  filter(match_probability > 0.2) |> 
   right_join(dfA, by = c('A' = 'name')) |> 
-  left_join(dfB, by = c('B' = 'name'))
+  left_join(dfB, by = c('B' = 'name')) |> 
+  # join with match labels for those pairs in the training set
+  left_join(train)
+```
+
+### Step 6: Validate Uncertain Matches
+
+For every match within a range of match probabilities (by default 0.2 to 0.9), use an LLM prompt to validate whether the name pair is a match or not, just like we did with the training data.
+
+```{r}
+matches_to_validate <- matches |> 
+  filter(match_probability > 0.2, 
+         match_probability < 0.9,
+         is.na(match))
+
+matches_to_validate$match <- check_match(matches_to_validate$A,
+                                         matches_to_validate$B)
+# append to train set
+train <- train |> 
+  bind_rows(matches_to_validate |> 
+              select(A,B,sim,match))
+
+# # append to matches
+# matches <- matches |> 
+#   anti_join(matches_to_validate, by = c('A','B')) |> 
+#   bind_rows(matches_to_validate)
+
+# refine the model
+model <- glm(as.numeric(match == 'Yes') ~ sim,
+             data = train,
+             family = 'binomial')
+
+df$match_probability <- predict(model, df, type = 'response')
+
+head(df)
+
+matches <- df |> 
+  filter(match_probability > 0.2) |> 
+  right_join(dfA, by = c('A' = 'name')) |> 
+  left_join(dfB, by = c('B' = 'name')) |> 
+  # join with match labels for those pairs in the training set
+  left_join(train)
+
 ```

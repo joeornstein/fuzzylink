@@ -129,21 +129,9 @@ train
 ### Step 4: Fit Model
 
 ``` r
-model <- glm(as.numeric(match == 'Yes') ~ sim, data = train)
-train$match_prob <- predict(model, train, type = 'response')
-train
-#> # A tibble: 9 × 5
-#>   A                  B               sim match match_prob
-#>   <fct>              <fct>         <dbl> <chr>      <dbl>
-#> 1 Jennifer C. Reilly Jimmy Pointer 0.197 No         0.192
-#> 2 James J. Pointer   Jessica Renny 0.222 No         0.227
-#> 3 James J. Pointer   Tim Ryan      0.254 Yes        0.270
-#> 4 Timothy B. Ryan    Jessica Renny 0.254 No         0.270
-#> 5 Timothy B. Ryan    Jimmy Pointer 0.290 Yes        0.319
-#> 6 Jennifer C. Reilly Tim Ryan      0.338 No         0.385
-#> 7 Jennifer C. Reilly Jessica Renny 0.423 No         0.500
-#> 8 Timothy B. Ryan    Tim Ryan      0.692 Yes        0.866
-#> 9 James J. Pointer   Jimmy Pointer 0.767 Yes        0.969
+model <- glm(as.numeric(match == 'Yes') ~ sim, 
+             data = train,
+             family = 'binomial')
 ```
 
 ### Step 5: Create Matched Dataset
@@ -155,12 +143,67 @@ df <- sim |>
 
 df$match_probability <- predict(model, df, type = 'response')
 
-df |> 
-  filter(match_probability > 0.5) |> 
+head(df)
+#>                    A             B       sim match_probability
+#> 1    Timothy B. Ryan      Tim Ryan 0.6916803         0.8906855
+#> 2   James J. Pointer      Tim Ryan 0.2539563         0.2602968
+#> 3 Jennifer C. Reilly      Tim Ryan 0.3384956         0.3923217
+#> 4    Timothy B. Ryan Jimmy Pointer 0.2901356         0.3133048
+#> 5   James J. Pointer Jimmy Pointer 0.7673960         0.9334718
+#> 6 Jennifer C. Reilly Jimmy Pointer 0.1969335         0.1894231
+
+matches <- df |> 
+  filter(match_probability > 0.2) |> 
   right_join(dfA, by = c('A' = 'name')) |> 
-  left_join(dfB, by = c('B' = 'name'))
-#>                    A             B       sim match_probability age       hobby
-#> 1    Timothy B. Ryan      Tim Ryan 0.6916803         0.8663648  28 Woodworking
-#> 2   James J. Pointer Jimmy Pointer 0.7673960         0.9694929  40      Guitar
-#> 3 Jennifer C. Reilly Jessica Renny 0.4228717         0.5002357  32     Camping
+  left_join(dfB, by = c('B' = 'name')) |> 
+  # join with match labels for those pairs in the training set
+  left_join(train)
+```
+
+### Step 6: Validate Uncertain Matches
+
+For every match within a range of match probabilities (by default 0.2 to
+0.9), use an LLM prompt to validate whether the name pair is a match or
+not, just like we did with the training data.
+
+``` r
+matches_to_validate <- matches |> 
+  filter(match_probability > 0.2, 
+         match_probability < 0.9,
+         is.na(match))
+
+matches_to_validate$match <- check_match(matches_to_validate$A,
+                                         matches_to_validate$B)
+# append to train set
+train <- train |> 
+  bind_rows(matches_to_validate |> 
+              select(A,B,sim,match))
+
+# # append to matches
+# matches <- matches |> 
+#   anti_join(matches_to_validate, by = c('A','B')) |> 
+#   bind_rows(matches_to_validate)
+
+# refine the model
+model <- glm(as.numeric(match == 'Yes') ~ sim,
+             data = train,
+             family = 'binomial')
+
+df$match_probability <- predict(model, df, type = 'response')
+
+head(df)
+#>                    A             B       sim match_probability
+#> 1    Timothy B. Ryan      Tim Ryan 0.6916803         0.8906855
+#> 2   James J. Pointer      Tim Ryan 0.2539563         0.2602968
+#> 3 Jennifer C. Reilly      Tim Ryan 0.3384956         0.3923217
+#> 4    Timothy B. Ryan Jimmy Pointer 0.2901356         0.3133048
+#> 5   James J. Pointer Jimmy Pointer 0.7673960         0.9334718
+#> 6 Jennifer C. Reilly Jimmy Pointer 0.1969335         0.1894231
+
+matches <- df |> 
+  filter(match_probability > 0.2) |> 
+  right_join(dfA, by = c('A' = 'name')) |> 
+  left_join(dfB, by = c('B' = 'name')) |> 
+  # join with match labels for those pairs in the training set
+  left_join(train)
 ```
