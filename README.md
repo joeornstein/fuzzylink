@@ -117,9 +117,9 @@ train
 #>   <fct>              <fct>         <dbl> <chr>
 #> 1 Jennifer C. Reilly Jimmy Pointer 0.197 No   
 #> 2 James J. Pointer   Jessica Renny 0.222 No   
-#> 3 Timothy B. Ryan    Jessica Renny 0.254 No   
-#> 4 James J. Pointer   Tim Ryan      0.254 No   
-#> 5 Timothy B. Ryan    Jimmy Pointer 0.290 No   
+#> 3 James J. Pointer   Tim Ryan      0.254 Yes  
+#> 4 Timothy B. Ryan    Jessica Renny 0.254 No   
+#> 5 Timothy B. Ryan    Jimmy Pointer 0.290 Yes  
 #> 6 Jennifer C. Reilly Tim Ryan      0.338 No   
 #> 7 Jennifer C. Reilly Jessica Renny 0.423 No   
 #> 8 Timothy B. Ryan    Tim Ryan      0.692 Yes  
@@ -145,12 +145,12 @@ df$match_probability <- predict(model, df, type = 'response')
 
 head(df)
 #>                    A             B       sim match_probability
-#> 1    Timothy B. Ryan      Tim Ryan 0.6916803      1.000000e+00
-#> 2   James J. Pointer      Tim Ryan 0.2539563      2.220446e-16
-#> 3 Jennifer C. Reilly      Tim Ryan 0.3384956      2.220446e-16
-#> 4    Timothy B. Ryan Jimmy Pointer 0.2901356      2.220446e-16
-#> 5   James J. Pointer Jimmy Pointer 0.7673960      1.000000e+00
-#> 6 Jennifer C. Reilly Jimmy Pointer 0.1969335      2.220446e-16
+#> 1    Timothy B. Ryan      Tim Ryan 0.6916803         0.8906855
+#> 2   James J. Pointer      Tim Ryan 0.2539563         0.2602968
+#> 3 Jennifer C. Reilly      Tim Ryan 0.3384956         0.3923217
+#> 4    Timothy B. Ryan Jimmy Pointer 0.2901356         0.3133048
+#> 5   James J. Pointer Jimmy Pointer 0.7673960         0.9334718
+#> 6 Jennifer C. Reilly Jimmy Pointer 0.1969335         0.1894231
 
 matches <- df |> 
   filter(match_probability > 0.2) |> 
@@ -174,15 +174,10 @@ matches_to_validate <- matches |>
 
 matches_to_validate$match <- check_match(matches_to_validate$A,
                                          matches_to_validate$B)
-# append to train set
+# append new labeled pairs to the train set
 train <- train |> 
   bind_rows(matches_to_validate |> 
               select(A,B,sim,match))
-
-# # append to matches
-# matches <- matches |> 
-#   anti_join(matches_to_validate, by = c('A','B')) |> 
-#   bind_rows(matches_to_validate)
 
 # refine the model
 model <- glm(as.numeric(match == 'Yes') ~ sim,
@@ -193,12 +188,12 @@ df$match_probability <- predict(model, df, type = 'response')
 
 head(df)
 #>                    A             B       sim match_probability
-#> 1    Timothy B. Ryan      Tim Ryan 0.6916803      1.000000e+00
-#> 2   James J. Pointer      Tim Ryan 0.2539563      2.220446e-16
-#> 3 Jennifer C. Reilly      Tim Ryan 0.3384956      2.220446e-16
-#> 4    Timothy B. Ryan Jimmy Pointer 0.2901356      2.220446e-16
-#> 5   James J. Pointer Jimmy Pointer 0.7673960      1.000000e+00
-#> 6 Jennifer C. Reilly Jimmy Pointer 0.1969335      2.220446e-16
+#> 1    Timothy B. Ryan      Tim Ryan 0.6916803         0.8906855
+#> 2   James J. Pointer      Tim Ryan 0.2539563         0.2602968
+#> 3 Jennifer C. Reilly      Tim Ryan 0.3384956         0.3923217
+#> 4    Timothy B. Ryan Jimmy Pointer 0.2901356         0.3133048
+#> 5   James J. Pointer Jimmy Pointer 0.7673960         0.9334718
+#> 6 Jennifer C. Reilly Jimmy Pointer 0.1969335         0.1894231
 
 matches <- df |> 
   filter(match_probability > 0.2) |> 
@@ -209,11 +204,21 @@ matches <- df |>
 
 matches
 #>                    A             B       sim match_probability age       hobby
-#> 1    Timothy B. Ryan      Tim Ryan 0.6916803                 1  28 Woodworking
-#> 2   James J. Pointer Jimmy Pointer 0.7673960                 1  40      Guitar
-#> 3 Jennifer C. Reilly          <NA>        NA                NA  32        <NA>
+#> 1    Timothy B. Ryan      Tim Ryan 0.6916803         0.8906855  28 Woodworking
+#> 2   James J. Pointer      Tim Ryan 0.2539563         0.2602968  40 Woodworking
+#> 3 Jennifer C. Reilly      Tim Ryan 0.3384956         0.3923217  32 Woodworking
+#> 4    Timothy B. Ryan Jimmy Pointer 0.2901356         0.3133048  28      Guitar
+#> 5   James J. Pointer Jimmy Pointer 0.7673960         0.9334718  40      Guitar
+#> 6    Timothy B. Ryan Jessica Renny 0.2536269         0.2598418  28     Camping
+#> 7   James J. Pointer Jessica Renny 0.2220962         0.2187213  40     Camping
+#> 8 Jennifer C. Reilly Jessica Renny 0.4228717         0.5419331  32     Camping
 #>   match
 #> 1   Yes
 #> 2   Yes
-#> 3  <NA>
+#> 3    No
+#> 4   Yes
+#> 5   Yes
+#> 6    No
+#> 7    No
+#> 8    No
 ```

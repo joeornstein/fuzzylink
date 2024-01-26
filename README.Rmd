@@ -133,15 +133,10 @@ matches_to_validate <- matches |>
 
 matches_to_validate$match <- check_match(matches_to_validate$A,
                                          matches_to_validate$B)
-# append to train set
+# append new labeled pairs to the train set
 train <- train |> 
   bind_rows(matches_to_validate |> 
               select(A,B,sim,match))
-
-# # append to matches
-# matches <- matches |> 
-#   anti_join(matches_to_validate, by = c('A','B')) |> 
-#   bind_rows(matches_to_validate)
 
 # refine the model
 model <- glm(as.numeric(match == 'Yes') ~ sim,
