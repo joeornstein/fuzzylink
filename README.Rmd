@@ -145,8 +145,6 @@ model <- glm(as.numeric(match == 'Yes') ~ sim,
 
 df$match_probability <- predict(model, df, type = 'response')
 
-head(df)
-
 matches <- df |> 
   filter(match_probability > 0.2) |> 
   right_join(dfA, by = c('A' = 'name')) |> 

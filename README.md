@@ -186,15 +186,6 @@ model <- glm(as.numeric(match == 'Yes') ~ sim,
 
 df$match_probability <- predict(model, df, type = 'response')
 
-head(df)
-#>                    A             B       sim match_probability
-#> 1    Timothy B. Ryan      Tim Ryan 0.6916803         0.8906855
-#> 2   James J. Pointer      Tim Ryan 0.2539563         0.2602968
-#> 3 Jennifer C. Reilly      Tim Ryan 0.3384956         0.3923217
-#> 4    Timothy B. Ryan Jimmy Pointer 0.2901356         0.3133048
-#> 5   James J. Pointer Jimmy Pointer 0.7673960         0.9334718
-#> 6 Jennifer C. Reilly Jimmy Pointer 0.1969335         0.1894231
-
 matches <- df |> 
   filter(match_probability > 0.2) |> 
   right_join(dfA, by = c('A' = 'name')) |> 
