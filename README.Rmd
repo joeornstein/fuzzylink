@@ -48,7 +48,7 @@ df <- fuzzylink(dfA, dfB, by = 'name')
 df
 ```
 
-The procedure works by taking *pretrained text embeddings* from OpenAI's GPT-3 and constructing a measure of similarity for each pair of names. These similarity metrics are then used as predictors in a statistical model estimating the probability that two name pairs represent the same entity.
+The procedure works by using *pretrained text embeddings* from OpenAI's GPT-3 to construct a measure of similarity for each pair of names. These similarity measures are then used as predictors in a statistical model to estimate the probability that two name pairs represent the same entity. In the guide below, I will walk step-by-step through what's going on under the hood when we call the `fuzzylink()` function.
 
 ## Installation
 
@@ -59,20 +59,19 @@ You can install the development version of `fuzzylink` from [GitHub](https://git
 devtools::install_github("joeornstein/fuzzylink")
 ```
 
+You will also need an account with OpenAI. You can sign up [here](https://beta.openai.com/signup), after which you'll need generate an API key [here](https://platform.openai.com/account/api-keys). I recommend adding this API key as a variable in your operating system environment called `OPENAI_API_KEY`; that way you won't risk leaking it by hard-coding it into your R scripts. The `fuzzylink` package will automatically look for your API key under that variable name, and will prompt you to enter the API key manually if it can't find one there. If you're unfamiliar with setting Environment Variables in your operating system, [here](https://dev.to/biplov/handling-passwords-and-secret-keys-using-environment-variables-2ei0) are some helpful instructions. Note that you may need to restart your computer after completing this step.
+
 ## Example
 
-This is a basic example which shows you how to solve a common problem:
-
-```{r example}
-library(fuzzylink)
-## basic example code
-```
-
-Under the hood, the `fuzzylink()` function takes the following steps:
+Let's look at the example from the introduction, and walk through the steps that `fuzzylink()` takes to join the two dataframes.
 
 ### Step 1: Embedding
 
+First, the function encodes each unique string in `dfA` and `dfB` as a 1,536-dimensional vector called an *embedding*. You can learn more about embeddings [here](https://platform.openai.com/docs/guides/embeddings/embedding-models), but the basic idea is to represent text using a vector of real-valued numbers, such that vectors that are close to one another in space have similar meaning.
+
 ```{r}
+library(fuzzylink)
+
 strings_A <- unique(dfA$name)
 strings_B <- unique(dfB$name)
 embeddings <- get_embeddings(unique(c(strings_A, strings_B)))
@@ -113,8 +112,7 @@ df <- sim |>
 df$match_probability <- predict(model, df, type = 'response')
 
 df |> 
-  filter(match_probability > 0.65) |> 
-  select(-sim) |> 
+  filter(match_probability > 0.5) |> 
   right_join(dfA, by = c('A' = 'name')) |> 
   left_join(dfB, by = c('B' = 'name'))
 ```
