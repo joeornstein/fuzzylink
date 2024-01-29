@@ -15,6 +15,17 @@ fuzzylink <- function(dfA, dfB,
     blocks <- data.frame(block = 1)
   }
 
+  ## Step 2: Get embeddings ----------------
+  if(verbose){
+    cat('Retrieving ',
+        prettyNum(length(all_strings), big.mark = ','),
+        ' embeddings (',
+        format(Sys.time(), '%X'),
+        ')\n\n', sep = '')
+  }
+  all_strings <- unique(c(dfA[[by]], dfB[[by]]))
+  embeddings <- get_embeddings(all_strings)
+
   ## Step 2: Get similarity matrix within each block ------------
   sim <- list()
   for(i in 1:nrow(blocks)){
@@ -55,14 +66,6 @@ fuzzylink <- function(dfA, dfB,
     # get a unique list of strings in each dataset
     strings_A <- unique(block_A[[by]])
     strings_B <- unique(block_B[[by]])
-
-    # get embeddings
-    if(verbose){
-      cat('Retrieving embeddings (',
-          format(Sys.time(), '%X'),
-          ')\n\n', sep = '')
-    }
-    embeddings <- get_embeddings(unique(c(strings_A, strings_B)))
 
     # compute cosine similarity matrix
     if(verbose){
