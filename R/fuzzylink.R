@@ -22,9 +22,9 @@ fuzzylink <- function(dfA, dfB,
     if(!is.null(blocking.variables)){
 
       if(verbose){
-        cat('Block ', i, ':\n', sep = '')
+        cat('Block ', i, ' of ', nrow(blocks), ':\n', sep = '')
         print(unlist(blocks[i,]))
-        cat('\n\n')
+        cat('\n')
       }
 
       # subset the data for each block from dfA and dfB
