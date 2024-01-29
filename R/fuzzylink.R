@@ -118,7 +118,9 @@ fuzzylink <- function(dfA, dfB,
     dplyr::left_join(dfB, by = c('B' = by),
                      relationship = 'many-to-many') |>
     # join with match labels from the training set
-    dplyr::left_join(train, by = c('A', 'B', 'sim', 'block'))
+    dplyr::left_join(train |>
+                       dplyr::select(A, B, match),
+                     by = c('A', 'B'))
 
   if(is.null(blocking.variables)) df <- dplyr::select(df, -block)
 
@@ -155,10 +157,16 @@ fuzzylink <- function(dfA, dfB,
 
     matches <- df |>
       dplyr::filter(match_probability > 0.2) |>
-      dplyr::filterright_join(dfA, by = c('A' = 'name')) |>
-      dplyr::filterleft_join(dfB, by = c('B' = 'name')) |>
-      # join with match labels for those pairs in the training set
-      dplyr::filterleft_join(train)
+      dplyr::right_join(dfA, by = c('A' = by),
+                        relationship = 'many-to-many') |>
+      dplyr::select(-all_of(blocking.variables)) |>
+      dplyr::left_join(dfB, by = c('B' = by),
+                       relationship = 'many-to-many') |>
+      # join with match labels from the training set
+      dplyr::left_join(train |>
+                         dplyr::select(A, B, match) |>
+                         unique(),
+                       by = c('A', 'B'))
   }
 
 
