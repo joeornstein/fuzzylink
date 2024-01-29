@@ -100,18 +100,21 @@ fuzzylink <- function(dfA, dfB,
 
   # df is the dataset of all within-block name pairs
   df <- na.omit(reshape2::melt(sim))
-  if(ncol(df) == 3) names(df) <- c('A', 'B', 'sim')
-  if(ncol(df) == 4) names(df) <- c('A', 'B', 'sim', 'block')
-  if(is.null(blocking.variables)) df <- dplyr::select(df, -block)
+  # rename columns
+  namekey <- c(Var1 = 'A', Var2 = 'B', value = 'sim', L1 = 'block')
+  names(df) <- namekey[names(df)]
 
   df$match_probability <- predict.glm(model, df, type = 'response')
 
   matches <- df |>
     dplyr::filter(match_probability > 0.2) |>
-    dplyr::right_join(dfA, by = c('A' = 'name')) |>
-    dplyr::left_join(dfB, by = c('B' = 'name')) |>
+    dplyr::right_join(dfA, by = c('A' = by)) |>
+    dplyr::select(-all_of(blocking.variables)) |>
+    dplyr::left_join(dfB, by = c('B' = by)) |>
     # join with match labels from the training set
-    dplyr::left_join(train, by = c('A', 'B', 'sim'))
+    dplyr::left_join(train, by = c('A', 'B', 'sim', 'block'))
+
+  if(is.null(blocking.variables)) df <- dplyr::select(df, -block)
 
   ## Step 6: Validate uncertain matches --------------
 

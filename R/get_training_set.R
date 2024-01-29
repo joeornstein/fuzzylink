@@ -15,15 +15,12 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 5){
 
   # convert similarity matrix to long dataframe
   sim <- reshape2::melt(sim)
+  # rename columns
+  namekey <- c(Var1 = 'A', Var2 = 'B', value = 'sim', L1 = 'block')
+  names(sim) <- namekey[names(sim)]
   # remove rows with missing values (generally from blocks with no exact matches)
   sim <- na.omit(sim)
 
-  if(ncol(sim) == 3){ # if not blocking
-    names(sim) <- c('A', 'B', 'sim')
-  }
-  if(ncol(sim) == 4){ # if blocking, melting a list of matrices
-    names(sim) <- c('A', 'B', 'sim', 'block')
-  }
 
   train <- sim |>
     # split embedding distance into equal-sized bins
