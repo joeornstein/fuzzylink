@@ -40,7 +40,7 @@ check_match <- function(string1, string2,
                        '\" and \"', string2[i], '\"'))
 
       # submit to OpenAI API
-      resp <- openai::create_chat_completion(model = 'gpt-3.5-turbo',
+      resp <- openai::create_chat_completion(model = model,
                                              messages = p,
                                              temperature = 0)
 
@@ -73,7 +73,7 @@ check_match <- function(string1, string2,
                      content = 'For each pair of names, decide whether they probably refer to the same entity. Nicknames, acronyms, abbreviations, and misspellings are all acceptable matches. Respond with "Yes" or "No".')
 
       # submit to OpenAI API
-      resp <- openai::create_chat_completion(model = 'gpt-3.5-turbo',
+      resp <- openai::create_chat_completion(model = model,
                                              messages = p,
                                              temperature = 0)
 
