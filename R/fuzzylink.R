@@ -23,6 +23,7 @@ fuzzylink <- function(dfA, dfB,
       if(verbose){
         cat('Block ', i, ':\n', sep = '')
         print(unlist(blocks[i,]))
+        print('\n\n')
       }
 
       # subset the data for each block from dfA and dfB
@@ -55,7 +56,7 @@ fuzzylink <- function(dfA, dfB,
     if(verbose){
       cat('Retrieving embeddings (',
           format(Sys.time(), '%X'),
-          ')', sep = '')
+          ')\n\n', sep = '')
     }
     embeddings <- get_embeddings(unique(c(strings_A, strings_B)))
 
@@ -63,7 +64,7 @@ fuzzylink <- function(dfA, dfB,
     if(verbose){
       cat('Computing similarity matrix (',
           format(Sys.time(), '%X'),
-          ')', sep = '')
+          ')\n\n', sep = '')
     }
     sim[[i]] <- get_similarity_matrix(embeddings, strings_A, strings_B)
   }
@@ -72,7 +73,7 @@ fuzzylink <- function(dfA, dfB,
   if(verbose){
     cat('Labeling training set (',
         format(Sys.time(), '%X'),
-        ')', sep = '')
+        ')\n\n', sep = '')
   }
   train <- get_training_set(sim)
 
@@ -80,7 +81,7 @@ fuzzylink <- function(dfA, dfB,
   if(verbose){
     cat('Fitting model (',
         format(Sys.time(), '%X'),
-        ')', sep = '')
+        ')\n\n', sep = '')
   }
   model <- glm(as.numeric(match == 'Yes') ~ sim,
                data = train,
@@ -90,7 +91,7 @@ fuzzylink <- function(dfA, dfB,
   if(verbose){
     cat('Linking datasets (',
         format(Sys.time(), '%X'),
-        ')', sep = '')
+        ')\n\n', sep = '')
   }
 
   # df is the dataset of all within-block name pairs
@@ -121,7 +122,7 @@ fuzzylink <- function(dfA, dfB,
           nrow(matches_to_validate),
           ' matches (',
           format(Sys.time(), '%X'),
-          ')', sep = '')
+          ')\n\n', sep = '')
     }
 
     matches_to_validate$match <- check_match(matches_to_validate$A,
@@ -151,7 +152,7 @@ fuzzylink <- function(dfA, dfB,
   if(verbose){
     cat('Done! (',
         format(Sys.time(), '%X'),
-        ')', sep = '')
+        ')\n', sep = '')
   }
 
   return(matches)
