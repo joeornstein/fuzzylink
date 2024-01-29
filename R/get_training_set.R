@@ -11,7 +11,7 @@
 #' @return A dataset with string pairs and a `match` column indicating whether they match.
 #' @export
 #'
-get_training_set <- function(sim, num_bins = 50, samples_per_bin = 5){
+get_training_set <- function(sim, num_bins = 50, samples_per_bin = 5, batch_size = 50){
 
   # convert similarity matrix to long dataframe
   sim <- reshape2::melt(sim)
@@ -31,8 +31,8 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 5){
     dplyr::ungroup() |>
     dplyr::select(-bin)
 
-  # label each name pair using zero-shot GPT-3.5 prompt
-  train$match <- check_match(train$A, train$B)
+  # label each name pair using zero-shot GPT-4 prompt
+  train$match <- check_match(train$A, train$B, batch_size = batch_size)
 
   return(train)
 

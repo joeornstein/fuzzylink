@@ -1,6 +1,7 @@
 fuzzylink <- function(dfA, dfB,
                       by, blocking.variables = NULL,
-                      verbose = TRUE){
+                      verbose = TRUE,
+                      batch_size = 50){
 
   ## Step 1: Blocking -----------------
 
@@ -82,7 +83,7 @@ fuzzylink <- function(dfA, dfB,
         format(Sys.time(), '%X'),
         ')\n\n', sep = '')
   }
-  train <- get_training_set(sim)
+  train <- get_training_set(sim, batch_size = batch_size)
 
   ## Step 4: Fit model -------------------
   if(verbose){
