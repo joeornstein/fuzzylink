@@ -74,7 +74,8 @@ library(fuzzylink)
 
 strings_A <- unique(dfA$name)
 strings_B <- unique(dfB$name)
-embeddings <- get_embeddings(unique(c(strings_A, strings_B)))
+all_strings <- unique( c(strings_A, strings_B) )
+embeddings <- get_embeddings(all_strings)
 
 dim(embeddings)
 rownames(embeddings)
