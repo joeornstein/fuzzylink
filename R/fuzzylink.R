@@ -9,7 +9,8 @@ fuzzylink <- function(dfA, dfB,
     blocks <- unique(dfA[,blocking.variables])
 
     # keep only the rows in dfB with exact matches on the blocking variables
-    dfB <- dplyr::inner_join(dfB, blocks)
+    dfB <- dplyr::inner_join(dfB, blocks,
+                             by = blocking.variables)
   } else{
     blocks <- data.frame(block = 1)
   }
@@ -23,7 +24,7 @@ fuzzylink <- function(dfA, dfB,
       if(verbose){
         cat('Block ', i, ':\n', sep = '')
         print(unlist(blocks[i,]))
-        print('\n\n')
+        cat('\n\n')
       }
 
       # subset the data for each block from dfA and dfB
@@ -40,7 +41,10 @@ fuzzylink <- function(dfA, dfB,
       block_B <- dfB[subset_B, ]
 
       # if you can't find any matches in dfA or dfB, go to the next block
-      if(nrow(block_A) == 0 | nrow(block_B) == 0) next
+      if(nrow(block_A) == 0 | nrow(block_B) == 0){
+        sim[[i]] <- NA
+        next
+      }
 
     } else{
       # if not blocking, compute similarity matrix for all dfA and dfB
@@ -95,7 +99,7 @@ fuzzylink <- function(dfA, dfB,
   }
 
   # df is the dataset of all within-block name pairs
-  df <- reshape2::melt(sim)
+  df <- na.omit(reshape2::melt(sim))
   if(ncol(df) == 3) names(df) <- c('A', 'B', 'sim')
   if(ncol(df) == 4) names(df) <- c('A', 'B', 'sim', 'block')
   if(is.null(blocking.variables)) df <- dplyr::select(df, -block)
