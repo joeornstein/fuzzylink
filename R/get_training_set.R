@@ -29,7 +29,9 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 5, batch_size
     dplyr::group_by(bin) |>
     dplyr::slice_sample(n = samples_per_bin) |>
     dplyr::ungroup() |>
-    dplyr::select(-bin)
+    dplyr::select(-bin) |>
+    # shuffle rows
+    dplyr::slice_sample(prop = 1)
 
   # label each name pair using zero-shot GPT-4 prompt
   train$match <- check_match(train$A, train$B, batch_size = batch_size)
