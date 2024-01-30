@@ -17,6 +17,7 @@ fuzzylink <- function(dfA, dfB,
   }
 
   ## Step 2: Get embeddings ----------------
+  all_strings <- unique(c(dfA[[by]], dfB[[by]]))
   if(verbose){
     cat('Retrieving ',
         prettyNum(length(all_strings), big.mark = ','),
@@ -24,7 +25,6 @@ fuzzylink <- function(dfA, dfB,
         format(Sys.time(), '%X'),
         ')\n\n', sep = '')
   }
-  all_strings <- unique(c(dfA[[by]], dfB[[by]]))
   embeddings <- get_embeddings(all_strings)
 
   ## Step 2: Get similarity matrix within each block ------------
