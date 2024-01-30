@@ -70,7 +70,7 @@ check_match <- function(string1, string2,
 
       # provide instructions
       p[[3]] <- list(role = 'user',
-                     content = 'For each pair of names, decide whether they probably refer to the same entity. Nicknames, acronyms, abbreviations, and misspellings are all acceptable matches. Respond with a numbered list of only "Yes" or "No".')
+                     content = 'For each pair of names, decide whether they probably refer to the same entity. Nicknames, acronyms, abbreviations, and misspellings are all acceptable matches. Respond only with a numbered list of "Yes" or "No".')
 
       # submit to OpenAI API
       resp <- openai::create_chat_completion(model = model,
