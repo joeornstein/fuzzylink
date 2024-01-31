@@ -35,7 +35,7 @@ check_match <- function(string1, string2,
       few_shot_preamble <- paste0(few_shot_examples$A, ' : ', few_shot_examples$B, ' = ', few_shot_examples$match, collapse = '\n')
       p <- paste0(few_shot_preamble, '\n', string1, ' : ', string2, ' =')
     } else{
-      p <- paste0('Name A: ', string1, '\nName B: ', string2, '\nMatch(Yes or No):')
+      p <- paste0('Decide if the following two names refer to the same entity.\n\nName A: ', string1, '\nName B: ', string2, '\nSame Entity (Yes or No):')
     }
 
     resp <- openai::create_completion(model = model,
