@@ -4,7 +4,7 @@
 \alias{get_training_set}
 \title{Create a training set}
 \usage{
-get_training_set(sim, num_bins = 50, samples_per_bin = 5)
+get_training_set(sim, num_bins = 50, samples_per_bin = 5, batch_size = 50)
 }
 \arguments{
 \item{sim}{A matrix of similarity scores}
