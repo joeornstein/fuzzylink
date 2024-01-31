@@ -96,6 +96,7 @@ fuzzylink <- function(dfA, dfB,
                family = 'binomial')
 
   # Step 5: Create matched dataset ---------------
+
   if(verbose){
     cat('Linking datasets (',
         format(Sys.time(), '%X'),
@@ -110,23 +111,12 @@ fuzzylink <- function(dfA, dfB,
 
   df$match_probability <- predict.glm(model, df, type = 'response')
 
-  matches <- df |>
-    dplyr::filter(match_probability > 0.2) |>
-    dplyr::right_join(dfA, by = c('A' = by),
-                      relationship = 'many-to-many') |>
-    dplyr::select(-all_of(blocking.variables)) |>
-    dplyr::left_join(dfB, by = c('B' = by),
-                     relationship = 'many-to-many') |>
-    # join with match labels from the training set
-    dplyr::left_join(train |>
-                       dplyr::select(A, B, match),
-                     by = c('A', 'B'))
-
-  if(is.null(blocking.variables)) df <- dplyr::select(df, -block)
-
   ## Step 6: Validate uncertain matches --------------
 
-  matches_to_validate <- matches |>
+  matches_to_validate <- df |>
+    dplyr::left_join(train |>
+                       dplyr::select(A, B, match),
+                     by = c('A', 'B')) |>
     dplyr::filter(match_probability > 0.2,
                   match_probability < 0.9,
                   is.na(match))
@@ -156,24 +146,30 @@ fuzzylink <- function(dfA, dfB,
 
     df$match_probability <- predict.glm(model, df, type = 'response')
 
-    matches <- df |>
-      dplyr::filter(match_probability > 0.2) |>
-      dplyr::right_join(dfA, by = c('A' = by),
-                        relationship = 'many-to-many') |>
-      dplyr::select(-all_of(blocking.variables)) |>
-      dplyr::left_join(dfB, by = c('B' = by),
-                       relationship = 'many-to-many') |>
-      # join with match labels from the training set
+    matches_to_validate <- df |>
       dplyr::left_join(train |>
-                         dplyr::select(A, B, match) |>
-                         unique(),
-                       by = c('A', 'B'))
-
-    matches_to_validate <- matches |>
+                         dplyr::select(A, B, match),
+                       by = c('A', 'B')) |>
       dplyr::filter(match_probability > 0.2,
                     match_probability < 0.9,
                     is.na(match))
   }
+
+
+  matches <- df |>
+    # join with match labels from the training set
+    dplyr::left_join(train |>
+                       dplyr::select(A, B, match),
+                     by = c('A', 'B')) |>
+    # only keep pairs that have been validated or have a match probability > 0.2
+    dplyr::filter((match_probability > 0.2 & is.na(match)) | match == 'Yes') |>
+    dplyr::right_join(dfA, by = c('A' = by),
+                      relationship = 'many-to-many') |>
+    dplyr::select(-all_of(blocking.variables)) |>
+    dplyr::left_join(dfB, by = c('B' = by),
+                     relationship = 'many-to-many')
+
+  if(is.null(blocking.variables)) matches <- dplyr::select(matches, -block)
 
 
   if(verbose){
