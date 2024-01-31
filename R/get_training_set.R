@@ -38,16 +38,16 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 5,
   # if not provided with few-shot examples, hand label the first 10 pairs (and remove from train)
   if(is.null(few_shot_examples)){
     few_shot_examples <- hand_label(head(train, 10))
-    train <- dplyr::slice_head(train, n = -10)
+    train <- dplyr::slice_tail(train, n = -10)
   }
 
   # label each name pair using zero-shot GPT-4 prompt
-  train$match <- check_match(train$A, train$B, batch_size = batch_size, few_shot_examples = few_shot_examples)
+  train$match <- check_match(train$A, train$B,
+                             batch_size = batch_size,
+                             few_shot_examples = few_shot_examples)
 
   # merge hand-labeled and GPT-labeled name pairs
-  if(is.null(few_shot_examples)){
-    train <- dplyr::bind_rows(few_shot_examples, train)
-  }
+  train <- dplyr::bind_rows(few_shot_examples, train)
 
   return(train)
 
