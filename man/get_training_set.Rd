@@ -4,7 +4,13 @@
 \alias{get_training_set}
 \title{Create a training set}
 \usage{
-get_training_set(sim, num_bins = 50, samples_per_bin = 5, batch_size = 50)
+get_training_set(
+  sim,
+  num_bins = 50,
+  samples_per_bin = 5,
+  batch_size = 50,
+  few_shot_examples = NULL
+)
 }
 \arguments{
 \item{sim}{A matrix of similarity scores}
@@ -12,6 +18,8 @@ get_training_set(sim, num_bins = 50, samples_per_bin = 5, batch_size = 50)
 \item{num_bins}{Number of bins to split similarity scores for stratified random sampling (defaults to 50)}
 
 \item{samples_per_bin}{Number of string pairs to sample from each bin (defaults to 5)}
+
+\item{few_shot_examples}{A dataframe with few-shot examples; must include columns \code{A}, \code{B}, and \code{match}}
 }
 \value{
 A dataset with string pairs and a \code{match} column indicating whether they match.
