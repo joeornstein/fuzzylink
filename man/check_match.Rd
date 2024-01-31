@@ -4,7 +4,13 @@
 \alias{check_match}
 \title{Test whether two strings match with an LLM prompt.}
 \usage{
-check_match(string1, string2, batch_size = 50, model = "gpt-4-turbo-preview")
+check_match(
+  string1,
+  string2,
+  batch_size = 50,
+  model = "gpt-3.5-turbo-instruct",
+  few_shot_examples = NULL
+)
 }
 \arguments{
 \item{string1}{A string or vector of strings}
@@ -13,7 +19,9 @@ check_match(string1, string2, batch_size = 50, model = "gpt-4-turbo-preview")
 
 \item{batch_size}{The number of string pairs to include in each prompt}
 
-\item{model}{Which OpenAI model to prompt; defaults to 'gpt-4-turbo-preview'}
+\item{model}{Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'}
+
+\item{few_shot_examples}{A dataframe with few-shot examples for prompt; must include columns \code{A}, \code{B}, and \code{match}}
 }
 \value{
 A string or vector of strings the same length as \code{string1} and \code{string2}. "Yes" if the pair of strings match, "No" otherwise.
