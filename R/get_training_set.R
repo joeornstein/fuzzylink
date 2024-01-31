@@ -7,6 +7,7 @@
 #' @param sim A matrix of similarity scores
 #' @param num_bins Number of bins to split similarity scores for stratified random sampling (defaults to 50)
 #' @param samples_per_bin Number of string pairs to sample from each bin (defaults to 5)
+#' @param few_shot_examples A dataframe with few-shot examples; must include columns `A`, `B`, and `match`
 #'
 #' @return A dataset with string pairs and a `match` column indicating whether they match.
 #' @export
