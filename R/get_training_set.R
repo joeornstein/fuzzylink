@@ -7,13 +7,12 @@
 #' @param sim A matrix of similarity scores
 #' @param num_bins Number of bins to split similarity scores for stratified random sampling (defaults to 50)
 #' @param samples_per_bin Number of string pairs to sample from each bin (defaults to 5)
-#' @param few_shot_examples A dataframe with few-shot examples; must include columns `A`, `B`, and `match`
 #'
 #' @return A dataset with string pairs and a `match` column indicating whether they match.
 #' @export
 #'
 get_training_set <- function(sim, num_bins = 50, samples_per_bin = 5,
-                             batch_size = 50, few_shot_examples = NULL){
+                             batch_size = 50){
 
   # convert similarity matrix to long dataframe
   sim <- reshape2::melt(sim)
@@ -35,19 +34,20 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 5,
     # shuffle rows
     dplyr::slice_sample(prop = 1)
 
-  # if not provided with few-shot examples, hand label the first 10 pairs (and remove from train)
-  if(is.null(few_shot_examples)){
-    few_shot_examples <- hand_label(head(train, 10))
-    train <- dplyr::slice_tail(train, n = -10)
+  # hand-label a set of few-shot examples?
+  manual_few_shot <- FALSE
+  if(manual_few_shot){
+    few_shot_examples <- hand_label(head(train, 5))
+    train <- dplyr::slice_tail(train, n = -5)
   }
 
   # label each name pair using zero-shot GPT-4 prompt
   train$match <- check_match(train$A, train$B,
-                             batch_size = batch_size,
-                             few_shot_examples = few_shot_examples)
+                             batch_size = batch_size)
 
-  # merge hand-labeled and GPT-labeled name pairs
-  train <- dplyr::bind_rows(few_shot_examples, train)
+  if(manual_few_shot){
+    train <- dplyr::bind_rows(few_shot_examples, train)
+  }
 
   return(train)
 

@@ -33,11 +33,10 @@ check_match <- function(string1, string2,
     # format the few-shot examples
     if(!is.null(few_shot_examples)){
       few_shot_preamble <- paste0(few_shot_examples$A, ' : ', few_shot_examples$B, ' = ', few_shot_examples$match, collapse = '\n')
+      p <- paste0(few_shot_preamble, '\n', string1, ' : ', string2, ' =')
     } else{
-      few_shot_preamble <- 'Timoth B. Ryan : Tim Ryan = match\nTim Ryan : Tom Ryan = mismatch\nUPS : United Parcel Service = match\nFEDEX : Federal Reserve = mismatch'
+      p <- paste0('Name A: ', string1, '\nName B: ', string2, '\nMatch(Yes or No):')
     }
-
-    p <- paste0(few_shot_preamble, '\n', string1, ' : ', string2, ' =')
 
     resp <- openai::create_completion(model = model,
                                       prompt = p,
