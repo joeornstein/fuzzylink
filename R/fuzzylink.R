@@ -131,7 +131,8 @@ fuzzylink <- function(dfA, dfB,
                   match_probability < 0.9,
                   is.na(match))
 
-  if(nrow(matches_to_validate) > 0){
+  while(nrow(matches_to_validate) > 0){
+
     if(verbose){
       cat('Validating ',
           nrow(matches_to_validate),
@@ -167,6 +168,11 @@ fuzzylink <- function(dfA, dfB,
                          dplyr::select(A, B, match) |>
                          unique(),
                        by = c('A', 'B'))
+
+    matches_to_validate <- matches |>
+      dplyr::filter(match_probability > 0.2,
+                    match_probability < 0.9,
+                    is.na(match))
   }
 
 
