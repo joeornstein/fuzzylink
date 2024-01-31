@@ -36,7 +36,7 @@ dfB <- tribble(~name, ~hobby,
                'Tom Ryan', 'Making Pasta',
                'Jenny Romer', 'Salsa Dance',
                'Jeremy Creilly', 'Gardening',
-               'Jennifer R. Renny', 'Acting',
+               'Jennifer R. Riley', 'Acting',
                'Joseph T. Ornstein', 'Banjo')
 
 ```
@@ -65,7 +65,7 @@ You can install the development version of `fuzzylink` from [GitHub](https://git
 devtools::install_github("joeornstein/fuzzylink")
 ```
 
-You will also need an account with OpenAI. You can sign up [here](https://beta.openai.com/signup), after which you'll need generate an API key [here](https://platform.openai.com/account/api-keys). I recommend adding this API key as a variable in your operating system environment called `OPENAI_API_KEY`; that way you won't risk leaking it by hard-coding it into your R scripts. The `fuzzylink` package will automatically look for your API key under that variable name, and will prompt you to enter the API key manually if it can't find one there. If you're unfamiliar with setting Environment Variables in your operating system, [here](https://dev.to/biplov/handling-passwords-and-secret-keys-using-environment-variables-2ei0) are some helpful instructions. Note that you may need to restart your computer after completing this step.
+You will also need an account with OpenAI. You can sign up [here](https://beta.openai.com/signup), after which you'll need to create an API key [here](https://platform.openai.com/account/api-keys). I recommend adding this API key as a variable in your operating system environment called `OPENAI_API_KEY`; that way you won't risk leaking it by hard-coding it into your R scripts. The `fuzzylink` package will automatically look for your API key under that variable name, and will prompt you to enter the API key manually if it can't find one there. If you're unfamiliar with setting Environment Variables in your operating system, [here](https://dev.to/biplov/handling-passwords-and-secret-keys-using-environment-variables-2ei0) are some helpful instructions. Note that you may need to restart your computer after completing this step.
 
 ## Example
 
@@ -76,6 +76,8 @@ Let's look at the example from the introduction, and walk through the steps that
 First, the function encodes each unique string in `dfA` and `dfB` as a 3,072-dimensional vector called an *embedding*. You can learn more about embeddings [here](https://platform.openai.com/docs/guides/embeddings/embedding-models), but the basic idea is to represent text using a vector of real-valued numbers, such that two vectors close to one another in space have similar meanings.
 
 ```{r}
+library(fuzzylink)
+
 strings_A <- unique(dfA$name)
 strings_B <- unique(dfB$name)
 all_strings <- unique( c(strings_A, strings_B) )
@@ -87,7 +89,7 @@ rownames(embeddings)
 
 ### Step 2: Similarity Scores
 
-Next, we compute the *cosine similarity* between each name pair. This is our measure of how closely related two pieces of text are. If you include `blocking.variables` in the call to `fuzzylink()`, the function will only consider *within-block* name pairs (e.g. it will only compute similarity scores for records with an exact match on last name). I highly recommend blocking wherever possible, because it reduces cost and significantly speeds up computation.
+Next, we compute the *cosine similarity* between each name pair. This is our measure of how closely related two pieces of text are, where 0 is completely unrelated and 1 is identical. If you include `blocking.variables` in the call to `fuzzylink()`, the function will only consider *within-block* name pairs (i.e. it will only compute similarity scores for records with an exact match on each blocking variable). I highly recommend blocking wherever possible, as it significantly reduces cost and speeds up computation.
 
 ```{r}
 sim <- get_similarity_matrix(embeddings, strings_A, strings_B)
@@ -95,6 +97,16 @@ sim
 ```
 
 ### Step 3: Create a Training Set
+
+Now that we have similarity scores for each pair of records...
+
+```
+Decide if the following two names refer to the same entity.
+
+Name A: {insert name here}
+Name B: {insert name here}
+Same Entity (Yes or No):
+```
 
 ```{r}
 train <- get_training_set(sim)
