@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of the `fuzzylink` package is to allow users to merge datasets with fuzzy matches on identifying variables. Suppose, for example, you have the following two datasets: 
+The goal of the `fuzzylink` package is to allow users to merge datasets with non-exact matches on key identifying variables. Suppose, for example, you have the following two datasets:
 
 ```{r, echo = FALSE}
 library(tidyverse)
@@ -32,7 +32,12 @@ dfA <- tribble(~name, ~age,
 dfB <- tribble(~name, ~hobby,
                'Tim Ryan', 'Woodworking',
                'Jimmy Pointer', 'Guitar',
-               'Jessica Renny', 'Camping')
+               'Jessica Pointer', 'Camping',
+               'Tom Ryan', 'Making Pasta',
+               'Jenny Romer', 'Salsa Dance',
+               'Jeremy Creilly', 'Gardening',
+               'Jennifer R. Renny', 'Acting',
+               'Joseph T. Ornstein', 'Banjo')
 
 ```
 
@@ -41,14 +46,15 @@ dfA
 dfB
 ```
 
-We would like a procedure that correctly identifies that the first two rows of `dfA` and `dfB` are likely to be matches, but not the third row. The `fuzzylink()` function can do so.
+We would like a procedure that correctly identifies which records in `dfB` are likely matches for the records in `dfA`. The `fuzzylink()` function performs this record linkage with a single line of code.
 
 ```{r, eval = FALSE}
+library(fuzzylink)
 df <- fuzzylink(dfA, dfB, by = 'name')
 df
 ```
 
-The procedure works by using *pretrained text embeddings* from OpenAI's GPT-3 to construct a measure of similarity for each pair of names. These similarity measures are then used as predictors in a statistical model to estimate the probability that two name pairs represent the same entity. In the guide below, I will walk step-by-step through what's going on under the hood when we call the `fuzzylink()` function.
+The procedure works by using *pretrained text embeddings* from OpenAI's GPT-3 to construct a measure of similarity for each pair of names. These similarity measures are then used as predictors in a statistical model to estimate the probability that two name pairs represent the same entity. In the guide below, I will walk step-by-step through what's happening under the hood when we call the `fuzzylink()` function.
 
 ## Installation
 
@@ -67,11 +73,9 @@ Let's look at the example from the introduction, and walk through the steps that
 
 ### Step 1: Embedding
 
-First, the function encodes each unique string in `dfA` and `dfB` as a 1,536-dimensional vector called an *embedding*. You can learn more about embeddings [here](https://platform.openai.com/docs/guides/embeddings/embedding-models), but the basic idea is to represent text using a vector of real-valued numbers, such that vectors that are close to one another in space have similar meaning.
+First, the function encodes each unique string in `dfA` and `dfB` as a 3,072-dimensional vector called an *embedding*. You can learn more about embeddings [here](https://platform.openai.com/docs/guides/embeddings/embedding-models), but the basic idea is to represent text using a vector of real-valued numbers, such that two vectors close to one another in space have similar meanings.
 
 ```{r}
-library(fuzzylink)
-
 strings_A <- unique(dfA$name)
 strings_B <- unique(dfB$name)
 all_strings <- unique( c(strings_A, strings_B) )
@@ -82,6 +86,8 @@ rownames(embeddings)
 ```
 
 ### Step 2: Similarity Scores
+
+Next, we compute the *cosine similarity* between each name pair. This is our measure of how closely related two pieces of text are. If you include `blocking.variables` in the call to `fuzzylink()`, the function will only consider *within-block* name pairs (e.g. it will only compute similarity scores for records with an exact match on last name). I highly recommend blocking wherever possible, because it reduces cost and significantly speeds up computation.
 
 ```{r}
 sim <- get_similarity_matrix(embeddings, strings_A, strings_B)
