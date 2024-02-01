@@ -17,7 +17,8 @@
 check_match <- function(string1, string2,
                         batch_size = 50,
                         model = 'gpt-3.5-turbo-instruct',
-                        few_shot_examples = NULL){
+                        few_shot_examples = NULL,
+                        record_type = 'entity'){
 
   if(length(string1) != length(string2)){
     stop('Inputs must have the same number of elements.')
@@ -35,7 +36,10 @@ check_match <- function(string1, string2,
       few_shot_preamble <- paste0(few_shot_examples$A, ' : ', few_shot_examples$B, ' = ', few_shot_examples$match, collapse = '\n')
       p <- paste0(few_shot_preamble, '\n', string1, ' : ', string2, ' =')
     } else{
-      p <- paste0('Decide if the following two names refer to the same entity.\n\nName A: ', string1, '\nName B: ', string2, '\nSame Entity (Yes or No):')
+      p <- paste0('Decide if the following two names refer to the same ', stringr::str_to_lower(record_type),
+                  '.\n\nName A: ', string1,
+                  '\nName B: ', string2,
+                  '\nSame ', stringr::str_to_title(record_type), ' (Yes or No):')
     }
 
     resp <- openai::create_completion(model = model,
