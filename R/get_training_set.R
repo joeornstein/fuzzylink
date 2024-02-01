@@ -23,6 +23,10 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 10){
 
 
   train <- sim |>
+    # get the five nearest neighbors for each record in dfA
+    dplyr::group_by(A) |>
+    dplyr::slice_max(sim, n = 5) |>
+    dplyr::ungroup() |>
     # split embedding distance into equal-sized bins
     dplyr::mutate(bin = cut(sim, breaks = num_bins)) |>
     # draw randomly from each bin to create the training set
