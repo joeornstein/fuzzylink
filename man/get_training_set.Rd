@@ -4,7 +4,7 @@
 \alias{get_training_set}
 \title{Create a training set}
 \usage{
-get_training_set(sim, num_bins = 50, samples_per_bin = 5, batch_size = 50)
+get_training_set(sim, num_bins = 50, samples_per_bin = 10)
 }
 \arguments{
 \item{sim}{A matrix of similarity scores}
@@ -14,8 +14,8 @@ get_training_set(sim, num_bins = 50, samples_per_bin = 5, batch_size = 50)
 \item{samples_per_bin}{Number of string pairs to sample from each bin (defaults to 5)}
 }
 \value{
-A dataset with string pairs and a \code{match} column indicating whether they match.
+A dataset with string pairs \code{A} and \code{B}, along with a \code{match} column indicating whether they match.
 }
 \description{
-Creates a training set from an embedding similarity matrix and labels it using a zero-shot GPT prompt.
+Creates a training set from a list of similarity matrices and labels it using a zero-shot GPT prompt.
 }

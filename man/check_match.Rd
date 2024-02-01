@@ -24,7 +24,7 @@ check_match(
 \item{few_shot_examples}{A dataframe with few-shot examples for prompt; must include columns \code{A}, \code{B}, and \code{match}}
 }
 \value{
-A string or vector of strings the same length as \code{string1} and \code{string2}. "Yes" if the pair of strings match, "No" otherwise.
+A vector the same length as \code{string1} and \code{string2}. "Yes" if the pair of strings match, "No" otherwise.
 }
 \description{
 Test whether two strings match with an LLM prompt.

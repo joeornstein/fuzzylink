@@ -7,7 +7,7 @@
 #' @param text A character vector
 #' @param model Which variant of the GPT-3 embedding model to use. Defaults to 'text-embedding-3-large'.
 #'
-#' @return A matrix of embedding vectors (one per row), the same length as the text input.
+#' @return A matrix of embedding vectors (one per row).
 #' @export
 #'
 #' @examples

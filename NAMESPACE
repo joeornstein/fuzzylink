@@ -2,6 +2,7 @@
 
 export(check_match)
 export(dot)
+export(fuzzylink)
 export(get_embeddings)
 export(get_similarity_matrix)
 export(get_training_set)

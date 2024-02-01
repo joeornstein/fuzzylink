@@ -6,7 +6,7 @@
 #' @param model Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'
 #' @param few_shot_examples A dataframe with few-shot examples for prompt; must include columns `A`, `B`, and `match`
 #'
-#' @return A string or vector of strings the same length as `string1` and `string2`. "Yes" if the pair of strings match, "No" otherwise.
+#' @return A vector the same length as `string1` and `string2`. "Yes" if the pair of strings match, "No" otherwise.
 #' @export
 #'
 #' @examples

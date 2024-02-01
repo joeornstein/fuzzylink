@@ -13,5 +13,5 @@ hand_label(df)
 A labeled dataframe (\code{match} column)
 }
 \description{
-This function prompts the user to manually label a set of name pairs using the \code{R} console, and returns the labeled dataframe.
+This function prompts the user to manually label a set of name pairs through the \code{R} console.
 }

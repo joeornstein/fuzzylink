@@ -12,7 +12,7 @@ get_embeddings(text, model = "text-embedding-3-large")
 \item{model}{Which variant of the GPT-3 embedding model to use. Defaults to 'text-embedding-3-large'.}
 }
 \value{
-A matrix of embedding vectors (one per row), the same length as the text input.
+A matrix of embedding vectors (one per row).
 }
 \description{
 Get pretrained text embeddings from the OpenAI API. Automatically batches requests to handle rate limits.

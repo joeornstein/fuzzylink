@@ -1,7 +1,7 @@
 #' Hand Label A Dataset
 #'
 #' @description
-#' This function prompts the user to manually label a set of name pairs using the `R` console, and returns the labeled dataframe.
+#' This function prompts the user to manually label a set of name pairs through the `R` console.
 #'
 #' @param df A dataframe with a column called `A` and a column called `B`
 #'

@@ -1,7 +1,21 @@
+#' Probabilistic Record Linkage Using Pretrained Text Embeddings
+#'
+#' @param dfA,dfB A pair of data frames or data frame extensions (e.g. tibbles)
+#' @param by A character denoting the name of the variable to use for fuzzy matching
+#' @param blocking.variables A character vector of variables that must match exactly in order to match two records
+#' @param verbose TRUE to print progress updates, FALSE for no output
+#'
+#' @return A dataframe with all rows of `dfA` joined with any matches from `dfB`
+#' @export
+#'
+#' @examples
+#' dfA <- data.frame(state.x77)
+#' dfA$name <- rownames(dfA)
+#' dfB <- data.frame(name = state.abb, state.division)
+#' df <- fuzzylink(dfA, dfB, by = 'name')
 fuzzylink <- function(dfA, dfB,
                       by, blocking.variables = NULL,
-                      verbose = TRUE,
-                      batch_size = 50){
+                      verbose = TRUE){
 
   ## Step 1: Blocking -----------------
 
@@ -83,7 +97,7 @@ fuzzylink <- function(dfA, dfB,
         format(Sys.time(), '%X'),
         ')\n\n', sep = '')
   }
-  train <- get_training_set(sim, batch_size = batch_size)
+  train <- get_training_set(sim)
 
   ## Step 4: Fit model -------------------
   if(verbose){
