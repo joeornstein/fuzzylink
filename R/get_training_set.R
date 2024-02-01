@@ -7,11 +7,12 @@
 #' @param sim A matrix of similarity scores
 #' @param num_bins Number of bins to split similarity scores for stratified random sampling (defaults to 50)
 #' @param samples_per_bin Number of string pairs to sample from each bin (defaults to 5)
+#' @param n Sample size for the training dataset
 #'
 #' @return A dataset with string pairs `A` and `B`, along with a `match` column indicating whether they match.
 #' @export
 #'
-get_training_set <- function(sim, num_bins = 50, samples_per_bin = 10){
+get_training_set <- function(sim, num_bins = 50, samples_per_bin = 10, n = 500){
 
   # convert similarity matrix to long dataframe
   sim <- reshape2::melt(sim)
@@ -21,21 +22,27 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 10){
   # remove rows with missing values (generally from blocks with no exact matches)
   sim <- na.omit(sim)
 
+  # how many nearest neighbors to include in the training set?
+  k <- floor(n / length(unique(sim$A)))
 
+  # if using knn sampling
   train <- sim |>
-    # get the five nearest neighbors for each record in dfA
+    # get the k nearest neighbors for each record in dfA
     dplyr::group_by(A) |>
-    dplyr::slice_max(sim, n = 5) |>
-    dplyr::ungroup() |>
-    # split embedding distance into equal-sized bins
-    dplyr::mutate(bin = cut(sim, breaks = num_bins)) |>
-    # draw randomly from each bin to create the training set
-    dplyr::group_by(bin) |>
-    dplyr::slice_sample(n = samples_per_bin) |>
-    dplyr::ungroup() |>
-    dplyr::select(-bin) |>
-    # shuffle rows
-    dplyr::slice_sample(prop = 1)
+    dplyr::slice_max(sim, n = k) |>
+    dplyr::ungroup()
+
+  # if using stratified sampling
+  # train <- sim |>
+  #   # split embedding distance into equal-sized bins
+  #   dplyr::mutate(bin = cut(sim, breaks = num_bins)) |>
+  #   # draw randomly from each bin to create the training set
+  #   dplyr::group_by(bin) |>
+  #   dplyr::slice_sample(n = samples_per_bin) |>
+  #   dplyr::ungroup() |>
+  #   dplyr::select(-bin) |>
+  #   # shuffle rows
+  #   dplyr::slice_sample(prop = 1)
 
   # add lexical string distance measures
   train$jw <- stringdist::stringsim(train$A, train$B, method = 'jw', p = 0.1)
