@@ -98,7 +98,7 @@ sim
 
 ### Step 3: Create a Training Set
 
-Now that we have similarity scores for each pair of records...
+We would like to use those cosine similarity scores to predict whether two names refer to the same entity. In order to do that, we need to first create a labeled dataset that we can use to fit a statistical model. The `get_training_set()` function selects a sample of name pairs and labels them using the following prompt to GPT-3.5.
 
 ```
 Decide if the following two names refer to the same entity.
@@ -115,13 +115,15 @@ train
 
 ### Step 4: Fit Model
 
+Next, we fit a logistic regression model using the `train` dataset, so that we can translate similarity scores into a probability that two records match.
+
 ```{r}
 model <- glm(as.numeric(match == 'Yes') ~ sim, 
              data = train,
              family = 'binomial')
 ```
 
-### Step 5: Create Matched Dataset
+Append these predictions to each name pair in the `dfA` and `dfB`.
 
 ```{r}
 df <- sim |> 
@@ -133,11 +135,14 @@ df$match_probability <- predict(model, df, type = 'response')
 head(df)
 ```
 
-### Step 6: Validate Uncertain Matches
 
-For every match within a range of match probabilities (by default 0.2 to 0.9), use an LLM prompt to validate whether the name pair is a match or not, just like we did with the training data.
+### Step 5: Validate Uncertain Matches
+
+For every name pair within a range of estimated match probabilities (by default 0.2 to 0.9), we will use the GPT-3.5 prompt above to validate whether the name pair is a match or not. These labeled pairs are then added to the training dataset and the logistic regression model is refined. We repeat this process until there are no matches left to validate. At that point, every record in `dfA` is either linked to a record in `dfB`, or there are no candidate matches in `dfB` with an estimated probability higher than the threshold.  
 
 ```{r}
+
+# find all unlabeled name pairs within a range of match probabilities
 matches_to_validate <- df |> 
   left_join(train, by = c('A', 'B', 'sim')) |> 
   filter(match_probability > 0.2, 
@@ -145,8 +150,11 @@ matches_to_validate <- df |>
          is.na(match))
 
 while(nrow(matches_to_validate) > 0){
+  
+  # validate matches using LLM prompt
   matches_to_validate$match <- check_match(matches_to_validate$A,
                                          matches_to_validate$B)
+  
   # append new labeled pairs to the train set
   train <- train |> 
     bind_rows(matches_to_validate |> 
@@ -157,8 +165,10 @@ while(nrow(matches_to_validate) > 0){
              data = train,
              family = 'binomial')
   
+  # re-estimate match probabilities
   df$match_probability <- predict(model, df, type = 'response')
   
+  # find all unlabeled name pairs within a range of match probabilities
   matches_to_validate <- df |> 
     left_join(train, by = c('A', 'B', 'sim')) |> 
     filter(match_probability > 0.2, 
@@ -166,7 +176,13 @@ while(nrow(matches_to_validate) > 0){
            is.na(match))
   
 }
+```
 
+### Step 6: Link Datasets
+
+Finally, we take all the validated name pairs---and those with an estimated match probability higher than the threshold for validation---and merge them into a single dataset. 
+
+```{r}
 matches <- df |>
     # join with match labels from the training set
     left_join(train |> select(A, B, match),

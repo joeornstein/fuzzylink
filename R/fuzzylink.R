@@ -105,7 +105,7 @@ fuzzylink <- function(dfA, dfB,
         format(Sys.time(), '%X'),
         ')\n\n', sep = '')
   }
-  model <- glm(as.numeric(match == 'Yes') ~ sim,
+  model <- glm(as.numeric(match == 'Yes') ~ sim + jw,
                data = train,
                family = 'binomial')
 
@@ -122,6 +122,9 @@ fuzzylink <- function(dfA, dfB,
   # rename columns
   namekey <- c(Var1 = 'A', Var2 = 'B', value = 'sim', L1 = 'block')
   names(df) <- namekey[names(df)]
+
+  # add lexical string distance measures
+  df$jw <- stringdist::stringsim(df$A, df$B, method = 'jw', p = 0.1)
 
   df$match_probability <- predict.glm(model, df, type = 'response')
 
@@ -154,7 +157,7 @@ fuzzylink <- function(dfA, dfB,
                          dplyr::select(A,B,sim,match))
 
     # refine the model
-    model <- glm(as.numeric(match == 'Yes') ~ sim,
+    model <- glm(as.numeric(match == 'Yes') ~ sim + jw,
                  data = train,
                  family = 'binomial')
 

@@ -33,6 +33,9 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 10){
     # shuffle rows
     dplyr::slice_sample(prop = 1)
 
+  # add lexical string distance measures
+  train$jw <- stringdist::stringsim(train$A, train$B, method = 'jw', p = 0.1)
+
   # hand-label a set of few-shot examples?
   manual_few_shot <- FALSE
   if(manual_few_shot){
