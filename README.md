@@ -38,18 +38,18 @@ function performs this record linkage with a single line of code.
 
 ``` r
 library(fuzzylink)
-df <- fuzzylink(dfA, dfB, by = 'name')
-#> Retrieving 11 embeddings (10:14:06 AM)
+df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person')
+#> Retrieving 11 embeddings (10:04:28 AM)
 #> 
-#> Computing similarity matrix (10:14:06 AM)
+#> Computing similarity matrix (10:04:29 AM)
 #> 
-#> Labeling training set (10:14:07 AM)
+#> Labeling training set (10:04:29 AM)
 #> 
-#> Fitting model (10:14:08 AM)
+#> Fitting model (10:04:30 AM)
 #> 
-#> Linking datasets (10:14:08 AM)
+#> Linking datasets (10:04:30 AM)
 #> 
-#> Done! (10:14:08 AM)
+#> Done! (10:04:30 AM)
 df
 #>                    A             B       sim        jw match_probability match
 #> 1    Timothy B. Ryan      Tim Ryan 0.6916803 0.7102778                 1   Yes
@@ -167,21 +167,21 @@ and labels them using the following prompt to GPT-3.5.
     Same Entity (Yes or No):
 
 ``` r
-train <- get_training_set(sim)
+train <- get_training_set(sim, record_type = 'person')
 train
 #> # A tibble: 24 × 5
-#>    A                  B                    sim    jw match
-#>    <fct>              <fct>              <dbl> <dbl> <chr>
-#>  1 James J. Pointer   Joseph T. Ornstein 0.344 0.735 No   
-#>  2 Timothy B. Ryan    Jimmy Pointer      0.290 0.549 No   
-#>  3 James J. Pointer   Jennifer R. Riley  0.363 0.569 No   
-#>  4 Jennifer C. Reilly Jenny Romer        0.393 0.784 No   
-#>  5 Timothy B. Ryan    Jenny Romer        0.227 0.429 No   
-#>  6 Jennifer C. Reilly Tom Ryan           0.337 0.347 No   
-#>  7 James J. Pointer   Tim Ryan           0.254 0.458 No   
-#>  8 Timothy B. Ryan    Joseph T. Ornstein 0.320 0.523 No   
-#>  9 James J. Pointer   Jeremy Creilly     0.315 0.596 No   
-#> 10 Jennifer C. Reilly Jeremy Creilly     0.424 0.779 No   
+#>    A                B                    sim    jw match
+#>    <fct>            <fct>              <dbl> <dbl> <chr>
+#>  1 Timothy B. Ryan  Tim Ryan           0.692 0.710 Yes  
+#>  2 Timothy B. Ryan  Tom Ryan           0.634 0.567 No   
+#>  3 Timothy B. Ryan  Jennifer R. Riley  0.467 0.501 No   
+#>  4 Timothy B. Ryan  Jeremy Creilly     0.375 0.517 No   
+#>  5 Timothy B. Ryan  Joseph T. Ornstein 0.320 0.523 No   
+#>  6 Timothy B. Ryan  Jimmy Pointer      0.290 0.549 No   
+#>  7 Timothy B. Ryan  Jessica Pointer    0.236 0.428 No   
+#>  8 Timothy B. Ryan  Jenny Romer        0.227 0.429 No   
+#>  9 James J. Pointer Jimmy Pointer      0.767 0.818 Yes  
+#> 10 James J. Pointer Jessica Pointer    0.623 0.778 No   
 #> # ℹ 14 more rows
 ```
 
@@ -189,10 +189,11 @@ train
 
 Next, we fit a logistic regression model using the `train` dataset, so
 that we can translate similarity scores into a probability that two
-records match.
+records match. We use both the cosine similarity (`sim`) and a lexical
+similarity measure (`jw`) as predictors in the model.
 
 ``` r
-model <- glm(as.numeric(match == 'Yes') ~ sim, 
+model <- glm(as.numeric(match == 'Yes') ~ sim + jw, 
              data = train,
              family = 'binomial')
 ```
@@ -200,20 +201,23 @@ model <- glm(as.numeric(match == 'Yes') ~ sim,
 Append these predictions to each name pair in the `dfA` and `dfB`.
 
 ``` r
+# create a dataframe with each name pair
 df <- sim |> 
   reshape2::melt() |> 
-  set_names(c('A', 'B', 'sim'))
+  set_names(c('A', 'B', 'sim')) |> 
+  # compute lexical similarity measures for each name pair
+  mutate(jw = stringdist::stringsim(A, B, method = 'jw', p = 0.1))
 
 df$match_probability <- predict(model, df, type = 'response')
 
 head(df)
-#>                    A             B       sim match_probability
-#> 1    Timothy B. Ryan      Tim Ryan 0.6916803      3.794280e-01
-#> 2   James J. Pointer      Tim Ryan 0.2539563      8.228429e-08
-#> 3 Jennifer C. Reilly      Tim Ryan 0.3384956      1.747202e-06
-#> 4    Timothy B. Ryan Jimmy Pointer 0.2901356      3.042493e-07
-#> 5   James J. Pointer Jimmy Pointer 0.7673960      9.041919e-01
-#> 6 Jennifer C. Reilly Jimmy Pointer 0.1969335      1.047663e-08
+#>                    A             B       sim        jw match_probability
+#> 1    Timothy B. Ryan      Tim Ryan 0.6916803 0.7102778      1.000000e+00
+#> 2   James J. Pointer      Tim Ryan 0.2539563 0.4583333      2.220446e-16
+#> 3 Jennifer C. Reilly      Tim Ryan 0.3384956 0.4074074      2.220446e-16
+#> 4    Timothy B. Ryan Jimmy Pointer 0.2901356 0.5493284      2.220446e-16
+#> 5   James J. Pointer Jimmy Pointer 0.7673960 0.8182692      1.000000e+00
+#> 6 Jennifer C. Reilly Jimmy Pointer 0.1969335 0.5496337      2.220446e-16
 ```
 
 ### Step 5: Validate Uncertain Matches
@@ -248,7 +252,7 @@ while(nrow(matches_to_validate) > 0){
               select(A,B,sim,match))
   
   # refine the model
-  model <- glm(as.numeric(match == 'Yes') ~ sim,
+  model <- glm(as.numeric(match == 'Yes') ~ sim + jw,
              data = train,
              family = 'binomial')
   
@@ -284,12 +288,12 @@ matches <- df |>
                      relationship = 'many-to-many')
 
 matches
-#>                    A             B       sim match_probability match age
-#> 1    Timothy B. Ryan      Tim Ryan 0.6916803         0.3794280   Yes  28
-#> 2   James J. Pointer Jimmy Pointer 0.7673960         0.9041919   Yes  40
-#> 3 Jennifer C. Reilly          <NA>        NA                NA  <NA>  32
-#>         hobby
-#> 1 Woodworking
-#> 2      Guitar
-#> 3        <NA>
+#>                    A             B       sim        jw match_probability match
+#> 1    Timothy B. Ryan      Tim Ryan 0.6916803 0.7102778                 1   Yes
+#> 2   James J. Pointer Jimmy Pointer 0.7673960 0.8182692                 1   Yes
+#> 3 Jennifer C. Reilly          <NA>        NA        NA                NA  <NA>
+#>   age       hobby
+#> 1  28 Woodworking
+#> 2  40      Guitar
+#> 3  32        <NA>
 ```

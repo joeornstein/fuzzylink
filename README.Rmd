@@ -50,7 +50,7 @@ We would like a procedure that correctly identifies which records in `dfB` are l
 
 ```{r}
 library(fuzzylink)
-df <- fuzzylink(dfA, dfB, by = 'name')
+df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person')
 df
 ```
 
@@ -109,16 +109,16 @@ Same Entity (Yes or No):
 ```
 
 ```{r}
-train <- get_training_set(sim)
+train <- get_training_set(sim, record_type = 'person')
 train
 ```
 
 ### Step 4: Fit Model
 
-Next, we fit a logistic regression model using the `train` dataset, so that we can translate similarity scores into a probability that two records match.
+Next, we fit a logistic regression model using the `train` dataset, so that we can translate similarity scores into a probability that two records match. We use both the cosine similarity (`sim`) and a lexical similarity measure (`jw`) as predictors in the model.
 
 ```{r}
-model <- glm(as.numeric(match == 'Yes') ~ sim, 
+model <- glm(as.numeric(match == 'Yes') ~ sim + jw, 
              data = train,
              family = 'binomial')
 ```
@@ -126,9 +126,12 @@ model <- glm(as.numeric(match == 'Yes') ~ sim,
 Append these predictions to each name pair in the `dfA` and `dfB`.
 
 ```{r}
+# create a dataframe with each name pair
 df <- sim |> 
   reshape2::melt() |> 
-  set_names(c('A', 'B', 'sim'))
+  set_names(c('A', 'B', 'sim')) |> 
+  # compute lexical similarity measures for each name pair
+  mutate(jw = stringdist::stringsim(A, B, method = 'jw', p = 0.1))
 
 df$match_probability <- predict(model, df, type = 'response')
 
@@ -161,7 +164,7 @@ while(nrow(matches_to_validate) > 0){
               select(A,B,sim,match))
   
   # refine the model
-  model <- glm(as.numeric(match == 'Yes') ~ sim,
+  model <- glm(as.numeric(match == 'Yes') ~ sim + jw,
              data = train,
              family = 'binomial')
   
