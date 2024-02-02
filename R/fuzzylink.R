@@ -73,13 +73,13 @@ fuzzylink <- function(dfA, dfB,
 
       # subset the data for each block from dfA and dfB
       subset_A <- mapply(`==`,
-                         dfA[, blocking.variables],
+                         dfA[, blocking.variables,drop=FALSE],
                          blocks[i,]) |>
         apply(1, all)
       block_A <- dfA[subset_A, ]
 
       subset_B <- mapply(`==`,
-                         dfB[, blocking.variables],
+                         dfB[, blocking.variables,drop=FALSE],
                          blocks[i,]) |>
         apply(1, all)
       block_B <- dfB[subset_B, ]
