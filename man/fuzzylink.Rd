@@ -10,7 +10,8 @@ fuzzylink(
   by,
   blocking.variables = NULL,
   verbose = TRUE,
-  record_type = "entity"
+  record_type = "entity",
+  openai_api_key = NULL
 )
 }
 \arguments{
@@ -23,6 +24,8 @@ fuzzylink(
 \item{verbose}{TRUE to print progress updates, FALSE for no output}
 
 \item{record_type}{A character describing what type of entity the \code{by} variable represents. Should be a singular noun (e.g. "person", "organization", "interest group", "city").}
+
+\item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
 }
 \value{
 A dataframe with all rows of \code{dfA} joined with any matches from \code{dfB}

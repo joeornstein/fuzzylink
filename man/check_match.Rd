@@ -10,7 +10,8 @@ check_match(
   batch_size = 50,
   model = "gpt-3.5-turbo-instruct",
   few_shot_examples = NULL,
-  record_type = "entity"
+  record_type = "entity",
+  openai_api_key = NULL
 )
 }
 \arguments{

@@ -9,7 +9,8 @@ get_training_set(
   num_bins = 50,
   samples_per_bin = 10,
   n = 500,
-  record_type = "entity"
+  record_type = "entity",
+  openai_api_key = NULL
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ get_training_set(
 \item{n}{Sample size for the training dataset}
 
 \item{record_type}{A character describing what type of entity the rows and columns of \code{sim} represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").}
+
+\item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
 }
 \value{
 A dataset with string pairs \code{A} and \code{B}, along with a \code{match} column indicating whether they match.

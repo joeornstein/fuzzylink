@@ -19,10 +19,19 @@ check_match <- function(string1, string2,
                         batch_size = 50,
                         model = 'gpt-3.5-turbo-instruct',
                         few_shot_examples = NULL,
-                        record_type = 'entity'){
+                        record_type = 'entity',
+                        openai_api_key = NULL){
 
   if(length(string1) != length(string2)){
     stop('Inputs must have the same number of elements.')
+  }
+
+  if(Sys.getenv('OPENAI_API_KEY') == '' & is.null(openai_api_key)){
+    stop("No API key detected in system environment. You can enter it manually using the 'openai_api_key' argument.")
+  }
+
+  if(is.null(openai_api_key)){
+    openai_api_key <- Sys.getenv("OPENAI_API_KEY")
   }
 
   use_completions_endpoint <- TRUE
@@ -46,7 +55,8 @@ check_match <- function(string1, string2,
     resp <- openai::create_completion(model = model,
                                       prompt = p,
                                       max_tokens = 1,
-                                      temperature = 0)
+                                      temperature = 0,
+                                      openai_api_key = openai_api_key)
 
     labels <- gsub(' ', '', resp$choices$text)
   }
@@ -74,7 +84,8 @@ check_match <- function(string1, string2,
         # submit to OpenAI API
         resp <- openai::create_chat_completion(model = model,
                                                messages = p,
-                                               temperature = 0)
+                                               temperature = 0,
+                                               openai_api_key = openai_api_key)
 
         # add to labels vector
         labels[i] <- resp$choices$message.content
@@ -107,7 +118,8 @@ check_match <- function(string1, string2,
         # submit to OpenAI API
         resp <- openai::create_chat_completion(model = model,
                                                messages = p,
-                                               temperature = 0)
+                                               temperature = 0,
+                                               openai_api_key = openai_api_key)
 
         # convert response into vector
         response_vector <- gsub('[0-9]+. ', '',

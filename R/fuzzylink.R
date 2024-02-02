@@ -5,6 +5,7 @@
 #' @param blocking.variables A character vector of variables that must match exactly in order to match two records
 #' @param verbose TRUE to print progress updates, FALSE for no output
 #' @param record_type A character describing what type of entity the `by` variable represents. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
+#' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
 #'
 #' @return A dataframe with all rows of `dfA` joined with any matches from `dfB`
 #' @export
@@ -17,7 +18,22 @@
 fuzzylink <- function(dfA, dfB,
                       by, blocking.variables = NULL,
                       verbose = TRUE,
-                      record_type = 'entity'){
+                      record_type = 'entity',
+                      openai_api_key = NULL){
+
+
+  # Check for errors in inputs
+  if(is.null(dfA[[by]])){
+    stop(cat("There is no variable called \'", by, "\' in dfA.", sep = ''))
+  }
+  if(is.null(dfB[[by]])){
+    stop(cat("There is no variable called \'", by, "\' in dfB.", sep = ''))
+  }
+  if(Sys.getenv('OPENAI_API_KEY') == '' & is.null(openai_api_key)){
+    stop("No API key detected in system environment. You can enter it manually using the 'openai_api_key' argument.")
+  }
+
+
 
   ## Step 1: Blocking -----------------
 
@@ -99,7 +115,7 @@ fuzzylink <- function(dfA, dfB,
         format(Sys.time(), '%X'),
         ')\n\n', sep = '')
   }
-  train <- get_training_set(sim, record_type = record_type)
+  train <- get_training_set(sim, record_type = record_type, openai_api_key = openai_api_key)
 
   ## Step 4: Fit model -------------------
   if(verbose){
@@ -152,7 +168,8 @@ fuzzylink <- function(dfA, dfB,
 
     matches_to_validate$match <- check_match(matches_to_validate$A,
                                              matches_to_validate$B,
-                                             record_type = record_type)
+                                             record_type = record_type,
+                                             openai_api_key = openai_api_key)
 
     # append new labeled pairs to the train set
     train <- train |>
