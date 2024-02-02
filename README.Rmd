@@ -198,3 +198,24 @@ matches <- df |>
 
 matches
 ```
+
+## A Note On Cost
+
+Because the `fuzzylink()` function makes several calls to the OpenAI API---which charges a [per-token fee](https://openai.com/pricing)---there is a monetary cost associated with each use. Based on the package defaults and API pricing as of February 2024, here is a table of approximate costs for merging datasets of various sizes.
+
+```{r, echo=FALSE}
+embedding_cost_per_token <- 0.00013 / 1e3
+completion_cost_per_token <- 0.0015 / 1e3
+tokens_per_string <- 4.5
+tokens_per_completion <- 40
+tibble(rows = 10^(1:6)) |> 
+  mutate(embedding_cost = rows * tokens_per_string * embedding_cost_per_token,
+         completion_cost = (rows / 2) * 5  * tokens_per_completion * completion_cost_per_token) |> 
+  mutate(approx_cost = paste0('$', round(embedding_cost + completion_cost, 2)), 
+         rows = prettyNum(rows, big.mark = ',')) |> 
+  select(`Total Number of Records` = rows, 
+         `Approximate Cost (Default Settings)` = approx_cost) |>  
+  knitr::kable()
+```
+
+For particularly large datasets, one can significantly reduce costs by blocking and/or increasing the probability threshold during the validation step.
