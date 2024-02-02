@@ -208,14 +208,17 @@ embedding_cost_per_token <- 0.00013 / 1e3
 completion_cost_per_token <- 0.0015 / 1e3
 tokens_per_string <- 4.5
 tokens_per_completion <- 40
-tibble(rows = 10^(1:6)) |> 
-  mutate(embedding_cost = rows * tokens_per_string * embedding_cost_per_token,
-         completion_cost = (rows / 2) * 5  * tokens_per_completion * completion_cost_per_token) |> 
+expand_grid(A = 10^(1:6),
+            B = 10^(1:6)) |> 
+  mutate(embedding_cost = (A+B) * tokens_per_string * embedding_cost_per_token,
+         completion_cost = A * 5 * tokens_per_completion * completion_cost_per_token) |> 
   mutate(approx_cost = paste0('$', round(embedding_cost + completion_cost, 2)), 
-         rows = scales::comma_format()(rows)) |> 
-  select(`Total Number of Records` = rows, 
+         A = scales::comma_format()(A),
+         B = scales::comma_format()(B)) |> 
+  select(`dfA` = A,
+         `dfB` = B,
          `Approximate Cost (Default Settings)` = approx_cost) |>  
   knitr::kable()
 ```
 
-For particularly large datasets, one can significantly reduce costs by blocking and/or increasing the probability threshold during the validation step.
+Note that cost scales more quickly with the size of `dfA` than with `dfB`, because the LLM prompts for validation are more costly than retrieving embeddings. For particularly large datasets, one can significantly reduce costs by blocking and/or increasing the probability threshold during the validation step.

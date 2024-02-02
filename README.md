@@ -38,20 +38,20 @@ function performs this record linkage with a single line of code.
 ``` r
 library(fuzzylink)
 df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person')
-#> Retrieving 10 embeddings (2:04:37 PM)
+#> Retrieving 10 embeddings (2:17:40 PM)
 #> 
-#> Computing similarity matrix (2:04:38 PM)
+#> Computing similarity matrix (2:17:41 PM)
 #> 
-#> Labeling training set (2:04:38 PM)
+#> Labeling training set (2:17:41 PM)
 #> 
-#> Fitting model (2:04:39 PM)
+#> Fitting model (2:17:42 PM)
 #> 
-#> Linking datasets (2:04:39 PM)
+#> Linking datasets (2:17:42 PM)
 #> 
-#> Done! (2:04:39 PM)
+#> Done! (2:17:42 PM)
 df
 #>                    A             B       sim        jw match_probability match
-#> 1    Timothy B. Ryan      Tim Ryan 0.6916803 0.7102778                 1   Yes
+#> 1    Timothy B. Ryan      Tim Ryan 0.6917096 0.7102778                 1   Yes
 #> 2   James J. Pointer Jimmy Pointer 0.7673960 0.8182692                 1   Yes
 #> 3 Jennifer C. Reilly          <NA>        NA        NA                NA  <NA>
 #>   age       hobby
@@ -138,13 +138,13 @@ significantly reduces cost and speeds up computation.
 sim <- get_similarity_matrix(embeddings, strings_A, strings_B)
 sim
 #>                     Tim Ryan Jimmy Pointer Jessica Pointer  Tom Ryan
-#> Timothy B. Ryan    0.6916803     0.2901356       0.2357985 0.6336776
-#> James J. Pointer   0.2539563     0.7673960       0.6228653 0.2874345
-#> Jennifer C. Reilly 0.3384956     0.1969335       0.3453105 0.3374179
+#> Timothy B. Ryan    0.6916962     0.2902109       0.2357331 0.6335850
+#> James J. Pointer   0.2539213     0.7675504       0.6230761 0.2873005
+#> Jennifer C. Reilly 0.3384895     0.1969540       0.3452958 0.3372888
 #>                    Jenny Romer Jeremy Creilly Jennifer R. Riley
-#> Timothy B. Ryan      0.2270235      0.3754056         0.4666738
-#> James J. Pointer     0.2129737      0.3148329         0.3629020
-#> Jennifer C. Reilly   0.3929493      0.4237705         0.7162645
+#> Timothy B. Ryan      0.2269178      0.3753147         0.4665456
+#> James J. Pointer     0.2128482      0.3148172         0.3628533
+#> Jennifer C. Reilly   0.3928484      0.4236825         0.7161347
 ```
 
 ### Step 3: Create a Training Set
@@ -175,7 +175,7 @@ train
 #>  5 Timothy B. Ryan  Jimmy Pointer     0.290 0.549 No   
 #>  6 Timothy B. Ryan  Jessica Pointer   0.236 0.428 No   
 #>  7 Timothy B. Ryan  Jenny Romer       0.227 0.429 No   
-#>  8 James J. Pointer Jimmy Pointer     0.767 0.818 Yes  
+#>  8 James J. Pointer Jimmy Pointer     0.768 0.818 Yes  
 #>  9 James J. Pointer Jessica Pointer   0.623 0.778 No   
 #> 10 James J. Pointer Jennifer R. Riley 0.363 0.569 No   
 #> # ℹ 11 more rows
@@ -208,12 +208,12 @@ df$match_probability <- predict(model, df, type = 'response')
 
 head(df)
 #>                    A             B       sim        jw match_probability
-#> 1    Timothy B. Ryan      Tim Ryan 0.6916803 0.7102778      1.000000e+00
-#> 2   James J. Pointer      Tim Ryan 0.2539563 0.4583333      2.220446e-16
-#> 3 Jennifer C. Reilly      Tim Ryan 0.3384956 0.4074074      2.220446e-16
-#> 4    Timothy B. Ryan Jimmy Pointer 0.2901356 0.5493284      2.220446e-16
-#> 5   James J. Pointer Jimmy Pointer 0.7673960 0.8182692      1.000000e+00
-#> 6 Jennifer C. Reilly Jimmy Pointer 0.1969335 0.5496337      2.220446e-16
+#> 1    Timothy B. Ryan      Tim Ryan 0.6916962 0.7102778      1.000000e+00
+#> 2   James J. Pointer      Tim Ryan 0.2539213 0.4583333      2.220446e-16
+#> 3 Jennifer C. Reilly      Tim Ryan 0.3384895 0.4074074      2.220446e-16
+#> 4    Timothy B. Ryan Jimmy Pointer 0.2902109 0.5493284      2.220446e-16
+#> 5   James J. Pointer Jimmy Pointer 0.7675504 0.8182692      1.000000e+00
+#> 6 Jennifer C. Reilly Jimmy Pointer 0.1969540 0.5496337      2.220446e-16
 ```
 
 ### Step 5: Validate Uncertain Matches
@@ -287,8 +287,8 @@ matches <- df |>
 
 matches
 #>                    A             B       sim        jw match_probability match
-#> 1    Timothy B. Ryan      Tim Ryan 0.6916803 0.7102778                 1   Yes
-#> 2   James J. Pointer Jimmy Pointer 0.7673960 0.8182692                 1   Yes
+#> 1    Timothy B. Ryan      Tim Ryan 0.6916962 0.7102778                 1   Yes
+#> 2   James J. Pointer Jimmy Pointer 0.7675504 0.8182692                 1   Yes
 #> 3 Jennifer C. Reilly          <NA>        NA        NA                NA  <NA>
 #>   age       hobby
 #> 1  28 Woodworking
@@ -304,15 +304,47 @@ a monetary cost associated with each use. Based on the package defaults
 and API pricing as of February 2024, here is a table of approximate
 costs for merging datasets of various sizes.
 
-| Total Number of Records | Approximate Cost (Default Settings) |
-|:------------------------|:------------------------------------|
-| 10                      | \$0                                 |
-| 100                     | \$0.02                              |
-| 1,000                   | \$0.15                              |
-| 10,000                  | \$1.51                              |
-| 100,000                 | \$15.06                             |
-| 1,000,000               | \$150.58                            |
+| dfA       | dfB       | Approximate Cost (Default Settings) |
+|:----------|:----------|:------------------------------------|
+| 10        | 10        | \$0                                 |
+| 10        | 100       | \$0                                 |
+| 10        | 1,000     | \$0                                 |
+| 10        | 10,000    | \$0.01                              |
+| 10        | 100,000   | \$0.06                              |
+| 10        | 1,000,000 | \$0.59                              |
+| 100       | 10        | \$0.03                              |
+| 100       | 100       | \$0.03                              |
+| 100       | 1,000     | \$0.03                              |
+| 100       | 10,000    | \$0.04                              |
+| 100       | 100,000   | \$0.09                              |
+| 100       | 1,000,000 | \$0.62                              |
+| 1,000     | 10        | \$0.3                               |
+| 1,000     | 100       | \$0.3                               |
+| 1,000     | 1,000     | \$0.3                               |
+| 1,000     | 10,000    | \$0.31                              |
+| 1,000     | 100,000   | \$0.36                              |
+| 1,000     | 1,000,000 | \$0.89                              |
+| 10,000    | 10        | \$3.01                              |
+| 10,000    | 100       | \$3.01                              |
+| 10,000    | 1,000     | \$3.01                              |
+| 10,000    | 10,000    | \$3.01                              |
+| 10,000    | 100,000   | \$3.06                              |
+| 10,000    | 1,000,000 | \$3.59                              |
+| 100,000   | 10        | \$30.06                             |
+| 100,000   | 100       | \$30.06                             |
+| 100,000   | 1,000     | \$30.06                             |
+| 100,000   | 10,000    | \$30.06                             |
+| 100,000   | 100,000   | \$30.12                             |
+| 100,000   | 1,000,000 | \$30.64                             |
+| 1,000,000 | 10        | \$300.59                            |
+| 1,000,000 | 100       | \$300.59                            |
+| 1,000,000 | 1,000     | \$300.59                            |
+| 1,000,000 | 10,000    | \$300.59                            |
+| 1,000,000 | 100,000   | \$300.64                            |
+| 1,000,000 | 1,000,000 | \$301.17                            |
 
-For particularly large datasets, one can significantly reduce costs by
-blocking and/or increasing the probability threshold during the
-validation step.
+Note that cost scales more quickly with the size of `dfA` than with
+`dfB`, because the LLM prompts for validation are more costly than
+retrieving embeddings. For particularly large datasets, one can
+significantly reduce costs by blocking and/or increasing the probability
+threshold during the validation step.
