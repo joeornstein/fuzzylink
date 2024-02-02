@@ -19,17 +19,16 @@ dfA
 #> 2 James J. Pointer      40
 #> 3 Jennifer C. Reilly    32
 dfB
-#> # A tibble: 8 × 2
-#>   name               hobby       
-#>   <chr>              <chr>       
-#> 1 Tim Ryan           Woodworking 
-#> 2 Jimmy Pointer      Guitar      
-#> 3 Jessica Pointer    Camping     
-#> 4 Tom Ryan           Making Pasta
-#> 5 Jenny Romer        Salsa Dance 
-#> 6 Jeremy Creilly     Gardening   
-#> 7 Jennifer R. Riley  Acting      
-#> 8 Joseph T. Ornstein Banjo
+#> # A tibble: 7 × 2
+#>   name              hobby       
+#>   <chr>             <chr>       
+#> 1 Tim Ryan          Woodworking 
+#> 2 Jimmy Pointer     Guitar      
+#> 3 Jessica Pointer   Camping     
+#> 4 Tom Ryan          Making Pasta
+#> 5 Jenny Romer       Salsa Dance 
+#> 6 Jeremy Creilly    Gardening   
+#> 7 Jennifer R. Riley Acting
 ```
 
 We would like a procedure that correctly identifies which records in
@@ -39,17 +38,17 @@ function performs this record linkage with a single line of code.
 ``` r
 library(fuzzylink)
 df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person')
-#> Retrieving 11 embeddings (10:04:28 AM)
+#> Retrieving 10 embeddings (12:25:37 PM)
 #> 
-#> Computing similarity matrix (10:04:29 AM)
+#> Computing similarity matrix (12:25:38 PM)
 #> 
-#> Labeling training set (10:04:29 AM)
+#> Labeling training set (12:25:38 PM)
 #> 
-#> Fitting model (10:04:30 AM)
+#> Fitting model (12:25:39 PM)
 #> 
-#> Linking datasets (10:04:30 AM)
+#> Linking datasets (12:25:39 PM)
 #> 
-#> Done! (10:04:30 AM)
+#> Done! (12:25:39 PM)
 df
 #>                    A             B       sim        jw match_probability match
 #> 1    Timothy B. Ryan      Tim Ryan 0.6916803 0.7102778                 1   Yes
@@ -116,12 +115,12 @@ all_strings <- unique( c(strings_A, strings_B) )
 embeddings <- get_embeddings(all_strings)
 
 dim(embeddings)
-#> [1]   11 3072
+#> [1]   10 3072
 rownames(embeddings)
 #>  [1] "Timothy B. Ryan"    "James J. Pointer"   "Jennifer C. Reilly"
 #>  [4] "Tim Ryan"           "Jimmy Pointer"      "Jessica Pointer"   
 #>  [7] "Tom Ryan"           "Jenny Romer"        "Jeremy Creilly"    
-#> [10] "Jennifer R. Riley"  "Joseph T. Ornstein"
+#> [10] "Jennifer R. Riley"
 ```
 
 ### Step 2: Similarity Scores
@@ -146,10 +145,6 @@ sim
 #> Timothy B. Ryan      0.2270235      0.3754056         0.4666738
 #> James J. Pointer     0.2129737      0.3148329         0.3629020
 #> Jennifer C. Reilly   0.3929493      0.4237705         0.7162645
-#>                    Joseph T. Ornstein
-#> Timothy B. Ryan             0.3197964
-#> James J. Pointer            0.3437143
-#> Jennifer C. Reilly          0.2287089
 ```
 
 ### Step 3: Create a Training Set
@@ -158,39 +153,40 @@ We would like to use those cosine similarity scores to predict whether
 two names refer to the same entity. In order to do that, we need to
 first create a labeled dataset that we can use to fit a statistical
 model. The `get_training_set()` function selects a sample of name pairs
-and labels them using the following prompt to GPT-3.5.
+and labels them using the following prompt to GPT-3.5 (brackets denote
+input variables).
 
-    Decide if the following two names refer to the same entity.
+    Decide if the following two names refer to the same {record_type}.
 
-    Name A: {insert name here}
-    Name B: {insert name here}
-    Same Entity (Yes or No):
+    Name A: {A}
+    Name B: {B}
+    Same {record_type} (Yes or No):
 
 ``` r
 train <- get_training_set(sim, record_type = 'person')
 train
-#> # A tibble: 24 × 5
-#>    A                B                    sim    jw match
-#>    <fct>            <fct>              <dbl> <dbl> <chr>
-#>  1 Timothy B. Ryan  Tim Ryan           0.692 0.710 Yes  
-#>  2 Timothy B. Ryan  Tom Ryan           0.634 0.567 No   
-#>  3 Timothy B. Ryan  Jennifer R. Riley  0.467 0.501 No   
-#>  4 Timothy B. Ryan  Jeremy Creilly     0.375 0.517 No   
-#>  5 Timothy B. Ryan  Joseph T. Ornstein 0.320 0.523 No   
-#>  6 Timothy B. Ryan  Jimmy Pointer      0.290 0.549 No   
-#>  7 Timothy B. Ryan  Jessica Pointer    0.236 0.428 No   
-#>  8 Timothy B. Ryan  Jenny Romer        0.227 0.429 No   
-#>  9 James J. Pointer Jimmy Pointer      0.767 0.818 Yes  
-#> 10 James J. Pointer Jessica Pointer    0.623 0.778 No   
-#> # ℹ 14 more rows
+#> # A tibble: 21 × 5
+#>    A                B                   sim    jw match
+#>    <fct>            <fct>             <dbl> <dbl> <chr>
+#>  1 Timothy B. Ryan  Tim Ryan          0.692 0.710 Yes  
+#>  2 Timothy B. Ryan  Tom Ryan          0.634 0.567 No   
+#>  3 Timothy B. Ryan  Jennifer R. Riley 0.467 0.501 No   
+#>  4 Timothy B. Ryan  Jeremy Creilly    0.375 0.517 No   
+#>  5 Timothy B. Ryan  Jimmy Pointer     0.290 0.549 No   
+#>  6 Timothy B. Ryan  Jessica Pointer   0.236 0.428 No   
+#>  7 Timothy B. Ryan  Jenny Romer       0.227 0.429 No   
+#>  8 James J. Pointer Jimmy Pointer     0.767 0.818 Yes  
+#>  9 James J. Pointer Jessica Pointer   0.623 0.778 No   
+#> 10 James J. Pointer Jennifer R. Riley 0.363 0.569 No   
+#> # ℹ 11 more rows
 ```
 
 ### Step 4: Fit Model
 
-Next, we fit a logistic regression model using the `train` dataset, so
-that we can translate similarity scores into a probability that two
-records match. We use both the cosine similarity (`sim`) and a lexical
-similarity measure (`jw`) as predictors in the model.
+Next, we fit a logistic regression model on the `train` dataset, so that
+we can map similarity scores onto a probability that two records match.
+We use both the cosine similarity (`sim`) and a lexical similarity
+measure (`jw`) as predictors in this model.
 
 ``` r
 model <- glm(as.numeric(match == 'Yes') ~ sim + jw, 
@@ -198,7 +194,7 @@ model <- glm(as.numeric(match == 'Yes') ~ sim + jw,
              family = 'binomial')
 ```
 
-Append these predictions to each name pair in the `dfA` and `dfB`.
+Append these predictions to each name pair in `dfA` and `dfB`.
 
 ``` r
 # create a dataframe with each name pair
@@ -222,13 +218,16 @@ head(df)
 
 ### Step 5: Validate Uncertain Matches
 
-For every name pair within a range of estimated match probabilities (by
-default 0.2 to 0.9), we will use the GPT-3.5 prompt above to validate
-whether the name pair is a match or not. These labeled pairs are then
-added to the training dataset and the logistic regression model is
-refined. We repeat this process until there are no matches left to
-validate. At that point, every record in `dfA` is either linked to a
-record in `dfB`, or there are no candidate matches in `dfB` with an
+We now have a dataset with estimated match probabilities for each pair
+of records in `dfA` and `dfB`. We could stop there, and just report the
+match probabilities. But we can get better results if we conduct a final
+validation step. For every name pair within a range of estimated match
+probabilities (by default 0.2 to 0.9), we will use the GPT-3.5 prompt
+above to check whether the name pair is a match or not. These labeled
+pairs are then added to the training dataset, the logistic regression
+model is refined, and we repeat this process until there are no matches
+left to validate. At that point, every record in `dfA` is either linked
+to a record in `dfB` or there are no candidate matches in `dfB` with an
 estimated probability higher than the threshold.
 
 ``` r
@@ -271,9 +270,8 @@ while(nrow(matches_to_validate) > 0){
 
 ### Step 6: Link Datasets
 
-Finally, we take all the validated name pairs—and those with an
-estimated match probability higher than the threshold for validation—and
-merge them into a single dataset.
+Finally, we take all name pairs whose match probability is higher than a
+given threshold and merge them into a single dataset.
 
 ``` r
 matches <- df |>
