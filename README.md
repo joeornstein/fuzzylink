@@ -38,20 +38,20 @@ function performs this record linkage with a single line of code.
 ``` r
 library(fuzzylink)
 df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person')
-#> Retrieving 10 embeddings (2:17:40 PM)
+#> Retrieving 10 embeddings (2:26:15 PM)
 #> 
-#> Computing similarity matrix (2:17:41 PM)
+#> Computing similarity matrix (2:26:16 PM)
 #> 
-#> Labeling training set (2:17:41 PM)
+#> Labeling training set (2:26:17 PM)
 #> 
-#> Fitting model (2:17:42 PM)
+#> Fitting model (2:26:17 PM)
 #> 
-#> Linking datasets (2:17:42 PM)
+#> Linking datasets (2:26:17 PM)
 #> 
-#> Done! (2:17:42 PM)
+#> Done! (2:26:17 PM)
 df
 #>                    A             B       sim        jw match_probability match
-#> 1    Timothy B. Ryan      Tim Ryan 0.6917096 0.7102778                 1   Yes
+#> 1    Timothy B. Ryan      Tim Ryan 0.6916803 0.7102778                 1   Yes
 #> 2   James J. Pointer Jimmy Pointer 0.7673960 0.8182692                 1   Yes
 #> 3 Jennifer C. Reilly          <NA>        NA        NA                NA  <NA>
 #>   age       hobby
@@ -138,23 +138,23 @@ significantly reduces cost and speeds up computation.
 sim <- get_similarity_matrix(embeddings, strings_A, strings_B)
 sim
 #>                     Tim Ryan Jimmy Pointer Jessica Pointer  Tom Ryan
-#> Timothy B. Ryan    0.6916962     0.2902109       0.2357331 0.6335850
-#> James J. Pointer   0.2539213     0.7675504       0.6230761 0.2873005
-#> Jennifer C. Reilly 0.3384895     0.1969540       0.3452958 0.3372888
+#> Timothy B. Ryan    0.6916803     0.2901356       0.2357985 0.6336776
+#> James J. Pointer   0.2539563     0.7673960       0.6228653 0.2874345
+#> Jennifer C. Reilly 0.3384956     0.1969335       0.3453105 0.3374179
 #>                    Jenny Romer Jeremy Creilly Jennifer R. Riley
-#> Timothy B. Ryan      0.2269178      0.3753147         0.4665456
-#> James J. Pointer     0.2128482      0.3148172         0.3628533
-#> Jennifer C. Reilly   0.3928484      0.4236825         0.7161347
+#> Timothy B. Ryan      0.2270235      0.3754056         0.4666738
+#> James J. Pointer     0.2129737      0.3148329         0.3629020
+#> Jennifer C. Reilly   0.3929493      0.4237705         0.7162645
 ```
 
 ### Step 3: Create a Training Set
 
 We would like to use those cosine similarity scores to predict whether
 two names refer to the same entity. In order to do that, we need to
-first create a labeled dataset that we can use to fit a statistical
-model. The `get_training_set()` function selects a sample of name pairs
-and labels them using the following prompt to GPT-3.5 (brackets denote
-input variables).
+first create a labeled dataset to fit a statistical model. The
+`get_training_set()` function selects a sample of name pairs and labels
+them using the following prompt to GPT-3.5 (brackets denote input
+variables).
 
     Decide if the following two names refer to the same {record_type}.
 
@@ -175,7 +175,7 @@ train
 #>  5 Timothy B. Ryan  Jimmy Pointer     0.290 0.549 No   
 #>  6 Timothy B. Ryan  Jessica Pointer   0.236 0.428 No   
 #>  7 Timothy B. Ryan  Jenny Romer       0.227 0.429 No   
-#>  8 James J. Pointer Jimmy Pointer     0.768 0.818 Yes  
+#>  8 James J. Pointer Jimmy Pointer     0.767 0.818 Yes  
 #>  9 James J. Pointer Jessica Pointer   0.623 0.778 No   
 #> 10 James J. Pointer Jennifer R. Riley 0.363 0.569 No   
 #> # ℹ 11 more rows
@@ -185,8 +185,8 @@ train
 
 Next, we fit a logistic regression model on the `train` dataset, so that
 we can map similarity scores onto a probability that two records match.
-We use both the cosine similarity (`sim`) and a lexical similarity
-measure (`jw`) as predictors in this model.
+We use both the cosine similarity (`sim`) and a measure of lexical
+similarity (`jw`) as predictors in this model.
 
 ``` r
 model <- glm(as.numeric(match == 'Yes') ~ sim + jw, 
@@ -208,27 +208,27 @@ df$match_probability <- predict(model, df, type = 'response')
 
 head(df)
 #>                    A             B       sim        jw match_probability
-#> 1    Timothy B. Ryan      Tim Ryan 0.6916962 0.7102778      1.000000e+00
-#> 2   James J. Pointer      Tim Ryan 0.2539213 0.4583333      2.220446e-16
-#> 3 Jennifer C. Reilly      Tim Ryan 0.3384895 0.4074074      2.220446e-16
-#> 4    Timothy B. Ryan Jimmy Pointer 0.2902109 0.5493284      2.220446e-16
-#> 5   James J. Pointer Jimmy Pointer 0.7675504 0.8182692      1.000000e+00
-#> 6 Jennifer C. Reilly Jimmy Pointer 0.1969540 0.5496337      2.220446e-16
+#> 1    Timothy B. Ryan      Tim Ryan 0.6916803 0.7102778      1.000000e+00
+#> 2   James J. Pointer      Tim Ryan 0.2539563 0.4583333      2.220446e-16
+#> 3 Jennifer C. Reilly      Tim Ryan 0.3384956 0.4074074      2.220446e-16
+#> 4    Timothy B. Ryan Jimmy Pointer 0.2901356 0.5493284      2.220446e-16
+#> 5   James J. Pointer Jimmy Pointer 0.7673960 0.8182692      1.000000e+00
+#> 6 Jennifer C. Reilly Jimmy Pointer 0.1969335 0.5496337      2.220446e-16
 ```
 
 ### Step 5: Validate Uncertain Matches
 
 We now have a dataset with estimated match probabilities for each pair
-of records in `dfA` and `dfB`. We could stop there, and just report the
-match probabilities. But we can get better results if we conduct a final
-validation step. For every name pair within a range of estimated match
-probabilities (by default 0.2 to 0.9), we will use the GPT-3.5 prompt
-above to check whether the name pair is a match or not. These labeled
-pairs are then added to the training dataset, the logistic regression
-model is refined, and we repeat this process until there are no matches
-left to validate. At that point, every record in `dfA` is either linked
-to a record in `dfB` or there are no candidate matches in `dfB` with an
-estimated probability higher than the threshold.
+of records in `dfA` and `dfB`. We could stop there and just report the
+match probabilities. But for larger datasets we can get better results
+if we conduct a final validation step. For every name pair within a
+range of estimated match probabilities (by default 0.2 to 0.9), we will
+use the GPT-3.5 prompt above to check whether the name pair is a match.
+These labeled pairs are then added to the training dataset, the logistic
+regression model is refined, and we repeat this process until there are
+no matches left to validate. At that point, every record in `dfA` is
+either linked to a record in `dfB` or there are no candidate matches in
+`dfB` with an estimated probability higher than the threshold.
 
 ``` r
 
@@ -287,8 +287,8 @@ matches <- df |>
 
 matches
 #>                    A             B       sim        jw match_probability match
-#> 1    Timothy B. Ryan      Tim Ryan 0.6916962 0.7102778                 1   Yes
-#> 2   James J. Pointer Jimmy Pointer 0.7675504 0.8182692                 1   Yes
+#> 1    Timothy B. Ryan      Tim Ryan 0.6916803 0.7102778                 1   Yes
+#> 2   James J. Pointer Jimmy Pointer 0.7673960 0.8182692                 1   Yes
 #> 3 Jennifer C. Reilly          <NA>        NA        NA                NA  <NA>
 #>   age       hobby
 #> 1  28 Woodworking
@@ -344,7 +344,7 @@ costs for merging datasets of various sizes.
 | 1,000,000 | 1,000,000 | \$301.17                            |
 
 Note that cost scales more quickly with the size of `dfA` than with
-`dfB`, because the LLM prompts for validation are more costly than
-retrieving embeddings. For particularly large datasets, one can
-significantly reduce costs by blocking and/or increasing the probability
-threshold during the validation step.
+`dfB`, because it is more costly to complete LLM prompts for validation
+than it is to retrieve embeddings. For particularly large datasets, one
+can significantly reduce costs by blocking and/or increasing the
+probability threshold during the validation step.
