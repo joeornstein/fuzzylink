@@ -32,23 +32,23 @@ dfB
 ```
 
 We would like a procedure that correctly identifies which records in
-`dfB` are likely matches for the records in `dfA`. The `fuzzylink()`
+`dfB` are likely matches for each record in `dfA`. The `fuzzylink()`
 function performs this record linkage with a single line of code.
 
 ``` r
 library(fuzzylink)
 df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person')
-#> Retrieving 10 embeddings (12:25:37 PM)
+#> Retrieving 10 embeddings (12:28:47 PM)
 #> 
-#> Computing similarity matrix (12:25:38 PM)
+#> Computing similarity matrix (12:28:48 PM)
 #> 
-#> Labeling training set (12:25:38 PM)
+#> Labeling training set (12:28:49 PM)
 #> 
-#> Fitting model (12:25:39 PM)
+#> Fitting model (12:28:50 PM)
 #> 
-#> Linking datasets (12:25:39 PM)
+#> Linking datasets (12:28:50 PM)
 #> 
-#> Done! (12:25:39 PM)
+#> Done! (12:28:50 PM)
 df
 #>                    A             B       sim        jw match_probability match
 #> 1    Timothy B. Ryan      Tim Ryan 0.6916803 0.7102778                 1   Yes

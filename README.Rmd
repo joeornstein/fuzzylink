@@ -45,7 +45,7 @@ dfA
 dfB
 ```
 
-We would like a procedure that correctly identifies which records in `dfB` are likely matches for the records in `dfA`. The `fuzzylink()` function performs this record linkage with a single line of code.
+We would like a procedure that correctly identifies which records in `dfB` are likely matches for each record in `dfA`. The `fuzzylink()` function performs this record linkage with a single line of code.
 
 ```{r}
 library(fuzzylink)
