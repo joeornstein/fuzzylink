@@ -38,17 +38,17 @@ function performs this record linkage with a single line of code.
 ``` r
 library(fuzzylink)
 df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person')
-#> Retrieving 10 embeddings (2:02:36 PM)
+#> Retrieving 10 embeddings (2:04:37 PM)
 #> 
-#> Computing similarity matrix (2:02:37 PM)
+#> Computing similarity matrix (2:04:38 PM)
 #> 
-#> Labeling training set (2:02:37 PM)
+#> Labeling training set (2:04:38 PM)
 #> 
-#> Fitting model (2:02:38 PM)
+#> Fitting model (2:04:39 PM)
 #> 
-#> Linking datasets (2:02:38 PM)
+#> Linking datasets (2:04:39 PM)
 #> 
-#> Done! (2:02:38 PM)
+#> Done! (2:04:39 PM)
 df
 #>                    A             B       sim        jw match_probability match
 #> 1    Timothy B. Ryan      Tim Ryan 0.6916803 0.7102778                 1   Yes
@@ -310,8 +310,8 @@ costs for merging datasets of various sizes.
 | 100                     | \$0.02                              |
 | 1,000                   | \$0.15                              |
 | 10,000                  | \$1.51                              |
-| 1e+05                   | \$15.06                             |
-| 1e+06                   | \$150.58                            |
+| 100,000                 | \$15.06                             |
+| 1,000,000               | \$150.58                            |
 
 For particularly large datasets, one can significantly reduce costs by
 blocking and/or increasing the probability threshold during the
