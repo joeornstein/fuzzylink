@@ -4,6 +4,7 @@
 #' @param by A character denoting the name of the variable to use for fuzzy matching
 #' @param blocking.variables A character vector of variables that must match exactly in order to match two records
 #' @param verbose TRUE to print progress updates, FALSE for no output
+#' @param record_type A character describing what type of entity the `by` variable represents. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
 #'
 #' @return A dataframe with all rows of `dfA` joined with any matches from `dfB`
 #' @export
@@ -15,7 +16,8 @@
 #' df <- fuzzylink(dfA, dfB, by = 'name')
 fuzzylink <- function(dfA, dfB,
                       by, blocking.variables = NULL,
-                      verbose = TRUE){
+                      verbose = TRUE,
+                      record_type = 'entity'){
 
   ## Step 1: Blocking -----------------
 

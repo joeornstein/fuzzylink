@@ -4,7 +4,13 @@
 \alias{get_training_set}
 \title{Create a training set}
 \usage{
-get_training_set(sim, num_bins = 50, samples_per_bin = 10)
+get_training_set(
+  sim,
+  num_bins = 50,
+  samples_per_bin = 10,
+  n = 500,
+  record_type = "entity"
+)
 }
 \arguments{
 \item{sim}{A matrix of similarity scores}
@@ -12,6 +18,10 @@ get_training_set(sim, num_bins = 50, samples_per_bin = 10)
 \item{num_bins}{Number of bins to split similarity scores for stratified random sampling (defaults to 50)}
 
 \item{samples_per_bin}{Number of string pairs to sample from each bin (defaults to 5)}
+
+\item{n}{Sample size for the training dataset}
+
+\item{record_type}{A character describing what type of entity the rows and columns of \code{sim} represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").}
 }
 \value{
 A dataset with string pairs \code{A} and \code{B}, along with a \code{match} column indicating whether they match.

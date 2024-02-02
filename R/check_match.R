@@ -5,6 +5,7 @@
 #' @param batch_size The number of string pairs to include in each prompt
 #' @param model Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'
 #' @param few_shot_examples A dataframe with few-shot examples for prompt; must include columns `A`, `B`, and `match`
+#' @param record_type A character describing what type of entity `string1` and `string2` represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
 #'
 #' @return A vector the same length as `string1` and `string2`. "Yes" if the pair of strings match, "No" otherwise.
 #' @export

@@ -4,7 +4,14 @@
 \alias{fuzzylink}
 \title{Probabilistic Record Linkage Using Pretrained Text Embeddings}
 \usage{
-fuzzylink(dfA, dfB, by, blocking.variables = NULL, verbose = TRUE)
+fuzzylink(
+  dfA,
+  dfB,
+  by,
+  blocking.variables = NULL,
+  verbose = TRUE,
+  record_type = "entity"
+)
 }
 \arguments{
 \item{dfA, dfB}{A pair of data frames or data frame extensions (e.g. tibbles)}
@@ -14,6 +21,8 @@ fuzzylink(dfA, dfB, by, blocking.variables = NULL, verbose = TRUE)
 \item{blocking.variables}{A character vector of variables that must match exactly in order to match two records}
 
 \item{verbose}{TRUE to print progress updates, FALSE for no output}
+
+\item{record_type}{A character describing what type of entity the \code{by} variable represents. Should be a singular noun (e.g. "person", "organization", "interest group", "city").}
 }
 \value{
 A dataframe with all rows of \code{dfA} joined with any matches from \code{dfB}

@@ -8,11 +8,12 @@
 #' @param num_bins Number of bins to split similarity scores for stratified random sampling (defaults to 50)
 #' @param samples_per_bin Number of string pairs to sample from each bin (defaults to 5)
 #' @param n Sample size for the training dataset
+#' @param record_type A character describing what type of entity the rows and columns of `sim` represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
 #'
 #' @return A dataset with string pairs `A` and `B`, along with a `match` column indicating whether they match.
 #' @export
 #'
-get_training_set <- function(sim, num_bins = 50, samples_per_bin = 10, n = 500){
+get_training_set <- function(sim, num_bins = 50, samples_per_bin = 10, n = 500, record_type = 'entity'){
 
   # convert similarity matrix to long dataframe
   sim <- reshape2::melt(sim)
