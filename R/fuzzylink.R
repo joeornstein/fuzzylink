@@ -39,7 +39,7 @@ fuzzylink <- function(dfA, dfB,
 
   if(!is.null(blocking.variables)){
     # get every unique combination of blocking variables in dfA
-    blocks <- unique(dfA[,blocking.variables])
+    blocks <- unique(dfA[,blocking.variables,drop = FALSE])
 
     # keep only the rows in dfB with exact matches on the blocking variables
     dfB <- dplyr::inner_join(dfB, blocks,
