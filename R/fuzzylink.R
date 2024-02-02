@@ -99,7 +99,7 @@ fuzzylink <- function(dfA, dfB,
         format(Sys.time(), '%X'),
         ')\n\n', sep = '')
   }
-  train <- get_training_set(sim)
+  train <- get_training_set(sim, record_type = record_type)
 
   ## Step 4: Fit model -------------------
   if(verbose){
@@ -151,7 +151,8 @@ fuzzylink <- function(dfA, dfB,
     }
 
     matches_to_validate$match <- check_match(matches_to_validate$A,
-                                             matches_to_validate$B)
+                                             matches_to_validate$B,
+                                             record_type = record_type)
 
     # append new labeled pairs to the train set
     train <- train |>

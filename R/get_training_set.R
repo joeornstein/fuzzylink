@@ -56,7 +56,7 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 10, n = 500, 
   }
 
   # label each name pair using zero-shot GPT prompt
-  train$match <- check_match(train$A, train$B)
+  train$match <- check_match(train$A, train$B, record_type = record_type)
 
   if(manual_few_shot){
     train <- dplyr::bind_rows(few_shot_examples, train)

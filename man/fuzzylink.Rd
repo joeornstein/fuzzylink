@@ -34,5 +34,5 @@ Probabilistic Record Linkage Using Pretrained Text Embeddings
 dfA <- data.frame(state.x77)
 dfA$name <- rownames(dfA)
 dfB <- data.frame(name = state.abb, state.division)
-df <- fuzzylink(dfA, dfB, by = 'name')
+df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'state')
 }
