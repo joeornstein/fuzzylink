@@ -123,9 +123,9 @@ fuzzylink <- function(dfA, dfB,
         format(Sys.time(), '%X'),
         ')\n\n', sep = '')
   }
-  model <- glm(as.numeric(match == 'Yes') ~ sim + jw,
-               data = train,
-               family = 'binomial')
+  model <- stats::glm(as.numeric(match == 'Yes') ~ sim + jw,
+                      data = train,
+                      family = 'binomial')
 
   # Step 5: Create matched dataset ---------------
 
@@ -136,7 +136,7 @@ fuzzylink <- function(dfA, dfB,
   }
 
   # df is the dataset of all within-block name pairs
-  df <- na.omit(reshape2::melt(sim))
+  df <- stats::na.omit(reshape2::melt(sim))
   # rename columns
   namekey <- c(Var1 = 'A', Var2 = 'B', value = 'sim', L1 = 'block')
   names(df) <- namekey[names(df)]
@@ -144,7 +144,7 @@ fuzzylink <- function(dfA, dfB,
   # add lexical string distance measures
   df$jw <- stringdist::stringsim(df$A, df$B, method = 'jw', p = 0.1)
 
-  df$match_probability <- predict.glm(model, df, type = 'response')
+  df$match_probability <- stats::predict.glm(model, df, type = 'response')
 
   ## Step 6: Validate uncertain matches --------------
 
@@ -177,11 +177,11 @@ fuzzylink <- function(dfA, dfB,
                          dplyr::select(A,B,sim,match))
 
     # refine the model
-    model <- glm(as.numeric(match == 'Yes') ~ sim + jw,
+    model <- stats::glm(as.numeric(match == 'Yes') ~ sim + jw,
                  data = train,
                  family = 'binomial')
 
-    df$match_probability <- predict.glm(model, df, type = 'response')
+    df$match_probability <- stats::predict.glm(model, df, type = 'response')
 
     matches_to_validate <- df |>
       dplyr::left_join(train |>
@@ -202,7 +202,7 @@ fuzzylink <- function(dfA, dfB,
     dplyr::filter((match_probability > 0.2 & is.na(match)) | match == 'Yes') |>
     dplyr::right_join(dfA, by = c('A' = by),
                       relationship = 'many-to-many') |>
-    dplyr::select(-all_of(blocking.variables)) |>
+    dplyr::select(-dplyr::all_of(blocking.variables)) |>
     dplyr::left_join(dfB, by = c('B' = by),
                      relationship = 'many-to-many')
 

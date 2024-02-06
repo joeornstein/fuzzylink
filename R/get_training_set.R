@@ -28,7 +28,7 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 10, n = 500,
   namekey <- c(Var1 = 'A', Var2 = 'B', value = 'sim', L1 = 'block')
   names(sim) <- namekey[names(sim)]
   # remove rows with missing values (generally from blocks with no exact matches)
-  sim <- na.omit(sim)
+  sim <- stats::na.omit(sim)
 
   # how many nearest neighbors to include in the training set?
   # k must be at least 1
@@ -61,7 +61,7 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 10, n = 500,
   # hand-label a set of few-shot examples?
   manual_few_shot <- FALSE
   if(manual_few_shot){
-    few_shot_examples <- hand_label(head(train, 5))
+    few_shot_examples <- hand_label(utils::head(train, 5))
     train <- dplyr::slice_tail(train, n = -5)
   }
 
