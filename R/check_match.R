@@ -52,13 +52,29 @@ check_match <- function(string1, string2,
                   '\nSame ', stringr::str_to_title(record_type), ' (Yes or No):')
     }
 
-    resp <- openai::create_completion(model = model,
-                                      prompt = p,
-                                      max_tokens = 1,
-                                      temperature = 0,
-                                      openai_api_key = openai_api_key)
+    # empty vector of labels
+    labels <- character(length = length(string1))
 
-    labels <- gsub(' ', '', resp$choices$text)
+    # batch prompts to handle API rate limits
+    max_prompts <- 2048
+    start_index <- 1
+
+    while(start_index <= length(labels)){
+
+      end_index <- min(length(labels), start_index + max_prompts - 1)
+
+      resp <- openai::create_completion(model = model,
+                                        prompt = p[start_index:end_index],
+                                        max_tokens = 1,
+                                        temperature = 0,
+                                        openai_api_key = openai_api_key)
+
+      labels[start_index:end_index] <- gsub(' ', '', resp$choices$text)
+
+      start_index <- end_index + 1
+
+    }
+
   }
 
   # legacy code: zero-shot with chat models
