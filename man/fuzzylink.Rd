@@ -11,7 +11,8 @@ fuzzylink(
   blocking.variables = NULL,
   verbose = TRUE,
   record_type = "entity",
-  openai_api_key = NULL
+  openai_api_key = NULL,
+  max_validations = 10000
 )
 }
 \arguments{
@@ -26,6 +27,8 @@ fuzzylink(
 \item{record_type}{A character describing what type of entity the \code{by} variable represents. Should be a singular noun (e.g. "person", "organization", "interest group", "city").}
 
 \item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
+
+\item{max_validations}{The maximum number of LLM prompts to submit during the validation stage; defaults to 10,000}
 }
 \value{
 A dataframe with all rows of \code{dfA} joined with any matches from \code{dfB}

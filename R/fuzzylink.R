@@ -6,6 +6,7 @@
 #' @param verbose TRUE to print progress updates, FALSE for no output
 #' @param record_type A character describing what type of entity the `by` variable represents. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
+#' @param max_validations The maximum number of LLM prompts to submit during the validation stage; defaults to 10,000
 #'
 #' @return A dataframe with all rows of `dfA` joined with any matches from `dfB`
 #' @export
