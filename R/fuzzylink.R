@@ -19,7 +19,8 @@ fuzzylink <- function(dfA, dfB,
                       by, blocking.variables = NULL,
                       verbose = TRUE,
                       record_type = 'entity',
-                      openai_api_key = NULL){
+                      openai_api_key = NULL,
+                      max_validations = 1e4){
 
 
   # Check for errors in inputs
@@ -148,6 +149,8 @@ fuzzylink <- function(dfA, dfB,
 
   ## Step 6: Validate uncertain matches --------------
 
+  validations_remaining <- max_validations
+
   matches_to_validate <- df |>
     dplyr::left_join(train |>
                        dplyr::select(A, B, match),
@@ -156,7 +159,13 @@ fuzzylink <- function(dfA, dfB,
                   match_probability < 0.9,
                   is.na(match))
 
-  while(nrow(matches_to_validate) > 0){
+  while(nrow(matches_to_validate) > 0 & validations_remaining > 0){
+
+    # if you've reached the user-specified cap, only validate a sample
+    if(nrow(matches_to_validate) > validations_remaining){
+      matches_to_validate <- matches_to_validate |>
+        dplyr::slice_sample(n = validations_remaining)
+    }
 
     if(verbose){
       cat('Validating ',
@@ -170,6 +179,8 @@ fuzzylink <- function(dfA, dfB,
                                              matches_to_validate$B,
                                              record_type = record_type,
                                              openai_api_key = openai_api_key)
+
+    validations_remaining <- validations_remaining - nrow(matches_to_validate)
 
     # append new labeled pairs to the train set
     train <- train |>
