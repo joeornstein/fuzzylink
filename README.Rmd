@@ -140,7 +140,9 @@ head(df)
 
 ### Step 5: Validate Uncertain Matches
 
-We now have a dataset with estimated match probabilities for each pair of records in `dfA` and `dfB`. We could stop there and just report the match probabilities. But for larger datasets we can get better results if we conduct a final validation step. For every name pair within a range of estimated match probabilities (by default 0.2 to 0.9), we will use the GPT-3.5 prompt above to check whether the name pair is a match. These labeled pairs are then added to the training dataset, the logistic regression model is refined, and we repeat this process until there are no matches left to validate. At that point, every record in `dfA` is either linked to a record in `dfB` or there are no candidate matches in `dfB` with an estimated probability higher than the threshold.  
+We now have a dataset with estimated match probabilities for each pair of records in `dfA` and `dfB`. We could stop there and just report the match probabilities. But for larger datasets we can get better results if we conduct a final validation step. For every name pair within a range of estimated match probabilities (by default 0.2 to 0.9), we will use the GPT-3.5 prompt above to check whether the name pair is a match. These labeled pairs are then added to the training dataset, the logistic regression model is refined, and we repeat this process until there are no matches left to validate. At that point, every record in `dfA` is either linked to a record in `dfB` or there are no candidate matches in `dfB` with an estimated probability higher than the threshold.
+
+Note that, by default, the `fuzzylink()` function will validate at most 100,000 name pairs during this step. This setting reduces both cost and runtime (see "A Note On Cost" below), but users who wish to validate more name pairs within larger datasets can increase the cap using the `max_validations` argument.
 
 ```{r}
 
@@ -208,10 +210,11 @@ embedding_cost_per_token <- 0.00013 / 1e3
 completion_cost_per_token <- 0.0015 / 1e3
 tokens_per_string <- 4.5
 tokens_per_completion <- 40
+max_validations <- 1e5
 expand_grid(A = 10^(1:6),
             B = 10^(1:6)) |> 
   mutate(embedding_cost = (A+B) * tokens_per_string * embedding_cost_per_token,
-         completion_cost = A * 5 * tokens_per_completion * completion_cost_per_token) |> 
+         completion_cost = if_else(A*5 < max_validations, A*5, max_validations) * tokens_per_completion * completion_cost_per_token) |> 
   mutate(approx_cost = paste0('$', round(embedding_cost + completion_cost, 2)), 
          A = scales::comma_format()(A),
          B = scales::comma_format()(B)) |> 
@@ -221,4 +224,4 @@ expand_grid(A = 10^(1:6),
   knitr::kable()
 ```
 
-Note that cost scales more quickly with the size of `dfA` than with `dfB`, because it is more costly to complete LLM prompts for validation than it is to retrieve embeddings. For particularly large datasets, one can significantly reduce costs by blocking and/or increasing the probability threshold during the validation step.
+Note that cost scales more quickly with the size of `dfA` than with `dfB`, because it is more costly to complete LLM prompts for validation than it is to retrieve embeddings. For particularly large datasets, one can reduce costs by blocking and/or reducing the maximum number of validations (`max_validations`).

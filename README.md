@@ -38,17 +38,17 @@ function performs this record linkage with a single line of code.
 ``` r
 library(fuzzylink)
 df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person')
-#> Retrieving 10 embeddings (2:26:15 PM)
+#> Retrieving 10 embeddings (2:37:43 PM)
 #> 
-#> Computing similarity matrix (2:26:16 PM)
+#> Computing similarity matrix (2:37:45 PM)
 #> 
-#> Labeling training set (2:26:17 PM)
+#> Labeling training set (2:37:45 PM)
 #> 
-#> Fitting model (2:26:17 PM)
+#> Fitting model (2:37:46 PM)
 #> 
-#> Linking datasets (2:26:17 PM)
+#> Linking datasets (2:37:46 PM)
 #> 
-#> Done! (2:26:17 PM)
+#> Done! (2:37:46 PM)
 df
 #>                    A             B       sim        jw match_probability match
 #> 1    Timothy B. Ryan      Tim Ryan 0.6916803 0.7102778                 1   Yes
@@ -166,18 +166,18 @@ variables).
 train <- get_training_set(sim, record_type = 'person')
 train
 #> # A tibble: 21 × 5
-#>    A                B                   sim    jw match
-#>    <fct>            <fct>             <dbl> <dbl> <chr>
-#>  1 Timothy B. Ryan  Tim Ryan          0.692 0.710 Yes  
-#>  2 Timothy B. Ryan  Tom Ryan          0.634 0.567 No   
-#>  3 Timothy B. Ryan  Jennifer R. Riley 0.467 0.501 No   
-#>  4 Timothy B. Ryan  Jeremy Creilly    0.375 0.517 No   
-#>  5 Timothy B. Ryan  Jimmy Pointer     0.290 0.549 No   
-#>  6 Timothy B. Ryan  Jessica Pointer   0.236 0.428 No   
-#>  7 Timothy B. Ryan  Jenny Romer       0.227 0.429 No   
-#>  8 James J. Pointer Jimmy Pointer     0.767 0.818 Yes  
-#>  9 James J. Pointer Jessica Pointer   0.623 0.778 No   
-#> 10 James J. Pointer Jennifer R. Riley 0.363 0.569 No   
+#>    A                  B                   sim    jw match
+#>    <fct>              <fct>             <dbl> <dbl> <chr>
+#>  1 Jennifer C. Reilly Jennifer R. Riley 0.716 0.929 No   
+#>  2 Timothy B. Ryan    Jeremy Creilly    0.375 0.517 No   
+#>  3 Jennifer C. Reilly Tim Ryan          0.338 0.407 No   
+#>  4 Jennifer C. Reilly Jenny Romer       0.393 0.784 No   
+#>  5 James J. Pointer   Jenny Romer       0.213 0.636 No   
+#>  6 James J. Pointer   Jessica Pointer   0.623 0.778 No   
+#>  7 Timothy B. Ryan    Tom Ryan          0.634 0.567 No   
+#>  8 Timothy B. Ryan    Jimmy Pointer     0.290 0.549 No   
+#>  9 James J. Pointer   Jimmy Pointer     0.767 0.818 Yes  
+#> 10 Timothy B. Ryan    Jessica Pointer   0.236 0.428 No   
 #> # ℹ 11 more rows
 ```
 
@@ -229,6 +229,12 @@ regression model is refined, and we repeat this process until there are
 no matches left to validate. At that point, every record in `dfA` is
 either linked to a record in `dfB` or there are no candidate matches in
 `dfB` with an estimated probability higher than the threshold.
+
+Note that, by default, the `fuzzylink()` function will validate at most
+100,000 name pairs during this step. This setting reduces both cost and
+runtime (see “A Note On Cost” below), but users who wish to validate
+more name pairs within larger datasets can increase the cap using the
+`max_validations` argument.
 
 ``` r
 
@@ -330,21 +336,21 @@ costs for merging datasets of various sizes.
 | 10,000    | 10,000    | \$3.01                              |
 | 10,000    | 100,000   | \$3.06                              |
 | 10,000    | 1,000,000 | \$3.59                              |
-| 100,000   | 10        | \$30.06                             |
-| 100,000   | 100       | \$30.06                             |
-| 100,000   | 1,000     | \$30.06                             |
-| 100,000   | 10,000    | \$30.06                             |
-| 100,000   | 100,000   | \$30.12                             |
-| 100,000   | 1,000,000 | \$30.64                             |
-| 1,000,000 | 10        | \$300.59                            |
-| 1,000,000 | 100       | \$300.59                            |
-| 1,000,000 | 1,000     | \$300.59                            |
-| 1,000,000 | 10,000    | \$300.59                            |
-| 1,000,000 | 100,000   | \$300.64                            |
-| 1,000,000 | 1,000,000 | \$301.17                            |
+| 100,000   | 10        | \$6.06                              |
+| 100,000   | 100       | \$6.06                              |
+| 100,000   | 1,000     | \$6.06                              |
+| 100,000   | 10,000    | \$6.06                              |
+| 100,000   | 100,000   | \$6.12                              |
+| 100,000   | 1,000,000 | \$6.64                              |
+| 1,000,000 | 10        | \$6.59                              |
+| 1,000,000 | 100       | \$6.59                              |
+| 1,000,000 | 1,000     | \$6.59                              |
+| 1,000,000 | 10,000    | \$6.59                              |
+| 1,000,000 | 100,000   | \$6.64                              |
+| 1,000,000 | 1,000,000 | \$7.17                              |
 
 Note that cost scales more quickly with the size of `dfA` than with
 `dfB`, because it is more costly to complete LLM prompts for validation
 than it is to retrieve embeddings. For particularly large datasets, one
-can significantly reduce costs by blocking and/or increasing the
-probability threshold during the validation step.
+can reduce costs by blocking and/or reducing the maximum number of
+validations (`max_validations`).
