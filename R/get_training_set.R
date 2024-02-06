@@ -31,14 +31,17 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 10, n = 500,
   sim <- na.omit(sim)
 
   # how many nearest neighbors to include in the training set?
-  k <- floor(n / length(unique(sim$A)))
+  # k must be at least 1
+  k <- max(floor(n / length(unique(sim$A))), 1)
 
   # if using knn sampling
   train <- sim |>
     # get the k nearest neighbors for each record in dfA
     dplyr::group_by(A) |>
     dplyr::slice_max(sim, n = k) |>
-    dplyr::ungroup()
+    dplyr::ungroup() |>
+    # keep a random sample of at most n
+    dplyr::slice_sample(n = n)
 
   # if using stratified sampling
   # train <- sim |>
