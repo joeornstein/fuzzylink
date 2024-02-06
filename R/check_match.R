@@ -69,11 +69,23 @@ check_match <- function(string1, string2,
                                         temperature = 0,
                                         openai_api_key = openai_api_key)
 
-      labels[start_index:end_index] <- gsub(' ', '', resp$choices$text)
+      labels[start_index:end_index] <- gsub(' |\n', '', resp$choices$text)
 
       start_index <- end_index + 1
 
     }
+
+    # if that loop returned any labels that weren't "Yes" or "No" (e.g. a carriage return),
+    # repeat the prompts with a higher max_token limit
+    missing_labels <- which(!(labels %in% c('Yes','No')))
+
+    resp <- openai::create_completion(model = model,
+                                      prompt = p[missing_labels],
+                                      max_tokens = 4,
+                                      temperature = 0,
+                                      openai_api_key = openai_api_key)
+
+      labels[missing_labels] <- gsub(' |\n', '', resp$choices$text)
 
   }
 
