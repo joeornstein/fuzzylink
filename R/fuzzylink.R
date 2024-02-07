@@ -170,7 +170,7 @@ fuzzylink <- function(dfA, dfB,
 
     if(verbose){
       cat('Validating ',
-          nrow(matches_to_validate),
+          prettyNum(nrow(matches_to_validate), big.mark = ','),
           ' matches (',
           format(Sys.time(), '%X'),
           ')\n\n', sep = '')
