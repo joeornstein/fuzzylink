@@ -70,7 +70,8 @@ check_match <- function(string1, string2,
                                         temperature = 0,
                                         openai_api_key = openai_api_key)
 
-      labels[start_index:end_index] <- gsub(' |\n', '', resp$choices$text)
+      labels[start_index:end_index] <- gsub(' |\n', '', resp$choices$text) |>
+        stringr::str_to_title()
 
       start_index <- end_index + 1
 
