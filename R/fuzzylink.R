@@ -188,6 +188,10 @@ fuzzylink <- function(dfA, dfB,
       dplyr::bind_rows(matches_to_validate |>
                          dplyr::select(A,B,sim,match))
 
+    # filter out improperly formatted labels
+    train <- train |>
+      dplyr::filter(match %in% c('Yes', 'No'))
+
     # refine the model
     model <- stats::glm(as.numeric(match == 'Yes') ~ sim + jw,
                  data = train,
