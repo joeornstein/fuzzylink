@@ -69,7 +69,7 @@ fuzzylink <- function(dfA, dfB,
 
       if(verbose){
         cat('Block ', i, ' of ', nrow(blocks), ':\n', sep = '')
-        print(unlist(blocks[i,]))
+        print(data.frame(blocks[i,]))
         cat('\n')
       }
 
