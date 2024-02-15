@@ -30,6 +30,10 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 10, n = 500,
   # remove rows with missing values (generally from blocks with no exact matches)
   sim <- stats::na.omit(sim)
 
+  # remove duplicate name pairs
+  sim <- dplyr::select(sim, -block)
+  sim <- unique(sim)
+
   # how many nearest neighbors to include in the training set?
   # k must be at least 1
   k <- max(floor(n / length(unique(sim$A))), 1)

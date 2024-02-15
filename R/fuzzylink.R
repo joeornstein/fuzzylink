@@ -143,6 +143,10 @@ fuzzylink <- function(dfA, dfB,
   namekey <- c(Var1 = 'A', Var2 = 'B', value = 'sim', L1 = 'block')
   names(df) <- namekey[names(df)]
 
+  # remove duplicate name pairs
+  df <- dplyr::select(df, -block)
+  df <- unique(df)
+
   # add lexical string distance measures
   df$jw <- stringdist::stringsim(df$A, df$B, method = 'jw', p = 0.1)
 
@@ -222,7 +226,8 @@ fuzzylink <- function(dfA, dfB,
     dplyr::left_join(dfB, by = c('B' = by),
                      relationship = 'many-to-many')
 
-  if(is.null(blocking.variables)) matches <- dplyr::select(matches, -block)
+  # already did this above
+  # if(is.null(blocking.variables)) matches <- dplyr::select(matches, -block)
 
 
   if(verbose){
