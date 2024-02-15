@@ -143,10 +143,6 @@ fuzzylink <- function(dfA, dfB,
   namekey <- c(Var1 = 'A', Var2 = 'B', value = 'sim', L1 = 'block')
   names(df) <- namekey[names(df)]
 
-  # remove duplicate name pairs
-  df <- dplyr::select(df, -block)
-  df <- unique(df)
-
   # add lexical string distance measures
   df$jw <- stringdist::stringsim(df$A, df$B, method = 'jw', p = 0.1)
 
@@ -157,6 +153,9 @@ fuzzylink <- function(dfA, dfB,
   validations_remaining <- max_validations
 
   matches_to_validate <- df |>
+    # remove duplicate name pairs
+    dplyr::select(-block) |>
+    unique() |>
     dplyr::left_join(train |>
                        dplyr::select(A, B, match),
                      by = c('A', 'B')) |>
@@ -204,6 +203,9 @@ fuzzylink <- function(dfA, dfB,
     df$match_probability <- stats::predict.glm(model, df, type = 'response')
 
     matches_to_validate <- df |>
+      # remove duplicate name pairs
+      dplyr::select(-block) |>
+      unique() |>
       dplyr::left_join(train |>
                          dplyr::select(A, B, match),
                        by = c('A', 'B')) |>
@@ -212,6 +214,11 @@ fuzzylink <- function(dfA, dfB,
                     is.na(match))
   }
 
+  # if blocking, merge with the blocking variables prior to linking
+  if(!is.null(blocking.variables)){
+    blocks$block <- 1:nrow(blocks)
+    df <- dplyr::left_join(df, blocks, by = 'block')
+  }
 
   matches <- df |>
     # join with match labels from the training set
@@ -219,15 +226,31 @@ fuzzylink <- function(dfA, dfB,
                        dplyr::select(A, B, match),
                      by = c('A', 'B')) |>
     # only keep pairs that have been validated or have a match probability > 0.2
-    dplyr::filter((match_probability > 0.2 & is.na(match)) | match == 'Yes') |>
-    dplyr::right_join(dfA, by = c('A' = by),
+    dplyr::filter((match_probability > 0.2 &
+                     is.na(match)) | match == 'Yes') |>
+    dplyr::right_join(dfA,
+                      by = c('A' = by, blocking.variables),
                       relationship = 'many-to-many') |>
-    dplyr::select(-dplyr::all_of(blocking.variables)) |>
-    dplyr::left_join(dfB, by = c('B' = by),
+    dplyr::left_join(dfB,
+                     by = c('B' = by, blocking.variables),
                      relationship = 'many-to-many')
 
-  # already did this above
-  # if(is.null(blocking.variables)) matches <- dplyr::select(matches, -block)
+  # } else{ # otherwise, no need to include blocking variables in the joins
+  #   matches <- df |>
+  #     # join with match labels from the training set
+  #     dplyr::left_join(train |>
+  #                        dplyr::select(A, B, match),
+  #                      by = c('A', 'B')) |>
+  #     # only keep pairs that have been validated or have a match probability > 0.2
+  #     dplyr::filter((match_probability > 0.2 & is.na(match)) | match == 'Yes') |>
+  #     dplyr::right_join(dfA, by = c('A' = by),
+  #                       relationship = 'many-to-many') |>
+  #     # dplyr::select(-dplyr::all_of(blocking.variables)) |>
+  #     dplyr::left_join(dfB, by = c('B' = by),
+  #                      relationship = 'many-to-many')
+  # }
+
+  if(is.null(blocking.variables)) matches <- dplyr::select(matches, -block)
 
 
   if(verbose){
