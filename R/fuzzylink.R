@@ -189,7 +189,7 @@ fuzzylink <- function(dfA, dfB,
     # append new labeled pairs to the train set
     train <- train |>
       dplyr::bind_rows(matches_to_validate |>
-                         dplyr::select(A,B,sim,match))
+                         dplyr::select(A,B,sim,jw,match))
 
     # filter out improperly formatted labels
     train <- train |>
