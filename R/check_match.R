@@ -16,7 +16,6 @@
 #'             c('Post Office', 'United Parcel', 'US Postal Service'))
 check_match <- function(string1, string2,
                         model = 'gpt-3.5-turbo-instruct',
-                        #few_shot_examples = NULL,
                         record_type = 'entity',
                         openai_api_key = NULL){
 
@@ -38,16 +37,11 @@ check_match <- function(string1, string2,
     # few_shot_preamble <- '"Timothy B. Ryan" and "Jimmy Pointer": No\n"Timoth B. Ryan" and "Tim Ryan": Yes\n"Michael V. Johnson" and "Michael E Johnson": No\n'
     # p <- paste0(few_shot_preamble, '\"', string1, '\" and \"', string2, '\":')
 
-    # format the few-shot examples
-    if(!is.null(few_shot_examples)){
-      few_shot_preamble <- paste0(few_shot_examples$A, ' : ', few_shot_examples$B, ' = ', few_shot_examples$match, collapse = '\n')
-      p <- paste0(few_shot_preamble, '\n', string1, ' : ', string2, ' =')
-    } else{
-      p <- paste0('Decide if the following two names refer to the same ', record_type,
-                  '. Respond \"Yes\" or \"No\".\n\nName A: ', string1,
-                  '\nName B: ', string2,
-                  '\nSame ', record_type, ':')
-    }
+    # format the prompt
+    p <- paste0('Decide if the following two names refer to the same ', record_type,
+                '. Respond \"Yes\" or \"No\".\n\nName A: ', string1,
+                '\nName B: ', string2,
+                '\nSame ', record_type, ':')
 
     # empty vector of labels
     labels <- character(length = length(string1))
@@ -85,27 +79,25 @@ check_match <- function(string1, string2,
     #
     #   labels[missing_labels] <- gsub(' |\n', '', resp$choices$text)
 
-  }
+  } else{ # if model is not one of the "Legacy" text models, use Chat Endpoint
 
-  # legacy code: zero-shot with chat models
-  if(!use_completions_endpoint){
     # create an empty vector of labels
     labels <- character(length = length(string1))
 
     # submit prompts in batches
+    batch_size <- 1
     if(batch_size == 1){
       # if batch_size = 1, we'll submit each prompt one at a time, using a modified (more accurate) prompt
       for(i in 1:length(string1)){
         # format GPT prompt
         p <- list()
         p[[1]] <- list(role = 'user',
-                       content = 'For each pair of names below, decide whether they probably refer to the same entity. Nicknames, acronyms, abbreviations, and misspellings are all acceptable matches. Respond with "Yes" or "No".')
+                       content = paste0('Decide if the following two names refer to the same ',
+                                        record_type, '. Respond "Yes" or "No".'))
 
-        # format content as a numbered list of string pairs
+        # format content string1, two carriage returns, then string2
         p[[2]] <- list(role = 'user',
-                       content = paste0(
-                         '\"', string1[i],
-                         '\" and \"', string2[i], '\"'))
+                       content = paste0(string1[i], '\n\n', string2[i]))
 
         # submit to OpenAI API
         resp <- openai::create_chat_completion(model = model,
@@ -162,6 +154,7 @@ check_match <- function(string1, string2,
 
       }
     }
+
   }
 
   return(labels)
