@@ -126,7 +126,7 @@ fuzzylink <- function(dfA, dfB,
         ')\n\n', sep = '')
   }
   model <- stats::glm(as.numeric(match == 'Yes') ~ sim + jw,
-                      data = train,
+                      data = train |> dplyr::filter(match %in% c('Yes', 'No')),
                       family = 'binomial')
 
   # Step 5: Create matched dataset ---------------
@@ -191,13 +191,13 @@ fuzzylink <- function(dfA, dfB,
       dplyr::bind_rows(matches_to_validate |>
                          dplyr::select(A,B,sim,jw,match))
 
-    # filter out improperly formatted labels
-    train <- train |>
-      dplyr::filter(match %in% c('Yes', 'No'))
+    # # filter out improperly formatted labels
+    # train <- train |>
+    #   dplyr::filter(match %in% c('Yes', 'No'))
 
-    # refine the model
+    # refine the model (train only on the properly formatted labels)
     model <- stats::glm(as.numeric(match == 'Yes') ~ sim + jw,
-                 data = train,
+                 data = train |> dplyr::filter(match %in% c('Yes', 'No')),
                  family = 'binomial')
 
     df$match_probability <- stats::predict.glm(model, df, type = 'response')
