@@ -10,6 +10,7 @@ get_training_set(
   samples_per_bin = 10,
   n = 500,
   record_type = "entity",
+  model = "gpt-3.5-turbo-instruct",
   openai_api_key = NULL
 )
 }
@@ -23,6 +24,8 @@ get_training_set(
 \item{n}{Sample size for the training dataset}
 
 \item{record_type}{A character describing what type of entity the rows and columns of \code{sim} represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").}
+
+\item{model}{Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'}
 
 \item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
 }

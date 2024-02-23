@@ -9,13 +9,14 @@
 #' @param samples_per_bin Number of string pairs to sample from each bin (defaults to 5)
 #' @param n Sample size for the training dataset
 #' @param record_type A character describing what type of entity the rows and columns of `sim` represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
+#' @param model Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
 #'
 #' @return A dataset with string pairs `A` and `B`, along with a `match` column indicating whether they match.
 #' @export
 #'
 get_training_set <- function(sim, num_bins = 50, samples_per_bin = 10, n = 500,
-                             record_type = 'entity',
+                             record_type = 'entity', model = 'gpt-3.5-turbo-instruct',
                              openai_api_key = NULL){
 
   if(Sys.getenv('OPENAI_API_KEY') == '' & is.null(openai_api_key)){
@@ -72,6 +73,7 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 10, n = 500,
   # label each name pair using zero-shot GPT prompt
   train$match <- check_match(train$A, train$B,
                              record_type = record_type,
+                             model = model,
                              openai_api_key = openai_api_key)
 
   if(manual_few_shot){
