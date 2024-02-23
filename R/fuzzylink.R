@@ -5,6 +5,7 @@
 #' @param blocking.variables A character vector of variables that must match exactly in order to match two records
 #' @param verbose TRUE to print progress updates, FALSE for no output
 #' @param record_type A character describing what type of entity the `by` variable represents. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
+#' @param model Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
 #' @param max_validations The maximum number of LLM prompts to submit during the validation stage; defaults to 100,000
 #'
@@ -20,6 +21,7 @@ fuzzylink <- function(dfA, dfB,
                       by, blocking.variables = NULL,
                       verbose = TRUE,
                       record_type = 'entity',
+                      model = 'gpt-3.5-turbo-instruct',
                       openai_api_key = NULL,
                       max_validations = 1e5){
 
@@ -117,7 +119,8 @@ fuzzylink <- function(dfA, dfB,
         format(Sys.time(), '%X'),
         ')\n\n', sep = '')
   }
-  train <- get_training_set(sim, record_type = record_type, openai_api_key = openai_api_key)
+  train <- get_training_set(sim, record_type = record_type,
+                            model = model, openai_api_key = openai_api_key)
 
   ## Step 4: Fit model -------------------
   if(verbose){
@@ -181,6 +184,7 @@ fuzzylink <- function(dfA, dfB,
 
     matches_to_validate$match <- check_match(matches_to_validate$A,
                                              matches_to_validate$B,
+                                             model = model,
                                              record_type = record_type,
                                              openai_api_key = openai_api_key)
 
