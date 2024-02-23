@@ -11,6 +11,7 @@ fuzzylink(
   blocking.variables = NULL,
   verbose = TRUE,
   record_type = "entity",
+  model = "gpt-3.5-turbo-instruct",
   openai_api_key = NULL,
   max_validations = 1e+05
 )
@@ -25,6 +26,8 @@ fuzzylink(
 \item{verbose}{TRUE to print progress updates, FALSE for no output}
 
 \item{record_type}{A character describing what type of entity the \code{by} variable represents. Should be a singular noun (e.g. "person", "organization", "interest group", "city").}
+
+\item{model}{Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'}
 
 \item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
 

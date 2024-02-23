@@ -128,9 +128,9 @@ fuzzylink <- function(dfA, dfB,
         format(Sys.time(), '%X'),
         ')\n\n', sep = '')
   }
-  model <- stats::glm(as.numeric(match == 'Yes') ~ sim + jw,
-                      data = train |> dplyr::filter(match %in% c('Yes', 'No')),
-                      family = 'binomial')
+  fit <- stats::glm(as.numeric(match == 'Yes') ~ sim + jw,
+                    data = train |> dplyr::filter(match %in% c('Yes', 'No')),
+                    family = 'binomial')
 
   # Step 5: Create matched dataset ---------------
 
@@ -149,7 +149,7 @@ fuzzylink <- function(dfA, dfB,
   # add lexical string distance measures
   df$jw <- stringdist::stringsim(df$A, df$B, method = 'jw', p = 0.1)
 
-  df$match_probability <- stats::predict.glm(model, df, type = 'response')
+  df$match_probability <- stats::predict.glm(fit, df, type = 'response')
 
   ## Step 6: Validate uncertain matches --------------
 
@@ -200,11 +200,11 @@ fuzzylink <- function(dfA, dfB,
     #   dplyr::filter(match %in% c('Yes', 'No'))
 
     # refine the model (train only on the properly formatted labels)
-    model <- stats::glm(as.numeric(match == 'Yes') ~ sim + jw,
-                 data = train |> dplyr::filter(match %in% c('Yes', 'No')),
-                 family = 'binomial')
+    fit <- stats::glm(as.numeric(match == 'Yes') ~ sim + jw,
+                      data = train |> dplyr::filter(match %in% c('Yes', 'No')),
+                      family = 'binomial')
 
-    df$match_probability <- stats::predict.glm(model, df, type = 'response')
+    df$match_probability <- stats::predict.glm(fit, df, type = 'response')
 
     matches_to_validate <- df |>
       # remove duplicate name pairs
