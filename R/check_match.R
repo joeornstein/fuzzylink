@@ -2,7 +2,6 @@
 #'
 #' @param string1 A string or vector of strings
 #' @param string2 A string or vector of strings
-#' @param batch_size The number of string pairs to include in each prompt
 #' @param model Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'
 #' @param record_type A character describing what type of entity `string1` and `string2` represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
@@ -16,7 +15,6 @@
 #' check_match(c('USPS', 'USPS', 'USPS'),
 #'             c('Post Office', 'United Parcel', 'US Postal Service'))
 check_match <- function(string1, string2,
-                        batch_size = 50,
                         model = 'gpt-3.5-turbo-instruct',
                         #few_shot_examples = NULL,
                         record_type = 'entity',

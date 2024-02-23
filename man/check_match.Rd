@@ -7,7 +7,6 @@
 check_match(
   string1,
   string2,
-  batch_size = 50,
   model = "gpt-3.5-turbo-instruct",
   record_type = "entity",
   openai_api_key = NULL
@@ -17,8 +16,6 @@ check_match(
 \item{string1}{A string or vector of strings}
 
 \item{string2}{A string or vector of strings}
-
-\item{batch_size}{The number of string pairs to include in each prompt}
 
 \item{model}{Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'}
 
