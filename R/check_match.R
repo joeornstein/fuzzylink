@@ -47,10 +47,10 @@ check_match <- function(string1, string2,
       few_shot_preamble <- paste0(few_shot_examples$A, ' : ', few_shot_examples$B, ' = ', few_shot_examples$match, collapse = '\n')
       p <- paste0(few_shot_preamble, '\n', string1, ' : ', string2, ' =')
     } else{
-      p <- paste0('Decide if the following two names refer to the same ', stringr::str_to_lower(record_type),
-                  '.\n\nName A: ', string1,
+      p <- paste0('Decide if the following two names refer to the same ', record_type,
+                  '. Respond \"Yes\" or \"No\".\n\nName A: ', string1,
                   '\nName B: ', string2,
-                  '\nSame ', stringr::str_to_title(record_type), ' (Yes or No):')
+                  '\nSame ', record_type, ':')
     }
 
     # empty vector of labels
