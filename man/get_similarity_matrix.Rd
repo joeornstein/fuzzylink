@@ -4,22 +4,24 @@
 \alias{get_similarity_matrix}
 \title{Create matrix of embedding similarities}
 \usage{
-get_similarity_matrix(embeddings, strings_A, strings_B)
+get_similarity_matrix(embeddings, strings_A = NULL, strings_B = NULL)
 }
 \arguments{
 \item{embeddings}{A matrix of text embeddings}
 
-\item{strings_A}{A list of strings in Dataset A}
+\item{strings_A}{A string vector}
 
-\item{strings_B}{A list of strings in Dataset B}
+\item{strings_B}{A string vector}
 }
 \value{
-A similarity matrix
+A matrix of cosine similarities between the embeddings of strings_A and the embeddings of strings_B
 }
 \description{
 Create a matrix of pairwise similarities between each string in \code{strings_A} and \code{strings_B}.
 }
 \examples{
-get_embeddings(c('UPS', 'USPS', 'Postal Service')) |>
-  get_similarity_matrix(c('UPS', 'USPS'), 'Postal Service')
+embeddings <- get_embeddings(c('UPS', 'USPS', 'Postal Service'))
+get_similarity_matrix(embeddings)
+get_similarity_matrix(embeddings, 'Postal Service')
+get_similarity_matrix(embeddings, 'Postal Service', c('UPS', 'USPS'))
 }

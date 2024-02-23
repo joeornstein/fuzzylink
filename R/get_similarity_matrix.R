@@ -5,16 +5,28 @@
 #'
 #'
 #' @param embeddings A matrix of text embeddings
-#' @param strings_A A list of strings in Dataset A
-#' @param strings_B A list of strings in Dataset B
+#' @param strings_A A string vector
+#' @param strings_B A string vector
 #'
-#' @return A similarity matrix
+#' @return A matrix of cosine similarities between the embeddings of strings_A and the embeddings of strings_B
 #' @export
 #'
 #' @examples
-#' get_embeddings(c('UPS', 'USPS', 'Postal Service')) |>
-#'   get_similarity_matrix(c('UPS', 'USPS'), 'Postal Service')
-get_similarity_matrix <- function(embeddings, strings_A, strings_B){
+#' embeddings <- get_embeddings(c('UPS', 'USPS', 'Postal Service'))
+#' get_similarity_matrix(embeddings)
+#' get_similarity_matrix(embeddings, 'Postal Service')
+#' get_similarity_matrix(embeddings, 'Postal Service', c('UPS', 'USPS'))
+get_similarity_matrix <- function(embeddings,
+                                  strings_A = NULL,
+                                  strings_B = NULL){
+
+  # if no input for strings_A or strings_B, default to the full list from embeddings object
+  if(is.null(strings_A)){
+    strings_A <- rownames(embeddings)
+  }
+  if(is.null(strings_B)){
+    strings_B <- rownames(embeddings)
+  }
 
   A <- embeddings[strings_A, , drop = FALSE]
   B <- embeddings[strings_B, , drop = FALSE]
