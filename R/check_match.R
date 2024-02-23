@@ -39,9 +39,9 @@ check_match <- function(string1, string2,
 
     # format the prompt
     p <- paste0('Decide if the following two names refer to the same ', record_type,
-                '. Respond \"Yes\" or \"No\".\n\nName A: ', string1,
-                '\nName B: ', string2,
-                '\nSame ', record_type, ':')
+                '. Respond \"Yes\" or \"No\".\n\n',
+                string1, '\n\n', string2,
+                '\n\nResponse:')
 
     # empty vector of labels
     labels <- character(length = length(string1))
