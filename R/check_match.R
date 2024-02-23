@@ -4,7 +4,6 @@
 #' @param string2 A string or vector of strings
 #' @param batch_size The number of string pairs to include in each prompt
 #' @param model Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'
-#' @param few_shot_examples A dataframe with few-shot examples for prompt; must include columns `A`, `B`, and `match`
 #' @param record_type A character describing what type of entity `string1` and `string2` represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
 #'
@@ -19,7 +18,7 @@
 check_match <- function(string1, string2,
                         batch_size = 50,
                         model = 'gpt-3.5-turbo-instruct',
-                        few_shot_examples = NULL,
+                        #few_shot_examples = NULL,
                         record_type = 'entity',
                         openai_api_key = NULL){
 
@@ -35,9 +34,8 @@ check_match <- function(string1, string2,
     openai_api_key <- Sys.getenv("OPENAI_API_KEY")
   }
 
-  use_completions_endpoint <- TRUE
-
-  if(use_completions_endpoint){
+  # use the Completions endpoint if the model is a "Legacy" model
+  if(model %in% c('gpt-3.5-turbo-instruct', 'davinci-002', 'babbage-002')){
 
     # few_shot_preamble <- '"Timothy B. Ryan" and "Jimmy Pointer": No\n"Timoth B. Ryan" and "Tim Ryan": Yes\n"Michael V. Johnson" and "Michael E Johnson": No\n'
     # p <- paste0(few_shot_preamble, '\"', string1, '\" and \"', string2, '\":')

@@ -9,7 +9,6 @@ check_match(
   string2,
   batch_size = 50,
   model = "gpt-3.5-turbo-instruct",
-  few_shot_examples = NULL,
   record_type = "entity",
   openai_api_key = NULL
 )
@@ -22,8 +21,6 @@ check_match(
 \item{batch_size}{The number of string pairs to include in each prompt}
 
 \item{model}{Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'}
-
-\item{few_shot_examples}{A dataframe with few-shot examples for prompt; must include columns \code{A}, \code{B}, and \code{match}}
 
 \item{record_type}{A character describing what type of entity \code{string1} and \code{string2} represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").}
 
