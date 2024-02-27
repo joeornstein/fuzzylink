@@ -13,7 +13,9 @@ fuzzylink(
   record_type = "entity",
   model = "gpt-3.5-turbo-instruct",
   openai_api_key = NULL,
-  max_validations = 1e+05
+  max_validations = 1e+05,
+  pmin = 0.1,
+  pmax = 0.9
 )
 }
 \arguments{
@@ -32,6 +34,8 @@ fuzzylink(
 \item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
 
 \item{max_validations}{The maximum number of LLM prompts to submit during the validation stage; defaults to 100,000}
+
+\item{pmin, pmax}{Numbers between 0 and 1, denoting the range of estimated match probabilities within which \code{fuzzylink()} will validate record pairs using an LLM prompt}
 }
 \value{
 A dataframe with all rows of \code{dfA} joined with any matches from \code{dfB}

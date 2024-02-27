@@ -8,6 +8,7 @@
 #' @param model Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
 #' @param max_validations The maximum number of LLM prompts to submit during the validation stage; defaults to 100,000
+#' @param pmin,pmax Numbers between 0 and 1, denoting the range of estimated match probabilities within which `fuzzylink()` will validate record pairs using an LLM prompt
 #'
 #' @return A dataframe with all rows of `dfA` joined with any matches from `dfB`
 #' @export
@@ -23,7 +24,8 @@ fuzzylink <- function(dfA, dfB,
                       record_type = 'entity',
                       model = 'gpt-3.5-turbo-instruct',
                       openai_api_key = NULL,
-                      max_validations = 1e5){
+                      max_validations = 1e5,
+                      pmin = 0.1, pmax = 0.9){
 
 
   # Check for errors in inputs
@@ -155,7 +157,7 @@ fuzzylink <- function(dfA, dfB,
 
   validations_remaining <- max_validations
 
-  get_matches_to_validate <- function(df, n = 1000, pmin = 0.1, pmax = 0.9){
+  get_matches_to_validate <- function(df, n = 1000){
 
     mtv <- df |>
       # merge with labels from train set
@@ -191,8 +193,8 @@ fuzzylink <- function(dfA, dfB,
       k <- max(floor(n / length(unique(mtv$A))), 1)
 
       mtv <- mtv |>
-        # don't validate any records with an estimated match probability less than pmin
-        dplyr::filter(match_probability > pmin) |>
+        # don't validate any records with an estimated match probability less than 2%
+        dplyr::filter(match_probability > 0.02) |>
         # get the k nearest neighbors for each unvalidated record in dfA
         dplyr::group_by(A) |>
         dplyr::slice_max(match_probability, n = k) |>
@@ -264,8 +266,8 @@ fuzzylink <- function(dfA, dfB,
     dplyr::left_join(train |>
                        dplyr::select(A, B, match),
                      by = c('A', 'B')) |>
-    # only keep pairs that have been validated or have a match probability > 0.2
-    dplyr::filter((match_probability > 0.2 &
+    # only keep pairs that have been validated or have a match probability > pmin
+    dplyr::filter((match_probability > pmin &
                      is.na(match)) | match == 'Yes') |>
     dplyr::right_join(dfA,
                       by = c('A' = by, blocking.variables),
