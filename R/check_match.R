@@ -40,7 +40,7 @@ check_match <- function(string1, string2,
     # format the prompt
     p <- paste0('Decide if the following two names refer to the same ', record_type,
                 '. Respond \"Yes\" or \"No\".\n\n',
-                string1, '\n\n', string2,
+                'Name A: ', string1, '\nName B: ', string2,
                 '\n\nResponse:')
 
     # empty vector of labels
@@ -95,9 +95,9 @@ check_match <- function(string1, string2,
                        content = paste0('Decide if the following two names refer to the same ',
                                         record_type, '. Respond "Yes" or "No".'))
 
-        # format content string1, two carriage returns, then string2
+        # format content
         p[[2]] <- list(role = 'user',
-                       content = paste0(string1[i], '\n\n', string2[i]))
+                       content = paste0('Name A: ', string1[i], '\nName B: ', string2[i]))
 
         # submit to OpenAI API
         resp <- openai::create_chat_completion(model = model,
