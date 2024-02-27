@@ -31,6 +31,10 @@ check_match <- function(string1, string2,
     openai_api_key <- Sys.getenv("OPENAI_API_KEY")
   }
 
+  # encode strings as characters
+  string1 <- as.character(string1)
+  string2 <- as.character(string2)
+
   # use the Completions endpoint if the model is a "Legacy" model
   if(model %in% c('gpt-3.5-turbo-instruct', 'davinci-002', 'babbage-002')){
 
@@ -46,13 +50,19 @@ check_match <- function(string1, string2,
     # empty vector of labels
     labels <- character(length = length(string1))
 
+    # labels="Yes" wherever the two strings match exactly
+    labels[string1==string2] <- 'Yes'
+
+    # don't submit prompts for exact string matches
+    p <- p[string1 != string2]
+
     # batch prompts to handle API rate limits
     max_prompts <- 2048
     start_index <- 1
 
-    while(start_index <= length(labels)){
+    while(start_index <= length(p)){
 
-      end_index <- min(length(labels), start_index + max_prompts - 1)
+      end_index <- min(length(p), start_index + max_prompts - 1)
 
       resp <- openai::create_completion(model = model,
                                         prompt = p[start_index:end_index],
@@ -60,7 +70,8 @@ check_match <- function(string1, string2,
                                         temperature = 0,
                                         openai_api_key = openai_api_key)
 
-      labels[start_index:end_index] <- gsub(' |\n', '', resp$choices$text) |>
+      # update labels vector (non-exact matches)
+      labels[string1!=string2][start_index:end_index] <- gsub(' |\n', '', resp$choices$text) |>
         stringr::str_to_title()
 
       start_index <- end_index + 1
