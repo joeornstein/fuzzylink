@@ -155,34 +155,52 @@ fuzzylink <- function(dfA, dfB,
 
   validations_remaining <- max_validations
 
-  get_matches_to_validate <- function(df, n = 1000, pmin = 0.01){
+  get_matches_to_validate <- function(df, n = 1000, pmin = 0.1, pmax = 0.9){
 
     mtv <- df |>
-      # remove duplicate name pairs
-      dplyr::select(-block) |>
-      unique() |>
       # merge with labels from train set
       dplyr::left_join(train |>
                          dplyr::select(A, B, match),
                        by = c('A', 'B')) |>
-      # keep only records from A with no validated matches
-      dplyr::group_by(A) |>
-      dplyr::filter(sum(match == 'Yes', na.rm = TRUE) == 0) |>
-      dplyr::ungroup() |>
-      dplyr::filter(is.na(match))
+      # keep name pairs within the user-specified uncertainty range
+      dplyr::filter(match_probability > pmin,
+                    match_probability < pmax,
+                    is.na(match)) |>
+      # remove duplicate name pairs
+      dplyr::select(-block) |>
+      unique()
 
-    # how many nearest neighbors to include
-    k <- max(floor(n / length(unique(mtv$A))), 1)
+    # if there are no name pairs remaining within the uncertainty range,
+    # validate the k nearest neighbors of records in A with no validated matches
+    if(nrow(mtv) == 0){
+      mtv <- df |>
+        # merge with labels from train set
+        dplyr::left_join(train |>
+                           dplyr::select(A, B, match),
+                         by = c('A', 'B')) |>
+        # keep only records from A with no validated matches
+        dplyr::group_by(A) |>
+        dplyr::filter(sum(match == 'Yes', na.rm = TRUE) == 0) |>
+        dplyr::ungroup() |>
+        dplyr::filter(is.na(match)) |>
+        # remove duplicate name pairs
+        dplyr::select(-block) |>
+        unique()
 
-    mtv |>
-      # don't validate any records with an estimated match probability less than pmin
-      dplyr::filter(match_probability > pmin) |>
-      # get the k nearest neighbors for each unvalidated record in dfA
-      dplyr::group_by(A) |>
-      dplyr::slice_max(match_probability, n = k) |>
-      dplyr::ungroup() |>
-      # keep a random sample of at most n
-      dplyr::slice_sample(n = n)
+      # how many nearest neighbors to include
+      k <- max(floor(n / length(unique(mtv$A))), 1)
+
+      mtv <- mtv |>
+        # don't validate any records with an estimated match probability less than pmin
+        dplyr::filter(match_probability > pmin) |>
+        # get the k nearest neighbors for each unvalidated record in dfA
+        dplyr::group_by(A) |>
+        dplyr::slice_max(match_probability, n = k) |>
+        dplyr::ungroup() |>
+        # keep a random sample of at most n
+        dplyr::slice_sample(n = n)
+    }
+    return(mtv)
   }
 
 
