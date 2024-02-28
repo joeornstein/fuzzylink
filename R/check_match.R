@@ -43,7 +43,7 @@ check_match <- function(string1, string2,
 
     # format the prompt
     p <- paste0('Decide if the following two names refer to the same ', record_type,
-                '. Respond \"Yes\" or \"No\".\n\n',
+                '. Think carefully. Respond \"Yes\" or \"No\".\n\n',
                 'Name A: ', string1, '\nName B: ', string2,
                 '\n\nResponse:')
 
@@ -104,7 +104,7 @@ check_match <- function(string1, string2,
         p <- list()
         p[[1]] <- list(role = 'user',
                        content = paste0('Decide if the following two names refer to the same ',
-                                        record_type, '. Respond "Yes" or "No".'))
+                                        record_type, '. Think carefully. Respond "Yes" or "No".'))
 
         # format content
         p[[2]] <- list(role = 'user',
