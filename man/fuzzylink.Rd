@@ -35,7 +35,7 @@ fuzzylink(
 
 \item{max_validations}{The maximum number of LLM prompts to submit during the validation stage; defaults to 100,000}
 
-\item{pmin, pmax}{Numbers between 0 and 1, denoting the range of estimated match probabilities within which \code{fuzzylink()} will validate record pairs using an LLM prompt}
+\item{pmin, pmax}{Numbers between 0 and 1, denoting the range of estimated match probabilities within which \code{fuzzylink()} will validate record pairs using an LLM prompt; defaults to 0.1 and 0.9}
 }
 \value{
 A dataframe with all rows of \code{dfA} joined with any matches from \code{dfB}
