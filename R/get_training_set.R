@@ -81,8 +81,8 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 10, n = 500,
   }
 
   # filter out improperly formatted labels
-  train <- train |>
-    dplyr::filter(match %in% c('Yes', 'No'))
+  # train <- train |>
+  #   dplyr::filter(match %in% c('Yes', 'No'))
 
   return(train)
 
