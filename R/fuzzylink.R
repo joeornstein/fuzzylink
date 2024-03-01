@@ -41,7 +41,7 @@ fuzzylink <- function(dfA, dfB,
 
 
 
-  ## Step 1: Blocking -----------------
+  ## Step 0: Blocking -----------------
 
   if(!is.null(blocking.variables)){
     # get every unique combination of blocking variables in dfA
@@ -54,7 +54,7 @@ fuzzylink <- function(dfA, dfB,
     blocks <- data.frame(block = 1)
   }
 
-  ## Step 2: Get embeddings ----------------
+  ## Step 1: Get embeddings ----------------
   all_strings <- unique(c(dfA[[by]], dfB[[by]]))
   if(verbose){
     cat('Retrieving ',
@@ -66,16 +66,21 @@ fuzzylink <- function(dfA, dfB,
   embeddings <- get_embeddings(all_strings)
 
   ## Step 2: Get similarity matrix within each block ------------
+  if(verbose){
+    cat('Computing similarity matrix (',
+        format(Sys.time(), '%X'),
+        ')\n\n', sep = '')
+  }
   sim <- list()
   for(i in 1:nrow(blocks)){
 
     if(!is.null(blocking.variables)){
 
-      if(verbose){
-        cat('Block ', i, ' of ', nrow(blocks), ':\n', sep = '')
-        print(data.frame(blocks[i,]))
-        cat('\n')
-      }
+      # if(verbose){
+      #   cat('Block ', i, ' of ', nrow(blocks), ':\n', sep = '')
+      #   print(data.frame(blocks[i,]))
+      #   cat('\n')
+      # }
 
       # subset the data for each block from dfA and dfB
       subset_A <- mapply(`==`,
@@ -107,11 +112,6 @@ fuzzylink <- function(dfA, dfB,
     strings_B <- unique(block_B[[by]])
 
     # compute cosine similarity matrix
-    if(verbose){
-      cat('Computing similarity matrix (',
-          format(Sys.time(), '%X'),
-          ')\n\n', sep = '')
-    }
     sim[[i]] <- get_similarity_matrix(embeddings, strings_A, strings_B)
   }
 
