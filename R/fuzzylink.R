@@ -157,7 +157,7 @@ fuzzylink <- function(dfA, dfB,
 
   validations_remaining <- max_validations
 
-  get_matches_to_validate <- function(df, k = 100){
+  get_matches_to_validate <- function(df, k = 50){
 
     mtv <- df |>
       # merge with labels from train set
@@ -175,10 +175,8 @@ fuzzylink <- function(dfA, dfB,
     # if there are no name pairs remaining within the uncertainty range,
     # validate the k nearest neighbors of records in A with no validated matches
     if(nrow(mtv) == 0){
+
       mtv <- df |>
-        # just validate within the range [1%, pmin]
-        dplyr::filter(match_probability > 0.01,
-                      match_probability < pmin) |>
         # merge with labels from train set
         dplyr::left_join(train |>
                            dplyr::select(A, B, match),
@@ -187,6 +185,9 @@ fuzzylink <- function(dfA, dfB,
         dplyr::group_by(A) |>
         dplyr::filter(sum(match == 'Yes', na.rm = TRUE) == 0) |>
         dplyr::ungroup() |>
+        # only validate within the range [1%, pmin]
+        dplyr::filter(match_probability > 0.01,
+                      match_probability < pmin) |>
         # get the k nearest neighbors for each unvalidated record in dfA
         dplyr::group_by(A) |>
         dplyr::slice_max(match_probability, n = k) |>
