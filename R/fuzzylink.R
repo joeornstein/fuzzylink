@@ -276,7 +276,7 @@ fuzzylink <- function(dfA, dfB,
     dplyr::left_join(dfB,
                      by = c('B' = by, blocking.variables),
                      relationship = 'many-to-many') |>
-    dplyr::rename(validated_match = match)
+    dplyr::rename(validated = match)
 
   # } else{ # otherwise, no need to include blocking variables in the joins
   #   matches <- df |>
