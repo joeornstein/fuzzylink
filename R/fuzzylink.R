@@ -8,7 +8,7 @@
 #' @param model Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
 #' @param max_validations The maximum number of LLM prompts to submit during the validation stage; defaults to 100,000
-#' @param pmin,pmax Numbers between 0 and 1, denoting the range of estimated match probabilities within which `fuzzylink()` will validate record pairs using an LLM prompt
+#' @param pmin,pmax Numbers between 0 and 1, denoting the range of estimated match probabilities within which `fuzzylink()` will validate record pairs using an LLM prompt; defaults to 0.1 and 0.9
 #'
 #' @return A dataframe with all rows of `dfA` joined with any matches from `dfB`
 #' @export
@@ -157,7 +157,7 @@ fuzzylink <- function(dfA, dfB,
 
   validations_remaining <- max_validations
 
-  get_matches_to_validate <- function(df, n = 1000){
+  get_matches_to_validate <- function(df, max_n = 2000){
 
     mtv <- df |>
       # merge with labels from train set
@@ -190,17 +190,17 @@ fuzzylink <- function(dfA, dfB,
         unique()
 
       # how many nearest neighbors to include
-      k <- max(floor(n / length(unique(mtv$A))), 1)
+      k <- max(floor(max_n / length(unique(mtv$A))), 1)
 
       mtv <- mtv |>
-        # don't validate any records with an estimated match probability less than 2%
+        # don't validate records with an estimated match probability less than 2%
         dplyr::filter(match_probability > 0.02) |>
         # get the k nearest neighbors for each unvalidated record in dfA
         dplyr::group_by(A) |>
         dplyr::slice_max(match_probability, n = k) |>
         dplyr::ungroup() |>
-        # keep a random sample of at most n
-        dplyr::slice_sample(n = n)
+        # keep a random sample of at most max_n
+        dplyr::slice_sample(n = max_n)
     }
     return(mtv)
   }
