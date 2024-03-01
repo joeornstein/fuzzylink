@@ -176,6 +176,9 @@ fuzzylink <- function(dfA, dfB,
     # validate the k nearest neighbors of records in A with no validated matches
     if(nrow(mtv) == 0){
       mtv <- df |>
+        # just validate within the range [1%, pmin]
+        dplyr::filter(match_probability > 0.01,
+                      match_probability < pmin) |>
         # merge with labels from train set
         dplyr::left_join(train |>
                            dplyr::select(A, B, match),
@@ -184,7 +187,11 @@ fuzzylink <- function(dfA, dfB,
         dplyr::group_by(A) |>
         dplyr::filter(sum(match == 'Yes', na.rm = TRUE) == 0) |>
         dplyr::ungroup() |>
-        # dplyr::filter(is.na(match)) |>
+        # get the k nearest neighbors for each unvalidated record in dfA
+        dplyr::group_by(A) |>
+        dplyr::slice_max(match_probability, n = k) |>
+        dplyr::ungroup() |>
+        dplyr::filter(is.na(match)) |>
         # remove duplicate name pairs
         dplyr::select(-block) |>
         unique()
@@ -192,14 +199,6 @@ fuzzylink <- function(dfA, dfB,
       # how many nearest neighbors to include
       # k <- max(floor(max_n / length(unique(mtv$A))), 1)
 
-      mtv <- mtv |>
-        # don't validate records with an estimated match probability less than 1%
-        dplyr::filter(match_probability > 0.01) |>
-        # get the k nearest neighbors for each unvalidated record in dfA
-        dplyr::group_by(A) |>
-        dplyr::slice_max(match_probability, n = k) |>
-        dplyr::ungroup() |>
-        dplyr::filter(is.na(match))
     }
     return(mtv)
   }
@@ -233,16 +232,18 @@ fuzzylink <- function(dfA, dfB,
                                              record_type = record_type,
                                              openai_api_key = openai_api_key)
 
-    validations_remaining <- validations_remaining - nrow(matches_to_validate)
+    # if you've validated all pairs within the range [pmin, pmax], set validations_remaining = 0
+    # otherwise, decrement validations_remaining as normal
+    if(sum(matches_to_validate$match_probability >= pmin) == 0){
+      validations_remaining <- 0
+    } else{
+      validations_remaining <- validations_remaining - nrow(matches_to_validate)
+    }
 
     # append new labeled pairs to the train set
     train <- train |>
       dplyr::bind_rows(matches_to_validate |>
                          dplyr::select(A,B,sim,jw,match))
-
-    # # filter out improperly formatted labels
-    # train <- train |>
-    #   dplyr::filter(match %in% c('Yes', 'No'))
 
     # refine the model (train only on the properly formatted labels)
     fit <- stats::glm(as.numeric(match == 'Yes') ~ sim + jw,
@@ -273,7 +274,8 @@ fuzzylink <- function(dfA, dfB,
                       relationship = 'many-to-many') |>
     dplyr::left_join(dfB,
                      by = c('B' = by, blocking.variables),
-                     relationship = 'many-to-many')
+                     relationship = 'many-to-many') |>
+    dplyr::rename(validated_match = match)
 
   # } else{ # otherwise, no need to include blocking variables in the joins
   #   matches <- df |>
