@@ -6,7 +6,7 @@
 #'
 #' @param text A character vector
 #' @param model Which variant of the GPT-3 embedding model to use. Defaults to 'text-embedding-3-large'.
-#' @param dimensions The dimension of the embedding vectors to return. Defaults to 3072.
+#' @param dimensions The dimension of the embedding vectors to return. Defaults to 256.
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
 #'
 #' @return A matrix of embedding vectors (one per row).

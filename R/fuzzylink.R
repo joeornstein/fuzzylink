@@ -7,6 +7,7 @@
 #' @param record_type A character describing what type of entity the `by` variable represents. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
 #' @param model Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
+#' @param embedding_dimensions The dimension of the embedding vectors to retrieve. Defaults to 256.
 #' @param max_validations The maximum number of LLM prompts to submit during the validation stage; defaults to 100,000
 #' @param pmin,pmax Numbers between 0 and 1, denoting the range of estimated match probabilities within which `fuzzylink()` will validate record pairs using an LLM prompt; defaults to 0.1 and 0.9
 #'

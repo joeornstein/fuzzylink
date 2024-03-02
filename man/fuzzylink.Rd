@@ -34,6 +34,8 @@ fuzzylink(
 
 \item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
 
+\item{embedding_dimensions}{The dimension of the embedding vectors to retrieve. Defaults to 256.}
+
 \item{max_validations}{The maximum number of LLM prompts to submit during the validation stage; defaults to 100,000}
 
 \item{pmin, pmax}{Numbers between 0 and 1, denoting the range of estimated match probabilities within which \code{fuzzylink()} will validate record pairs using an LLM prompt; defaults to 0.1 and 0.9}
