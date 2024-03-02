@@ -12,7 +12,8 @@ fuzzylink(
   verbose = TRUE,
   record_type = "entity",
   model = "gpt-3.5-turbo-instruct",
-  openai_api_key = NULL,
+  openai_api_key = Sys.getenv("OPENAI_API_KEY"),
+  embedding_dimensions = 256,
   max_validations = 1e+05,
   pmin = 0.1,
   pmax = 0.9

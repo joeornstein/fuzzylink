@@ -16,7 +16,7 @@ get_embeddings(
 
 \item{model}{Which variant of the GPT-3 embedding model to use. Defaults to 'text-embedding-3-large'.}
 
-\item{dimensions}{The dimension of the embedding vectors to return. Defaults to 256.}
+\item{dimensions}{The dimension of the embedding vectors to return. Defaults to 3072.}
 
 \item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
 }

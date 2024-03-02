@@ -23,7 +23,8 @@ fuzzylink <- function(dfA, dfB,
                       verbose = TRUE,
                       record_type = 'entity',
                       model = 'gpt-3.5-turbo-instruct',
-                      openai_api_key = NULL,
+                      openai_api_key = Sys.getenv('OPENAI_API_KEY'),
+                      embedding_dimensions = 256,
                       max_validations = 1e5,
                       pmin = 0.1, pmax = 0.9){
 
@@ -35,10 +36,9 @@ fuzzylink <- function(dfA, dfB,
   if(is.null(dfB[[by]])){
     stop(cat("There is no variable called \'", by, "\' in dfB.", sep = ''))
   }
-  if(Sys.getenv('OPENAI_API_KEY') == '' & is.null(openai_api_key)){
+  if(openai_api_key == ''){
     stop("No API key detected in system environment. You can enter it manually using the 'openai_api_key' argument.")
   }
-
 
 
   ## Step 0: Blocking -----------------
@@ -63,7 +63,9 @@ fuzzylink <- function(dfA, dfB,
         format(Sys.time(), '%X'),
         ')\n\n', sep = '')
   }
-  embeddings <- get_embeddings(all_strings)
+  embeddings <- get_embeddings(all_strings,
+                               dimensions = embedding_dimensions,
+                               openai_api_key = openai_api_key)
 
   ## Step 2: Get similarity matrix within each block ------------
   if(verbose){
