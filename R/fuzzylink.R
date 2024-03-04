@@ -160,7 +160,7 @@ fuzzylink <- function(dfA, dfB,
 
   validations_remaining <- max_validations
 
-  get_matches_to_validate <- function(df, k = 50){
+  get_matches_to_validate <- function(df, k = 20){
 
     mtv <- df |>
       # merge with labels from train set
@@ -168,7 +168,7 @@ fuzzylink <- function(dfA, dfB,
                          dplyr::select(A, B, match),
                        by = c('A', 'B')) |>
       # keep name pairs within the user-specified uncertainty range
-      dplyr::filter(match_probability > pmin,
+      dplyr::filter(match_probability >= pmin,
                     match_probability < pmax,
                     is.na(match)) |>
       # remove duplicate name pairs
@@ -188,9 +188,8 @@ fuzzylink <- function(dfA, dfB,
         dplyr::group_by(A) |>
         dplyr::filter(sum(match == 'Yes', na.rm = TRUE) == 0) |>
         dplyr::ungroup() |>
-        # only validate within the range [1%, pmin]
-        dplyr::filter(match_probability > 0.01,
-                      match_probability < pmin) |>
+        # remove records that have already been validated in range [pmin, 1]
+        dplyr::filter(match_probability < pmin) |>
         # remove duplicate name pairs
         dplyr::select(-block) |>
         unique() |>
