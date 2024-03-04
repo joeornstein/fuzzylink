@@ -16,7 +16,8 @@ fuzzylink(
   embedding_dimensions = 256,
   max_validations = 1e+05,
   pmin = 0.1,
-  pmax = 0.9
+  pmax = 0.9,
+  k = 20
 )
 }
 \arguments{
@@ -39,6 +40,8 @@ fuzzylink(
 \item{max_validations}{The maximum number of LLM prompts to submit during the validation stage; defaults to 100,000}
 
 \item{pmin, pmax}{Numbers between 0 and 1, denoting the range of estimated match probabilities within which \code{fuzzylink()} will validate record pairs using an LLM prompt; defaults to 0.1 and 0.9}
+
+\item{k}{Number of nearest neighbors to validate for records in \code{dfA} with no identified matches. Higher values may improve recall at expense of precision. Defaults to 20.}
 }
 \value{
 A dataframe with all rows of \code{dfA} joined with any matches from \code{dfB}

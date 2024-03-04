@@ -10,6 +10,7 @@
 #' @param embedding_dimensions The dimension of the embedding vectors to retrieve. Defaults to 256.
 #' @param max_validations The maximum number of LLM prompts to submit during the validation stage; defaults to 100,000
 #' @param pmin,pmax Numbers between 0 and 1, denoting the range of estimated match probabilities within which `fuzzylink()` will validate record pairs using an LLM prompt; defaults to 0.1 and 0.9
+#' @param k Number of nearest neighbors to validate for records in `dfA` with no identified matches. Higher values may improve recall at expense of precision. Defaults to 20.
 #'
 #' @return A dataframe with all rows of `dfA` joined with any matches from `dfB`
 #' @export
@@ -27,7 +28,9 @@ fuzzylink <- function(dfA, dfB,
                       openai_api_key = Sys.getenv('OPENAI_API_KEY'),
                       embedding_dimensions = 256,
                       max_validations = 1e5,
-                      pmin = 0.1, pmax = 0.9){
+                      pmin = 0.1,
+                      pmax = 0.9,
+                      k = 20){
 
 
   # Check for errors in inputs
@@ -160,7 +163,7 @@ fuzzylink <- function(dfA, dfB,
 
   validations_remaining <- max_validations
 
-  get_matches_to_validate <- function(df, k = 20){
+  get_matches_to_validate <- function(df){
 
     mtv <- df |>
       # merge with labels from train set
