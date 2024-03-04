@@ -66,7 +66,6 @@ check_match <- function(string1, string2,
 
     while(start_index <= length(p)){
 
-      print(start_index)
       end_index <- min(length(p), start_index + max_prompts - 1)
 
       # build request body
@@ -94,7 +93,7 @@ check_match <- function(string1, string2,
         if(response$status_code == 429){
 
           time_to_wait <- gsub('.*Please try again in\\s(.+)\\.\\sVisit.*', '\\1', parsed$error$message)
-          print(paste0('Exceeded Rate Limit. Waiting ', time_to_wait, '.'))
+          cat(paste0('Exceeded Rate Limit. Waiting ', time_to_wait, '.\n\n'))
 
           time_val <- as.numeric(gsub('[^0-9.]+', '', time_to_wait))
           time_unit <- gsub('[^A-z]+', '', time_to_wait)
@@ -195,7 +194,7 @@ check_match <- function(string1, string2,
           if(response$status_code == 429){
 
             time_to_wait <- gsub('.*Please try again in\\s(.+)\\.\\sVisit.*', '\\1', parsed$error$message)
-            print(paste0('Exceeded Rate Limit. Waiting ', time_to_wait, '.'))
+            cat(paste0('Exceeded Rate Limit. Waiting ', time_to_wait, '.\n\n'))
 
             time_val <- as.numeric(gsub('[^0-9.]+', '', time_to_wait))
             time_unit <- gsub('[^A-z]+', '', time_to_wait)
@@ -270,7 +269,7 @@ check_match <- function(string1, string2,
           if(response$status_code == 429){
 
             time_to_wait <- gsub('.*Please try again in\\s(.+)\\.\\sVisit.*', '\\1', parsed$error$message)
-            print(paste0('Exceeded Rate Limit. Waiting ', time_to_wait, '.'))
+            cat(paste0('Exceeded Rate Limit. Waiting ', time_to_wait, '.\n\n'))
 
             time_val <- as.numeric(gsub('[^0-9.]+', '', time_to_wait))
             time_unit <- gsub('[^A-z]+', '', time_to_wait)
