@@ -17,18 +17,14 @@
 check_match <- function(string1, string2,
                         model = 'gpt-3.5-turbo-instruct',
                         record_type = 'entity',
-                        openai_api_key = NULL){
+                        openai_api_key = Sys.getenv('OPENAI_API_KEY')){
 
   if(length(string1) != length(string2)){
     stop('Inputs must have the same number of elements.')
   }
 
-  if(Sys.getenv('OPENAI_API_KEY') == '' & is.null(openai_api_key)){
+  if(openai_api_key == ''){
     stop("No API key detected in system environment. You can enter it manually using the 'openai_api_key' argument.")
-  }
-
-  if(is.null(openai_api_key)){
-    openai_api_key <- Sys.getenv("OPENAI_API_KEY")
   }
 
   # encode strings as characters
@@ -56,25 +52,82 @@ check_match <- function(string1, string2,
     # don't submit prompts for exact string matches
     p <- p[string1 != string2]
 
+    # build path parameters
+    base_url <- "https://api.openai.com/v1/completions"
+
+    headers <- c(
+      "Authorization" = paste("Bearer", openai_api_key),
+      "Content-Type" = "application/json"
+    )
+
     # batch prompts to handle API rate limits
     max_prompts <- 2048
     start_index <- 1
 
     while(start_index <= length(p)){
 
+      print(start_index)
       end_index <- min(length(p), start_index + max_prompts - 1)
 
-      resp <- openai::create_completion(model = model,
-                                        prompt = p[start_index:end_index],
-                                        max_tokens = 1,
-                                        temperature = 0,
-                                        openai_api_key = openai_api_key)
+      # build request body
+      body <- list()
+      body[['model']] <- model
+      body[['prompt']] <- p[start_index:end_index]
+      body[['max_tokens']] <- 1
+      body[['temperature']] <- 0
+
+      repeat{
+        # make API request
+        response <- httr::POST(
+          url = base_url,
+          httr::add_headers(.headers = headers),
+          body = body,
+          encode = "json"
+        )
+
+        # parse the response
+        parsed <- response |>
+          httr::content(as = "text", encoding = "UTF-8") |>
+          jsonlite::fromJSON(flatten = TRUE)
+
+        # if you've hit a rate limit, wait and resubmit
+        if(response$status_code == 429){
+
+          time_to_wait <- gsub('.*Please try again in\\s(.+)\\.\\sVisit.*', '\\1', parsed$error$message)
+          print(paste0('Exceeded Rate Limit. Waiting ', time_to_wait, '.'))
+
+          time_val <- as.numeric(gsub('[^0-9.]+', '', time_to_wait))
+          time_unit <- gsub('[^A-z]+', '', time_to_wait)
+
+          time_to_wait <- ceiling(time_val / ifelse(time_unit == 'ms', 1000, 1))
+
+          Sys.sleep(time_to_wait)
+
+        } else{
+          break
+        }
+      }
+
+
+      # # if you've hit a rate limit, wait and resubmit
+      # if(response$status_code == 429){
+      #   print('API')
+      #
+      # }
+
+
 
       # update labels vector (non-exact matches)
-      labels[string1!=string2][start_index:end_index] <- gsub(' |\n', '', resp$choices$text) |>
+      labels[string1!=string2][start_index:end_index] <- gsub(' |\n', '', parsed$choices$text) |>
         stringr::str_to_title()
 
       start_index <- end_index + 1
+
+      # resp <- openai::create_completion(model = model,
+      #                                   prompt = p[start_index:end_index],
+      #                                   max_tokens = 1,
+      #                                   temperature = 0,
+      #                                   openai_api_key = openai_api_key)
 
     }
 
@@ -91,6 +144,13 @@ check_match <- function(string1, string2,
     #   labels[missing_labels] <- gsub(' |\n', '', resp$choices$text)
 
   } else{ # if model is not one of the "Legacy" text models, use Chat Endpoint
+
+    base_url <- "https://api.openai.com/v1/chat/completions"
+
+    headers <- c(
+      "Authorization" = paste("Bearer", openai_api_key),
+      "Content-Type" = "application/json"
+    )
 
     # create an empty vector of labels
     labels <- character(length = length(string1))
@@ -111,13 +171,54 @@ check_match <- function(string1, string2,
                        content = paste0('Name A: ', string1[i], '\nName B: ', string2[i]))
 
         # submit to OpenAI API
-        resp <- openai::create_chat_completion(model = model,
-                                               messages = p,
-                                               temperature = 0,
-                                               openai_api_key = openai_api_key)
+        body <- list()
+        body[['model']] <- model
+        body[['messages']] <- p
+        body[['temperature']] <- 0
+        body[['max_tokens']] <- 1
+
+        repeat{
+          # make a request
+          response <- httr::POST(
+            url = base_url,
+            httr::add_headers(.headers = headers),
+            body = body,
+            encode = "json"
+          )
+
+          # parse the response
+          parsed <- response |>
+            httr::content(as = "text", encoding = "UTF-8") |>
+            jsonlite::fromJSON(flatten = TRUE)
+
+          # if you've hit a rate limit, wait and resubmit
+          if(response$status_code == 429){
+
+            time_to_wait <- gsub('.*Please try again in\\s(.+)\\.\\sVisit.*', '\\1', parsed$error$message)
+            print(paste0('Exceeded Rate Limit. Waiting ', time_to_wait, '.'))
+
+            time_val <- as.numeric(gsub('[^0-9.]+', '', time_to_wait))
+            time_unit <- gsub('[^A-z]+', '', time_to_wait)
+
+            time_to_wait <- ceiling(time_val / ifelse(time_unit == 'ms', 1000, 1))
+
+            Sys.sleep(time_to_wait)
+
+          } else{
+            break
+          }
+        }
+
+
+
+
+        # resp <- openai::create_chat_completion(model = model,
+        #                                        messages = p,
+        #                                        temperature = 0,
+        #                                        openai_api_key = openai_api_key)
 
         # add to labels vector
-        labels[i] <- resp$choices$message.content
+        labels[i] <- parsed$choices$message.content
 
       }
 
@@ -145,14 +246,51 @@ check_match <- function(string1, string2,
                        content = 'For each pair of names, decide whether they probably refer to the same entity. Nicknames, acronyms, abbreviations, and misspellings are all acceptable matches. Respond only with a numbered list of "Yes" or "No".')
 
         # submit to OpenAI API
-        resp <- openai::create_chat_completion(model = model,
-                                               messages = p,
-                                               temperature = 0,
-                                               openai_api_key = openai_api_key)
+        body <- list()
+        body[['model']] <- model
+        body[['messages']] <- p
+        body[['temperature']] <- 0
+        body[['max_tokens']] <- 1
+
+        repeat{
+          # make a request
+          response <- httr::POST(
+            url = base_url,
+            httr::add_headers(.headers = headers),
+            body = body,
+            encode = "json"
+          )
+
+          # parse the response
+          parsed <- response |>
+            httr::content(as = "text", encoding = "UTF-8") |>
+            jsonlite::fromJSON(flatten = TRUE)
+
+          # if you've hit a rate limit, wait and resubmit
+          if(response$status_code == 429){
+
+            time_to_wait <- gsub('.*Please try again in\\s(.+)\\.\\sVisit.*', '\\1', parsed$error$message)
+            print(paste0('Exceeded Rate Limit. Waiting ', time_to_wait, '.'))
+
+            time_val <- as.numeric(gsub('[^0-9.]+', '', time_to_wait))
+            time_unit <- gsub('[^A-z]+', '', time_to_wait)
+
+            time_to_wait <- ceiling(time_val / ifelse(time_unit == 'ms', 1000, 1))
+
+            Sys.sleep(time_to_wait)
+
+          } else{
+            break
+          }
+        }
+        # resp <- openai::create_chat_completion(model = model,
+        #                                        messages = p,
+        #                                        temperature = 0,
+        #                                        openai_api_key = openai_api_key)
 
         # convert response into vector
         response_vector <- gsub('[0-9]+. ', '',
-                                unlist(strsplit(resp$choices$message.content, '\n')))
+                                unlist(strsplit(parsed$choices$message.content, '\n')))
 
         if(length(response_vector) != length(substring1)){
           stop('Problem with the API response: labels not the same length as input. Try smaller batch size.')

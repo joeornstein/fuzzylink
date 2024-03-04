@@ -13,7 +13,6 @@ Imports:
     stats,
     utils,
     dplyr,
-    openai,
     Rfast,
     reshape2,
     stringdist,
