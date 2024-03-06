@@ -7,7 +7,7 @@
 <!-- badges: end -->
 
 The goal of the `fuzzylink` package is to allow users to merge datasets
-with non-exact matches on key identifying variables. Suppose, for
+with non-exact matches on a key identifying variable. Suppose, for
 example, you have the following two datasets:
 
 ``` r
@@ -38,26 +38,26 @@ function performs this record linkage with a single line of code.
 ``` r
 library(fuzzylink)
 df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person')
-#> Retrieving 10 embeddings (2:37:43 PM)
+#> Retrieving 10 embeddings (4:12:29 PM)
 #> 
-#> Computing similarity matrix (2:37:45 PM)
+#> Computing similarity matrix (4:12:30 PM)
 #> 
-#> Labeling training set (2:37:45 PM)
+#> Labeling training set (4:12:30 PM)
 #> 
-#> Fitting model (2:37:46 PM)
+#> Fitting model (4:12:30 PM)
 #> 
-#> Linking datasets (2:37:46 PM)
+#> Linking datasets (4:12:30 PM)
 #> 
-#> Done! (2:37:46 PM)
+#> Done! (4:12:30 PM)
 df
-#>                    A             B       sim        jw match_probability match
-#> 1    Timothy B. Ryan      Tim Ryan 0.6916803 0.7102778                 1   Yes
-#> 2   James J. Pointer Jimmy Pointer 0.7673960 0.8182692                 1   Yes
-#> 3 Jennifer C. Reilly          <NA>        NA        NA                NA  <NA>
-#>   age       hobby
-#> 1  28 Woodworking
-#> 2  40      Guitar
-#> 3  32        <NA>
+#>                    A             B       sim        jw match_probability
+#> 1    Timothy B. Ryan      Tim Ryan 0.7159697 0.7102778                 1
+#> 2   James J. Pointer Jimmy Pointer 0.7865519 0.8182692                 1
+#> 3 Jennifer C. Reilly          <NA>        NA        NA                NA
+#>   validated age       hobby
+#> 1       Yes  28 Woodworking
+#> 2       Yes  40      Guitar
+#> 3      <NA>  32        <NA>
 ```
 
 The procedure works by using *pretrained text embeddings* from OpenAI’s
@@ -78,18 +78,15 @@ devtools::install_github("joeornstein/fuzzylink")
 ```
 
 You will also need an account with OpenAI. You can sign up
-[here](https://beta.openai.com/signup), after which you’ll need to
+[here](https://beta.openai.com/signup), after which you will need to
 create an API key [here](https://platform.openai.com/account/api-keys).
-I recommend adding this API key as a variable in your operating system
-environment called `OPENAI_API_KEY`; that way you won’t risk leaking it
-by hard-coding it into your R scripts. The `fuzzylink` package will
-automatically look for your API key under that variable name, and will
-prompt you to enter the API key manually if it can’t find one there. If
-you’re unfamiliar with setting Environment Variables in your operating
-system,
-[here](https://dev.to/biplov/handling-passwords-and-secret-keys-using-environment-variables-2ei0)
-are some helpful instructions. Note that you may need to restart your
-computer after completing this step.
+Then copy-paste your API key into the following line of code.
+
+    library(fuzzylink)
+
+    openai_api_key('YOUR API KEY GOES HERE', install = TRUE)
+
+Now you’re all set up!
 
 ## Example
 
@@ -99,7 +96,7 @@ steps that `fuzzylink()` takes to join the two dataframes.
 ### Step 1: Embedding
 
 First, the function encodes each unique string in `dfA` and `dfB` as a
-3,072-dimensional vector called an *embedding*. You can learn more about
+256-dimensional vector called an *embedding*. You can learn more about
 embeddings
 [here](https://platform.openai.com/docs/guides/embeddings/embedding-models),
 but the basic idea is to represent text using a vector of real-valued
@@ -115,7 +112,7 @@ all_strings <- unique( c(strings_A, strings_B) )
 embeddings <- get_embeddings(all_strings)
 
 dim(embeddings)
-#> [1]   10 3072
+#> [1]  10 256
 rownames(embeddings)
 #>  [1] "Timothy B. Ryan"    "James J. Pointer"   "Jennifer C. Reilly"
 #>  [4] "Tim Ryan"           "Jimmy Pointer"      "Jessica Pointer"   
@@ -138,13 +135,13 @@ significantly reduces cost and speeds up computation.
 sim <- get_similarity_matrix(embeddings, strings_A, strings_B)
 sim
 #>                     Tim Ryan Jimmy Pointer Jessica Pointer  Tom Ryan
-#> Timothy B. Ryan    0.6916803     0.2901356       0.2357985 0.6336776
-#> James J. Pointer   0.2539563     0.7673960       0.6228653 0.2874345
-#> Jennifer C. Reilly 0.3384956     0.1969335       0.3453105 0.3374179
+#> Timothy B. Ryan    0.7159697     0.3469817       0.3030329 0.6437172
+#> James J. Pointer   0.4271890     0.7865519       0.6706029 0.4177391
+#> Jennifer C. Reilly 0.4244224     0.2518819       0.4040852 0.3175173
 #>                    Jenny Romer Jeremy Creilly Jennifer R. Riley
-#> Timothy B. Ryan      0.2270235      0.3754056         0.4666738
-#> James J. Pointer     0.2129737      0.3148329         0.3629020
-#> Jennifer C. Reilly   0.3929493      0.4237705         0.7162645
+#> Timothy B. Ryan      0.3723864      0.4715908         0.6091323
+#> James J. Pointer     0.3486939      0.4728189         0.4957477
+#> Jennifer C. Reilly   0.4293938      0.4983237         0.7468081
 ```
 
 ### Step 3: Create a Training Set
@@ -163,21 +160,21 @@ variables).
     Same {record_type} (Yes or No):
 
 ``` r
-train <- get_training_set(sim, record_type = 'person')
+train <- get_training_set(list(sim), record_type = 'person')
 train
 #> # A tibble: 21 × 5
 #>    A                  B                   sim    jw match
 #>    <fct>              <fct>             <dbl> <dbl> <chr>
-#>  1 Jennifer C. Reilly Jennifer R. Riley 0.716 0.929 No   
-#>  2 Timothy B. Ryan    Jeremy Creilly    0.375 0.517 No   
-#>  3 Jennifer C. Reilly Tim Ryan          0.338 0.407 No   
-#>  4 Jennifer C. Reilly Jenny Romer       0.393 0.784 No   
-#>  5 James J. Pointer   Jenny Romer       0.213 0.636 No   
-#>  6 James J. Pointer   Jessica Pointer   0.623 0.778 No   
-#>  7 Timothy B. Ryan    Tom Ryan          0.634 0.567 No   
-#>  8 Timothy B. Ryan    Jimmy Pointer     0.290 0.549 No   
-#>  9 James J. Pointer   Jimmy Pointer     0.767 0.818 Yes  
-#> 10 Timothy B. Ryan    Jessica Pointer   0.236 0.428 No   
+#>  1 James J. Pointer   Jessica Pointer   0.671 0.778 No   
+#>  2 Timothy B. Ryan    Jimmy Pointer     0.347 0.549 No   
+#>  3 James J. Pointer   Jimmy Pointer     0.787 0.818 Yes  
+#>  4 Timothy B. Ryan    Jennifer R. Riley 0.609 0.501 No   
+#>  5 James J. Pointer   Tim Ryan          0.427 0.458 No   
+#>  6 Jennifer C. Reilly Jimmy Pointer     0.252 0.550 No   
+#>  7 James J. Pointer   Jennifer R. Riley 0.496 0.569 No   
+#>  8 Jennifer C. Reilly Tim Ryan          0.424 0.407 No   
+#>  9 Jennifer C. Reilly Tom Ryan          0.318 0.347 No   
+#> 10 Timothy B. Ryan    Jenny Romer       0.372 0.429 No   
 #> # ℹ 11 more rows
 ```
 
@@ -208,12 +205,12 @@ df$match_probability <- predict(model, df, type = 'response')
 
 head(df)
 #>                    A             B       sim        jw match_probability
-#> 1    Timothy B. Ryan      Tim Ryan 0.6916803 0.7102778      1.000000e+00
-#> 2   James J. Pointer      Tim Ryan 0.2539563 0.4583333      2.220446e-16
-#> 3 Jennifer C. Reilly      Tim Ryan 0.3384956 0.4074074      2.220446e-16
-#> 4    Timothy B. Ryan Jimmy Pointer 0.2901356 0.5493284      2.220446e-16
-#> 5   James J. Pointer Jimmy Pointer 0.7673960 0.8182692      1.000000e+00
-#> 6 Jennifer C. Reilly Jimmy Pointer 0.1969335 0.5496337      2.220446e-16
+#> 1    Timothy B. Ryan      Tim Ryan 0.7159697 0.7102778      1.000000e+00
+#> 2   James J. Pointer      Tim Ryan 0.4271890 0.4583333      2.220446e-16
+#> 3 Jennifer C. Reilly      Tim Ryan 0.4244224 0.4074074      2.220446e-16
+#> 4    Timothy B. Ryan Jimmy Pointer 0.3469817 0.5493284      2.220446e-16
+#> 5   James J. Pointer Jimmy Pointer 0.7865519 0.8182692      1.000000e+00
+#> 6 Jennifer C. Reilly Jimmy Pointer 0.2518819 0.5496337      2.220446e-16
 ```
 
 ### Step 5: Validate Uncertain Matches
@@ -221,9 +218,9 @@ head(df)
 We now have a dataset with estimated match probabilities for each pair
 of records in `dfA` and `dfB`. We could stop there and just report the
 match probabilities. But for larger datasets we can get better results
-if we conduct a final validation step. For every name pair within a
-range of estimated match probabilities (by default 0.2 to 0.9), we will
-use the GPT-3.5 prompt above to check whether the name pair is a match.
+if we conduct a final validation step. For each name pair within a range
+of estimated match probabilities (by default 0.1 to 0.95), we will use
+the GPT-3.5 prompt above to check whether the name pair is a match.
 These labeled pairs are then added to the training dataset, the logistic
 regression model is refined, and we repeat this process until there are
 no matches left to validate. At that point, every record in `dfA` is
@@ -237,12 +234,11 @@ more name pairs within larger datasets can increase the cap using the
 `max_validations` argument.
 
 ``` r
-
 # find all unlabeled name pairs within a range of match probabilities
 matches_to_validate <- df |> 
   left_join(train, by = c('A', 'B', 'sim')) |> 
-  filter(match_probability > 0.2, 
-         match_probability < 0.9,
+  filter(match_probability > 0.1, 
+         match_probability < 0.95,
          is.na(match))
 
 while(nrow(matches_to_validate) > 0){
@@ -267,8 +263,8 @@ while(nrow(matches_to_validate) > 0){
   # find all unlabeled name pairs within a range of match probabilities
   matches_to_validate <- df |> 
     left_join(train, by = c('A', 'B', 'sim')) |> 
-    filter(match_probability > 0.2, 
-           match_probability < 0.9,
+    filter(match_probability > 0.1, 
+           match_probability < 0.95,
            is.na(match))
   
 }
@@ -277,7 +273,7 @@ while(nrow(matches_to_validate) > 0){
 ### Step 6: Link Datasets
 
 Finally, we take all name pairs whose match probability is higher than a
-given threshold and merge them into a single dataset.
+user-specified threshold and merge them into a single dataset.
 
 ``` r
 matches <- df |>
@@ -285,7 +281,7 @@ matches <- df |>
     left_join(train |> select(A, B, match),
               by = c('A', 'B')) |>
     # only keep pairs that have been validated or have a match probability > 0.2
-    filter((match_probability > 0.2 & is.na(match)) | match == 'Yes') |>
+    filter((match_probability > 0.1 & is.na(match)) | match == 'Yes') |>
     right_join(dfA, by = c('A' = 'name'),
                relationship = 'many-to-many') |>
     left_join(dfB, by = c('B' = 'name'),
@@ -293,8 +289,8 @@ matches <- df |>
 
 matches
 #>                    A             B       sim        jw match_probability match
-#> 1    Timothy B. Ryan      Tim Ryan 0.6916803 0.7102778                 1   Yes
-#> 2   James J. Pointer Jimmy Pointer 0.7673960 0.8182692                 1   Yes
+#> 1    Timothy B. Ryan      Tim Ryan 0.7159697 0.7102778                 1   Yes
+#> 2   James J. Pointer Jimmy Pointer 0.7865519 0.8182692                 1   Yes
 #> 3 Jennifer C. Reilly          <NA>        NA        NA                NA  <NA>
 #>   age       hobby
 #> 1  28 Woodworking
@@ -307,8 +303,8 @@ matches
 Because the `fuzzylink()` function makes several calls to the OpenAI
 API—which charges a [per-token fee](https://openai.com/pricing)—there is
 a monetary cost associated with each use. Based on the package defaults
-and API pricing as of February 2024, here is a table of approximate
-costs for merging datasets of various sizes.
+and API pricing as of March 2024, here is a table of approximate costs
+for merging datasets of various sizes.
 
 | dfA       | dfB       | Approximate Cost (Default Settings) |
 |:----------|:----------|:------------------------------------|
@@ -318,36 +314,36 @@ costs for merging datasets of various sizes.
 | 10        | 10,000    | \$0.01                              |
 | 10        | 100,000   | \$0.06                              |
 | 10        | 1,000,000 | \$0.59                              |
-| 100       | 10        | \$0.03                              |
-| 100       | 100       | \$0.03                              |
-| 100       | 1,000     | \$0.03                              |
-| 100       | 10,000    | \$0.04                              |
-| 100       | 100,000   | \$0.09                              |
-| 100       | 1,000,000 | \$0.62                              |
-| 1,000     | 10        | \$0.3                               |
-| 1,000     | 100       | \$0.3                               |
-| 1,000     | 1,000     | \$0.3                               |
-| 1,000     | 10,000    | \$0.31                              |
-| 1,000     | 100,000   | \$0.36                              |
-| 1,000     | 1,000,000 | \$0.89                              |
-| 10,000    | 10        | \$3.01                              |
-| 10,000    | 100       | \$3.01                              |
-| 10,000    | 1,000     | \$3.01                              |
-| 10,000    | 10,000    | \$3.01                              |
-| 10,000    | 100,000   | \$3.06                              |
-| 10,000    | 1,000,000 | \$3.59                              |
-| 100,000   | 10        | \$6.06                              |
-| 100,000   | 100       | \$6.06                              |
-| 100,000   | 1,000     | \$6.06                              |
-| 100,000   | 10,000    | \$6.06                              |
-| 100,000   | 100,000   | \$6.12                              |
-| 100,000   | 1,000,000 | \$6.64                              |
-| 1,000,000 | 10        | \$6.59                              |
-| 1,000,000 | 100       | \$6.59                              |
-| 1,000,000 | 1,000     | \$6.59                              |
-| 1,000,000 | 10,000    | \$6.59                              |
-| 1,000,000 | 100,000   | \$6.64                              |
-| 1,000,000 | 1,000,000 | \$7.17                              |
+| 100       | 10        | \$0.02                              |
+| 100       | 100       | \$0.02                              |
+| 100       | 1,000     | \$0.02                              |
+| 100       | 10,000    | \$0.03                              |
+| 100       | 100,000   | \$0.08                              |
+| 100       | 1,000,000 | \$0.61                              |
+| 1,000     | 10        | \$0.23                              |
+| 1,000     | 100       | \$0.23                              |
+| 1,000     | 1,000     | \$0.23                              |
+| 1,000     | 10,000    | \$0.23                              |
+| 1,000     | 100,000   | \$0.28                              |
+| 1,000     | 1,000,000 | \$0.81                              |
+| 10,000    | 10        | \$2.26                              |
+| 10,000    | 100       | \$2.26                              |
+| 10,000    | 1,000     | \$2.26                              |
+| 10,000    | 10,000    | \$2.26                              |
+| 10,000    | 100,000   | \$2.31                              |
+| 10,000    | 1,000,000 | \$2.84                              |
+| 100,000   | 10        | \$4.56                              |
+| 100,000   | 100       | \$4.56                              |
+| 100,000   | 1,000     | \$4.56                              |
+| 100,000   | 10,000    | \$4.56                              |
+| 100,000   | 100,000   | \$4.62                              |
+| 100,000   | 1,000,000 | \$5.14                              |
+| 1,000,000 | 10        | \$5.09                              |
+| 1,000,000 | 100       | \$5.09                              |
+| 1,000,000 | 1,000     | \$5.09                              |
+| 1,000,000 | 10,000    | \$5.09                              |
+| 1,000,000 | 100,000   | \$5.14                              |
+| 1,000,000 | 1,000,000 | \$5.67                              |
 
 Note that cost scales more quickly with the size of `dfA` than with
 `dfB`, because it is more costly to complete LLM prompts for validation
