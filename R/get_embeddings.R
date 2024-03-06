@@ -53,13 +53,34 @@ get_embeddings <- function(text,
     body[["model"]] <- model
     body[["input"]] <- chunk
     body[["dimensions"]] <- dimensions
-    response <- httr::POST(url = base_url, httr::add_headers(.headers = headers),
-                           body = body, encode = "json")
 
-    # parse the response and append it to the embeddings list
-    emb <- response |>
-      httr::content(as = "text", encoding = "UTF-8") |>
-      jsonlite::fromJSON(flatten = TRUE)
+    repeat{
+      # make API request
+      response <- httr::POST(url = base_url, httr::add_headers(.headers = headers),
+                             body = body, encode = "json")
+
+      # parse the response and append it to the embeddings list
+      emb <- response |>
+        httr::content(as = "text", encoding = "UTF-8") |>
+        jsonlite::fromJSON(flatten = TRUE)
+
+      # if you've hit a rate limit, wait and resubmit
+      if(response$status_code == 429){
+
+        time_to_wait <- gsub('.*Please try again in\\s(.+)\\.\\sVisit.*', '\\1', parsed$error$message)
+        cat(paste0('Exceeded Rate Limit. Waiting ', time_to_wait, '.\n\n'))
+
+        time_val <- as.numeric(gsub('[^0-9.]+', '', time_to_wait))
+        time_unit <- gsub('[^A-z]+', '', time_to_wait)
+
+        time_to_wait <- ceiling(time_val / ifelse(time_unit == 'ms', 1000, 1))
+
+        Sys.sleep(time_to_wait)
+
+      } else{
+        break
+      }
+    }
 
     embeddings[index:end] <- emb$data$embedding
 
