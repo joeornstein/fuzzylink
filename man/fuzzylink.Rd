@@ -15,8 +15,7 @@ fuzzylink(
   openai_api_key = Sys.getenv("OPENAI_API_KEY"),
   embedding_dimensions = 256,
   max_validations = 1e+05,
-  pmin = 0.1,
-  pmax = 0.9,
+  p = c(0.1, 0.95),
   k = 20
 )
 }
@@ -35,13 +34,13 @@ fuzzylink(
 
 \item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
 
-\item{embedding_dimensions}{The dimension of the embedding vectors to retrieve. Defaults to 256.}
+\item{embedding_dimensions}{The dimension of the embedding vectors to retrieve. Defaults to 256}
 
-\item{max_validations}{The maximum number of LLM prompts to submit during the validation stage; defaults to 100,000}
+\item{max_validations}{The maximum number of LLM prompts to submit during the validation stage. Defaults to 100,000}
 
-\item{pmin, pmax}{Numbers between 0 and 1, denoting the range of estimated match probabilities within which \code{fuzzylink()} will validate record pairs using an LLM prompt; defaults to 0.1 and 0.9}
+\item{p}{The range of estimated match probabilities within which \code{fuzzylink()} will validate record pairs using an LLM prompt. Defaults to c(0.1, 0.95)}
 
-\item{k}{Number of nearest neighbors to validate for records in \code{dfA} with no identified matches. Higher values may improve recall at expense of precision. Defaults to 20.}
+\item{k}{Number of nearest neighbors to validate for records in \code{dfA} with no identified matches. Higher values may improve recall at expense of precision. Defaults to 20}
 }
 \value{
 A dataframe with all rows of \code{dfA} joined with any matches from \code{dfB}
