@@ -67,7 +67,7 @@ get_embeddings <- function(text,
       # if you've hit a rate limit, wait and resubmit
       if(response$status_code == 429){
 
-        time_to_wait <- gsub('.*Please try again in\\s(.+)\\.\\sVisit.*', '\\1', parsed$error$message)
+        time_to_wait <- gsub('.*Please try again in\\s(.+)\\.\\sVisit.*', '\\1', emb$error$message)
         cat(paste0('Exceeded Rate Limit. Waiting ', time_to_wait, '.\n\n'))
 
         time_val <- as.numeric(gsub('[^0-9.]+', '', time_to_wait))
