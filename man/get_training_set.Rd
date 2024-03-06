@@ -11,7 +11,7 @@ get_training_set(
   n = 500,
   record_type = "entity",
   model = "gpt-3.5-turbo-instruct",
-  openai_api_key = NULL
+  openai_api_key = Sys.getenv("OPENAI_API_KEY")
 )
 }
 \arguments{
