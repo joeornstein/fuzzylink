@@ -27,7 +27,8 @@ library(tidyverse)
 dfA <- tribble(~name, ~age,
                'Timothy B. Ryan', 28,
                'James J. Pointer', 40,
-               'Jennifer C. Reilly', 32)
+               'Jennifer C. Reilly', 32) |> 
+  data.frame()
 
 dfB <- tribble(~name, ~hobby,
                'Tim Ryan', 'Woodworking',
@@ -36,7 +37,8 @@ dfB <- tribble(~name, ~hobby,
                'Tom Ryan', 'Making Pasta',
                'Jenny Romer', 'Salsa Dance',
                'Jeremy Creilly', 'Gardening',
-               'Jennifer R. Riley', 'Acting')
+               'Jennifer R. Riley', 'Acting') |> 
+  data.frame()
 
 ```
 
@@ -47,9 +49,15 @@ dfB
 
 We would like a procedure that correctly identifies which records in `dfB` are likely matches for each record in `dfA`. The `fuzzylink()` function performs this record linkage with a single line of code.
 
-```{r}
+```
 library(fuzzylink)
 df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person')
+df
+```
+
+```{r, echo=FALSE}
+library(fuzzylink)
+df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person', verbose = FALSE)
 df
 ```
 
@@ -64,7 +72,9 @@ You can install the development version of `fuzzylink` from [GitHub](https://git
 devtools::install_github("joeornstein/fuzzylink")
 ```
 
-You will also need an account with OpenAI. You can sign up [here](https://beta.openai.com/signup), after which you will need to create an API key [here](https://platform.openai.com/account/api-keys). Then copy-paste your API key into the following line of code.
+You will also need an account with OpenAI. You can sign up [here](https://beta.openai.com/signup), after which you will need to create an API key [here](https://platform.openai.com/account/api-keys). For best performance, you may also want to provide credit card information (this significantly boosts your API rate limit, even if you're not spending money). 
+
+Once your account is created, copy-paste your API key into the following line of R code.
 
 ```
 library(fuzzylink)

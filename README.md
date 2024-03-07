@@ -12,53 +12,37 @@ example, you have the following two datasets:
 
 ``` r
 dfA
-#> # A tibble: 3 × 2
-#>   name                 age
-#>   <chr>              <dbl>
-#> 1 Timothy B. Ryan       28
-#> 2 James J. Pointer      40
-#> 3 Jennifer C. Reilly    32
+#>                 name age
+#> 1    Timothy B. Ryan  28
+#> 2   James J. Pointer  40
+#> 3 Jennifer C. Reilly  32
 dfB
-#> # A tibble: 7 × 2
-#>   name              hobby       
-#>   <chr>             <chr>       
-#> 1 Tim Ryan          Woodworking 
-#> 2 Jimmy Pointer     Guitar      
-#> 3 Jessica Pointer   Camping     
-#> 4 Tom Ryan          Making Pasta
-#> 5 Jenny Romer       Salsa Dance 
-#> 6 Jeremy Creilly    Gardening   
-#> 7 Jennifer R. Riley Acting
+#>                name        hobby
+#> 1          Tim Ryan  Woodworking
+#> 2     Jimmy Pointer       Guitar
+#> 3   Jessica Pointer      Camping
+#> 4          Tom Ryan Making Pasta
+#> 5       Jenny Romer  Salsa Dance
+#> 6    Jeremy Creilly    Gardening
+#> 7 Jennifer R. Riley       Acting
 ```
 
 We would like a procedure that correctly identifies which records in
 `dfB` are likely matches for each record in `dfA`. The `fuzzylink()`
 function performs this record linkage with a single line of code.
 
-``` r
-library(fuzzylink)
-df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person')
-#> Retrieving 10 embeddings (4:12:29 PM)
-#> 
-#> Computing similarity matrix (4:12:30 PM)
-#> 
-#> Labeling training set (4:12:30 PM)
-#> 
-#> Fitting model (4:12:30 PM)
-#> 
-#> Linking datasets (4:12:30 PM)
-#> 
-#> Done! (4:12:30 PM)
-df
-#>                    A             B       sim        jw match_probability
-#> 1    Timothy B. Ryan      Tim Ryan 0.7159697 0.7102778                 1
-#> 2   James J. Pointer Jimmy Pointer 0.7865519 0.8182692                 1
-#> 3 Jennifer C. Reilly          <NA>        NA        NA                NA
-#>   validated age       hobby
-#> 1       Yes  28 Woodworking
-#> 2       Yes  40      Guitar
-#> 3      <NA>  32        <NA>
-```
+    library(fuzzylink)
+    df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person')
+    df
+
+    #>                    A             B       sim        jw match_probability
+    #> 1    Timothy B. Ryan      Tim Ryan 0.7159697 0.7102778                 1
+    #> 2   James J. Pointer Jimmy Pointer 0.7865519 0.8182692                 1
+    #> 3 Jennifer C. Reilly          <NA>        NA        NA                NA
+    #>   validated age       hobby
+    #> 1       Yes  28 Woodworking
+    #> 2       Yes  40      Guitar
+    #> 3      <NA>  32        <NA>
 
 The procedure works by using *pretrained text embeddings* from OpenAI’s
 GPT-3 to construct a measure of similarity for each pair of names. These
@@ -80,7 +64,12 @@ devtools::install_github("joeornstein/fuzzylink")
 You will also need an account with OpenAI. You can sign up
 [here](https://beta.openai.com/signup), after which you will need to
 create an API key [here](https://platform.openai.com/account/api-keys).
-Then copy-paste your API key into the following line of code.
+For best performance, you may also want to provide credit card
+information (this significantly boosts your API rate limit, even if
+you’re not spending money).
+
+Once your account is created, copy-paste your API key into the following
+line of R code.
 
     library(fuzzylink)
 
@@ -165,15 +154,15 @@ train
 #> # A tibble: 21 × 5
 #>    A                  B                   sim    jw match
 #>    <fct>              <fct>             <dbl> <dbl> <chr>
-#>  1 James J. Pointer   Jessica Pointer   0.671 0.778 No   
-#>  2 Timothy B. Ryan    Jimmy Pointer     0.347 0.549 No   
-#>  3 James J. Pointer   Jimmy Pointer     0.787 0.818 Yes  
-#>  4 Timothy B. Ryan    Jennifer R. Riley 0.609 0.501 No   
-#>  5 James J. Pointer   Tim Ryan          0.427 0.458 No   
-#>  6 Jennifer C. Reilly Jimmy Pointer     0.252 0.550 No   
-#>  7 James J. Pointer   Jennifer R. Riley 0.496 0.569 No   
-#>  8 Jennifer C. Reilly Tim Ryan          0.424 0.407 No   
-#>  9 Jennifer C. Reilly Tom Ryan          0.318 0.347 No   
+#>  1 Timothy B. Ryan    Tim Ryan          0.716 0.710 Yes  
+#>  2 James J. Pointer   Jimmy Pointer     0.787 0.818 Yes  
+#>  3 Timothy B. Ryan    Jennifer R. Riley 0.609 0.501 No   
+#>  4 Jennifer C. Reilly Tom Ryan          0.318 0.347 No   
+#>  5 Timothy B. Ryan    Jessica Pointer   0.303 0.428 No   
+#>  6 James J. Pointer   Jessica Pointer   0.671 0.778 No   
+#>  7 James J. Pointer   Jenny Romer       0.349 0.636 No   
+#>  8 Timothy B. Ryan    Jimmy Pointer     0.347 0.549 No   
+#>  9 Jennifer C. Reilly Jimmy Pointer     0.252 0.550 No   
 #> 10 Timothy B. Ryan    Jenny Romer       0.372 0.429 No   
 #> # ℹ 11 more rows
 ```
