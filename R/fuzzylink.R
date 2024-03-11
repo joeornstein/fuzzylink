@@ -148,7 +148,7 @@ fuzzylink <- function(dfA, dfB,
   }
 
   # df is the dataset of all within-block name pairs
-  df <- stats::na.omit(reshape2::melt(sim))
+  df <- dplyr::filter(reshape2::melt(sim), !is.na(sim))
   # rename columns
   namekey <- c(Var1 = 'A', Var2 = 'B', value = 'sim', L1 = 'block')
   names(df) <- namekey[names(df)]
