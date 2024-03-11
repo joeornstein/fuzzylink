@@ -257,6 +257,7 @@ fuzzylink <- function(dfA, dfB,
                       family = 'binomial')
 
     df$match_probability <- stats::predict.glm(fit, df, type = 'response')
+    # using the equation instead of stats::predict.glm() is *marginally* quicker?
 
     matches_to_validate <- get_matches_to_validate(df)
   }
