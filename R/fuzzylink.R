@@ -175,7 +175,7 @@ fuzzylink <- function(dfA, dfB,
                     is.na(match)) |>
       # remove duplicate name pairs
       dplyr::select(-block) |>
-      unique() |>
+      dplyr::distinct() |>
       # validate in batches of 500
       dplyr::slice_max(match_probability, n = 500)
 
@@ -196,7 +196,7 @@ fuzzylink <- function(dfA, dfB,
         dplyr::filter(match_probability < p[1]) |>
         # remove duplicate name pairs
         dplyr::select(-block) |>
-        unique() |>
+        dplyr::distinct() |>
         # get the k nearest neighbors for each unvalidated record in dfA
         dplyr::group_by(A) |>
         dplyr::slice_max(match_probability, n = k) |>
