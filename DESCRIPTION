@@ -18,7 +18,9 @@ Imports:
     stringdist,
     stringr,
     httr,
-    jsonlite
+    jsonlite,
+    httr2,
+    curl
 Depends: 
     R (>= 2.10)
 LazyData: true
