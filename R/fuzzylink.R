@@ -148,10 +148,11 @@ fuzzylink <- function(dfA, dfB,
   }
 
   # df is the dataset of all within-block name pairs
-  df <- dplyr::filter(reshape2::melt(sim), !is.na(sim))
+  df <- reshape2::melt(sim)
   # rename columns
   namekey <- c(Var1 = 'A', Var2 = 'B', value = 'sim', L1 = 'block')
   names(df) <- namekey[names(df)]
+  df <- dplyr::filter(df, !is.na(sim))
 
   # add lexical string distance measures
   df$jw <- stringdist::stringsim(df$A, df$B, method = 'jw', p = 0.1)
@@ -188,8 +189,8 @@ fuzzylink <- function(dfA, dfB,
         dplyr::left_join(train |>
                            dplyr::select(A, B, match),
                          by = c('A', 'B')) |>
-        # keep only records from A with no validated matches
-        dplyr::group_by(A) |>
+        # keep only records from A with no within-block validated matches
+        dplyr::group_by(A, block) |>
         dplyr::filter(sum(match == 'Yes', na.rm = TRUE) == 0) |>
         dplyr::ungroup() |>
         # remove records that have already been validated in range [p_lower, 1]
@@ -238,28 +239,30 @@ fuzzylink <- function(dfA, dfB,
                                              record_type = record_type,
                                              openai_api_key = openai_api_key)
 
-    # if you've validated all pairs with match probability > p_lower, set validations_remaining = 0
-    # otherwise, decrement validations_remaining as normal
-    if(sum(matches_to_validate$match_probability >= p[1]) == 0){
-      validations_remaining <- 0
-    } else{
-      validations_remaining <- validations_remaining - nrow(matches_to_validate)
-    }
-
     # append new labeled pairs to the train set
     train <- train |>
       dplyr::bind_rows(matches_to_validate |>
                          dplyr::select(A,B,sim,jw,match))
 
-    # refine the model (train only on the properly formatted labels)
-    fit <- stats::glm(as.numeric(match == 'Yes') ~ sim + jw,
-                      data = train |> dplyr::filter(match %in% c('Yes', 'No')),
-                      family = 'binomial')
+    # TODO: easier to just call 'break' here?
+    # if you've validated all pairs with match probability > p_lower, set validations_remaining = 0
+    # otherwise, decrement validations_remaining as normal, refine the model, and validate new batch of uncertain pairs
+    if(sum(matches_to_validate$match_probability >= p[1]) == 0){
+      validations_remaining <- 0
+    } else{
+      validations_remaining <- validations_remaining - nrow(matches_to_validate)
 
-    df$match_probability <- stats::predict.glm(fit, df, type = 'response')
-    # using the equation instead of stats::predict.glm() is *marginally* quicker?
+      # refine the model (train only on the properly formatted labels)
+      fit <- stats::glm(as.numeric(match == 'Yes') ~ sim + jw,
+                        data = train |> dplyr::filter(match %in% c('Yes', 'No')),
+                        family = 'binomial')
 
-    matches_to_validate <- get_matches_to_validate(df)
+      df$match_probability <- stats::predict.glm(fit, df, type = 'response')
+      # using the equation instead of stats::predict.glm() is *marginally* quicker?
+
+      matches_to_validate <- get_matches_to_validate(df)
+    }
+
   }
 
   # if blocking, merge with the blocking variables prior to linking
