@@ -25,73 +25,122 @@ get_embeddings <- function(text,
     stop("No API key detected in system environment. You can enter it manually using the 'openai_api_key' argument.")
   }
 
-  # initialize empty list
-  embeddings <- vector(mode='list', length=length(text))
-  names(embeddings) <- text
+  # split the embeddings into chunks, because the OpenAI
+  # embeddings endpoint will only take so many tokens at a time
 
-  # get the embeddings in chunks, because the OpenAI API
-  # will only take so many tokens at a time
-  chunk_size <- 1000
-  index <- 1
+  # max characters per chunk is approximately max tokens times 4
+  max_characters <- 8192 * 4
+  # Calculate cumulative sum of character lengths
+  cumulative_length <- cumsum(nchar(text))
+  # Find the indices where to split
+  split_indices <- cumulative_length %/% max_characters
+  # Split the vector based on the calculated indices
+  chunks <- split(text, split_indices)
 
-  repeat{
+  # format a list of API requests
+  format_request <- function(chunk,
+                             base_url = "https://api.openai.com/v1/embeddings"){
 
-    # if index is greater than the length of list, break the loop
-    if(index > length(text)) break
-
-    # create the chunk
-    end <- min(index + chunk_size - 1, length(text))
-    chunk <- text[index:end]
-
-    # get the embeddings for that chunk
-    # emb <- openai::create_embedding(model = model,
-    #                                 input = chunk)
-    base_url <- "https://api.openai.com/v1/embeddings"
-    headers <- c(Authorization = paste("Bearer", openai_api_key),
-                 `Content-Type` = "application/json")
-    body <- list()
-    body[["model"]] <- model
-    body[["input"]] <- chunk
-    body[["dimensions"]] <- dimensions
-
-    repeat{
-      # make API request
-      response <- httr::POST(url = base_url, httr::add_headers(.headers = headers),
-                             body = body, encode = "json")
-
-      # parse the response and append it to the embeddings list
-      emb <- response |>
-        httr::content(as = "text", encoding = "UTF-8") |>
-        jsonlite::fromJSON(flatten = TRUE)
-
-      # if you've hit a rate limit, wait and resubmit
-      if(response$status_code == 429){
-
-        time_to_wait <- gsub('.*Please try again in\\s(.+)\\.\\sVisit.*', '\\1', emb$error$message)
-        cat(paste0('Exceeded Rate Limit. Waiting ', time_to_wait, '.\n\n'))
-
-        time_val <- as.numeric(gsub('[^0-9.]+', '', time_to_wait))
-        time_unit <- gsub('[^A-z]+', '', time_to_wait)
-
-        time_to_wait <- ceiling(time_val / ifelse(time_unit == 'ms', 1000, 1))
-
-        Sys.sleep(time_to_wait)
-
-      } else{
-        break
-      }
-    }
-
-    embeddings[index:end] <- emb$data$embedding
-
-    # increment the index
-    index <- index + chunk_size
-
+    httr2::request(base_url) |>
+      # headers
+      httr2::req_headers('Authorization' = paste("Bearer", openai_api_key)) |>
+      httr2::req_headers("Content-Type" = "application/json") |>
+      # body
+      httr2::req_body_json(list(model = model,
+                                input = chunk,
+                                dimensions = dimensions))
   }
 
+  reqs <- lapply(chunks, format_request)
+
+  # submit prompts in parallel (20 concurrent requests per host seems to be the optimum)
+  resps <- httr2::req_perform_parallel(reqs, pool = curl::new_pool(host_con = 20))
+
+  # parse the responses
+  parsed <- resps |>
+    lapply(httr2::resp_body_string) |>
+    lapply(jsonlite::fromJSON, flatten=TRUE)
+
+  # get the embeddings
+  embeddings <- sapply(parsed, function(x) x$data$embedding)
+
   # bind into a matrix
+  if(length(chunks) > 1) embeddings <- lapply(embeddings, function(x) do.call(rbind, x))
   embeddings <- do.call(rbind, embeddings)
+  rownames(embeddings) <- text
 
   return(embeddings)
+
+#
+#
+#
+#   # initialize empty list
+#   embeddings <- vector(mode='list', length=length(text))
+#   names(embeddings) <- text
+#
+#   # get the embeddings in chunks, because the OpenAI API
+#   # will only take so many tokens at a time
+#   chunk_size <- 1000
+#   index <- 1
+#
+#   repeat{
+#
+#     # if index is greater than the length of list, break the loop
+#     if(index > length(text)) break
+#
+#     # create the chunk
+#     end <- min(index + chunk_size - 1, length(text))
+#     chunk <- text[index:end]
+#
+#     # get the embeddings for that chunk
+#     # emb <- openai::create_embedding(model = model,
+#     #                                 input = chunk)
+#     base_url <- "https://api.openai.com/v1/embeddings"
+#     headers <- c(Authorization = paste("Bearer", openai_api_key),
+#                  `Content-Type` = "application/json")
+#     body <- list()
+#     body[["model"]] <- model
+#     body[["input"]] <- chunk
+#     body[["dimensions"]] <- dimensions
+#
+#     repeat{
+#       # make API request
+#       response <- httr::POST(url = base_url, httr::add_headers(.headers = headers),
+#                              body = body, encode = "json")
+#
+#       # parse the response and append it to the embeddings list
+#       emb <- response |>
+#         httr::content(as = "text", encoding = "UTF-8") |>
+#         jsonlite::fromJSON(flatten = TRUE)
+#
+#       # if you've hit a rate limit, wait and resubmit
+#       if(response$status_code == 429){
+#
+#         time_to_wait <- gsub('.*Please try again in\\s(.+)\\.\\sVisit.*', '\\1', emb$error$message)
+#         cat(paste0('Exceeded Rate Limit. Waiting ', time_to_wait, '.\n\n'))
+#
+#         time_val <- as.numeric(gsub('[^0-9.]+', '', time_to_wait))
+#         time_unit <- gsub('[^A-z]+', '', time_to_wait)
+#
+#         time_to_wait <- ceiling(time_val / ifelse(time_unit == 'ms', 1000, 1))
+#
+#         Sys.sleep(time_to_wait)
+#
+#       } else{
+#         break
+#       }
+#     }
+#
+#     embeddings[index:end] <- emb$data$embedding
+#
+#     # increment the index
+#     index <- index + chunk_size
+#
+#   }
+#
+#   # bind into a matrix
+#   embeddings <- do.call(rbind, embeddings)
+#
+#   return(embeddings)
 
 }

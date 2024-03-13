@@ -36,7 +36,7 @@ check_match <- function(string1, string2,
 
     # format the prompt
     p <- paste0('Decide if the following two names refer to the same ', record_type,
-                '. Misspellings, alternative names, and acronyms may be acceptale matches. Think carefully. Respond \"Yes\" or \"No\".\n\n',
+                '. Think carefully. Respond \"Yes\" or \"No\".\n\n',
                 'Name A: ', string1, '\nName B: ', string2,
                 '\n\nResponse:')
 
