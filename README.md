@@ -39,7 +39,7 @@ function performs this record linkage with a single line of code.
     df
 
     #>                A                         B       sim        jw
-    #> 1      Joe Biden    Joseph Robinette Biden 0.7667135 0.7208273
+    #> 1      Joe Biden    Joseph Robinette Biden 0.7666187 0.7208273
     #> 2   Donald Trump        Donald John Trump  0.8389039 0.9333333
     #> 3   Barack Obama      Barack Hussein Obama 0.8456774 0.9200000
     #> 4 George W. Bush        George Walker Bush 0.8446634 0.9301587
@@ -121,7 +121,7 @@ completely unrelated and 1 is identical. If you include
 `blocking.variables` in the call to `fuzzylink()`, the function will
 only consider *within-block* name pairs (i.e. it will only compute
 similarity scores for records with an exact match on each blocking
-variable). I strongly recommend blocking wherever possible, as it
+variable). I **strongly recommend** blocking wherever possible, as it
 significantly reduces cost and speeds up computation.
 
 ``` r
@@ -129,22 +129,22 @@ sim <- get_similarity_matrix(embeddings, strings_A, strings_B)
 sim
 #>                Joseph Robinette Biden Donald John Trump  Barack Hussein Obama
 #> Joe Biden                   0.7666187          0.5532721            0.5309486
-#> Donald Trump                0.4316644          0.8389761            0.4478877
+#> Donald Trump                0.4317744          0.8389039            0.4480156
 #> Barack Obama                0.5172067          0.4756720            0.8456774
 #> George W. Bush              0.4942308          0.4878543            0.5681931
 #> Bill Clinton                0.4885142          0.5038318            0.5173374
 #>                George Walker Bush William Jefferson Clinton
-#> Joe Biden               0.5093871                 0.5426070
-#> Donald Trump            0.4805681                 0.4464012
-#> Barack Obama            0.4854325                 0.5131033
-#> George W. Bush          0.8446898                 0.6115912
-#> Bill Clinton            0.6233320                 0.8731945
+#> Joe Biden               0.5093797                 0.5426070
+#> Donald Trump            0.4807618                 0.4465016
+#> Barack Obama            0.4853952                 0.5131033
+#> George W. Bush          0.8446634                 0.6115912
+#> Bill Clinton            0.6233374                 0.8731945
 #>                George Herbert Walker Bush Biff Tannen Joe Riley
-#> Joe Biden                       0.4700685   0.3014880 0.3908584
-#> Donald Trump                    0.3943969   0.3438497 0.2331767
-#> Barack Obama                    0.4243461   0.2546198 0.3482104
-#> George W. Bush                  0.7335671   0.2458795 0.3608438
-#> Bill Clinton                    0.5951100   0.2212838 0.3196263
+#> Joe Biden                       0.4701206   0.3014880 0.3908584
+#> Donald Trump                    0.3945427   0.3438834 0.2332212
+#> Barack Obama                    0.4242546   0.2546198 0.3482104
+#> George W. Bush                  0.7335619   0.2458795 0.3608438
+#> Bill Clinton                    0.5951578   0.2212838 0.3196263
 ```
 
 ### Step 3: Create a Training Set
@@ -166,18 +166,18 @@ variables).
 train <- get_training_set(list(sim), record_type = 'person')
 train
 #> # A tibble: 40 × 5
-#>    A              B                            sim    jw match
-#>    <fct>          <fct>                      <dbl> <dbl> <chr>
-#>  1 Bill Clinton   Barack Hussein Obama       0.517 0.56  No   
-#>  2 George W. Bush Joe Riley                  0.361 0.410 No   
-#>  3 Donald Trump   Joe Riley                  0.233 0.417 No   
-#>  4 Joe Biden      Barack Hussein Obama       0.531 0.535 No   
-#>  5 Bill Clinton   Joe Riley                  0.320 0.361 No   
-#>  6 Joe Biden      George Herbert Walker Bush 0.470 0.366 No   
-#>  7 Joe Biden      Joe Riley                  0.391 0.867 No   
-#>  8 Bill Clinton   George Walker Bush         0.623 0.361 No   
-#>  9 Barack Obama   William Jefferson Clinton  0.513 0.414 No   
-#> 10 Joe Biden      George Walker Bush         0.509 0.389 No   
+#>    A              B                              sim    jw match
+#>    <fct>          <fct>                        <dbl> <dbl> <chr>
+#>  1 Barack Obama   "Joseph Robinette Biden"     0.517 0.419 No   
+#>  2 Bill Clinton   "Joe Riley"                  0.320 0.361 No   
+#>  3 George W. Bush "Joe Riley"                  0.361 0.410 No   
+#>  4 Barack Obama   "Biff Tannen"                0.255 0.457 No   
+#>  5 Barack Obama   "Joe Riley"                  0.348 0.398 No   
+#>  6 Barack Obama   "Donald John Trump "         0.476 0.472 No   
+#>  7 Bill Clinton   "George Herbert Walker Bush" 0.595 0.371 No   
+#>  8 Donald Trump   "Donald John Trump "         0.839 0.933 Yes  
+#>  9 Donald Trump   "William Jefferson Clinton"  0.447 0.372 No   
+#> 10 Donald Trump   "Barack Hussein Obama"       0.448 0.489 No   
 #> # ℹ 30 more rows
 ```
 
@@ -209,7 +209,7 @@ df$match_probability <- predict(model, df, type = 'response')
 head(df)
 #>                A                      B       sim        jw match_probability
 #> 1      Joe Biden Joseph Robinette Biden 0.7666187 0.7208273      1.000000e+00
-#> 2   Donald Trump Joseph Robinette Biden 0.4316644 0.4217172      2.220446e-16
+#> 2   Donald Trump Joseph Robinette Biden 0.4317744 0.4217172      2.220446e-16
 #> 3   Barack Obama Joseph Robinette Biden 0.5172067 0.4191919      2.220446e-16
 #> 4 George W. Bush Joseph Robinette Biden 0.4942308 0.5200216      2.220446e-16
 #> 5   Bill Clinton Joseph Robinette Biden 0.4885142 0.4797980      2.220446e-16
@@ -223,8 +223,8 @@ of records in `dfA` and `dfB`. We could stop there and just report the
 match probabilities. But for larger datasets we can get better results
 if we conduct a final validation step. For each name pair within a range
 of estimated match probabilities (by default 0.1 to 0.95), we will use
-the GPT-3.5 prompt above to check whether the name pair is a match.
-These labeled pairs are then added to the training dataset, the logistic
+the GPT-4 prompt above to check whether the name pair is a match. These
+labeled pairs are then added to the training dataset, the logistic
 regression model is refined, and we repeat this process until there are
 no matches left to validate. At that point, every record in `dfA` is
 either linked to a record in `dfB` or there are no candidate matches in
@@ -293,9 +293,9 @@ matches <- df |>
 matches
 #>                A                         B       sim        jw
 #> 1      Joe Biden    Joseph Robinette Biden 0.7666187 0.7208273
-#> 2   Donald Trump        Donald John Trump  0.8389761 0.9333333
+#> 2   Donald Trump        Donald John Trump  0.8389039 0.9333333
 #> 3   Barack Obama      Barack Hussein Obama 0.8456774 0.9200000
-#> 4 George W. Bush        George Walker Bush 0.8446898 0.9301587
+#> 4 George W. Bush        George Walker Bush 0.8446634 0.9301587
 #> 5   Bill Clinton William Jefferson Clinton 0.8731945 0.5788889
 #>   match_probability match age      hobby
 #> 1                 1   Yes  81   Football

@@ -126,7 +126,7 @@ head(embeddings['Bill Clinton',])
 
 ### Step 2: Similarity Scores
 
-Next, we compute the *cosine similarity* between each name pair. This is our measure of how closely related two pieces of text are, where 0 is completely unrelated and 1 is identical. If you include `blocking.variables` in the call to `fuzzylink()`, the function will only consider *within-block* name pairs (i.e. it will only compute similarity scores for records with an exact match on each blocking variable). I strongly recommend blocking wherever possible, as it significantly reduces cost and speeds up computation.
+Next, we compute the *cosine similarity* between each name pair. This is our measure of how closely related two pieces of text are, where 0 is completely unrelated and 1 is identical. If you include `blocking.variables` in the call to `fuzzylink()`, the function will only consider *within-block* name pairs (i.e. it will only compute similarity scores for records with an exact match on each blocking variable). I **strongly recommend** blocking wherever possible, as it significantly reduces cost and speeds up computation.
 
 ```{r}
 sim <- get_similarity_matrix(embeddings, strings_A, strings_B)
@@ -178,7 +178,7 @@ head(df)
 
 ### Step 5: Validate Uncertain Matches
 
-We now have a dataset with estimated match probabilities for each pair of records in `dfA` and `dfB`. We could stop there and just report the match probabilities. But for larger datasets we can get better results if we conduct a final validation step. For each name pair within a range of estimated match probabilities (by default 0.1 to 0.95), we will use the GPT-3.5 prompt above to check whether the name pair is a match. These labeled pairs are then added to the training dataset, the logistic regression model is refined, and we repeat this process until there are no matches left to validate. At that point, every record in `dfA` is either linked to a record in `dfB` or there are no candidate matches in `dfB` with an estimated probability higher than the threshold.
+We now have a dataset with estimated match probabilities for each pair of records in `dfA` and `dfB`. We could stop there and just report the match probabilities. But for larger datasets we can get better results if we conduct a final validation step. For each name pair within a range of estimated match probabilities (by default 0.1 to 0.95), we will use the GPT-4 prompt above to check whether the name pair is a match. These labeled pairs are then added to the training dataset, the logistic regression model is refined, and we repeat this process until there are no matches left to validate. At that point, every record in `dfA` is either linked to a record in `dfB` or there are no candidate matches in `dfB` with an estimated probability higher than the threshold.
 
 Note that, by default, the `fuzzylink()` function will validate at most 100,000 name pairs during this step. This setting reduces both cost and runtime (see "A Note On Cost" below), but users who wish to validate more name pairs within larger datasets can increase the cap using the `max_validations` argument.
 
