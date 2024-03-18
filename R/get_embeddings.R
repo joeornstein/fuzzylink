@@ -29,7 +29,7 @@ get_embeddings <- function(text,
   # embeddings endpoint will only take so many tokens at a time
 
   # max characters per chunk is approximately max tokens times 4
-  max_characters <- 7000 * 4 # 8192 is max tokens, so a little buffer
+  max_characters <- 7500 * 4 # 8192 is max tokens, so a little buffer
   # Calculate cumulative sum of character lengths
   cumulative_length <- cumsum(nchar(text))
   # Find the indices where to split
