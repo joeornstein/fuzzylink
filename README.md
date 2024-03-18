@@ -12,19 +12,22 @@ example, you have the following two datasets:
 
 ``` r
 dfA
-#>                 name age
-#> 1    Timothy B. Ryan  28
-#> 2   James J. Pointer  40
-#> 3 Jennifer C. Reilly  32
+#>             name age
+#> 1      Joe Biden  81
+#> 2   Donald Trump  77
+#> 3   Barack Obama  62
+#> 4 George W. Bush  77
+#> 5   Bill Clinton  77
 dfB
-#>                name        hobby
-#> 1          Tim Ryan  Woodworking
-#> 2     Jimmy Pointer       Guitar
-#> 3   Jessica Pointer      Camping
-#> 4          Tom Ryan Making Pasta
-#> 5       Jenny Romer  Salsa Dance
-#> 6    Jeremy Creilly    Gardening
-#> 7 Jennifer R. Riley       Acting
+#>                         name      hobby
+#> 1     Joseph Robinette Biden   Football
+#> 2         Donald John Trump        Golf
+#> 3       Barack Hussein Obama Basketball
+#> 4         George Walker Bush    Reading
+#> 5  William Jefferson Clinton  Saxophone
+#> 6 George Herbert Walker Bush  Skydiving
+#> 7                Biff Tannen   Bullying
+#> 8                  Joe Riley    Jogging
 ```
 
 We would like a procedure that correctly identifies which records in
@@ -35,17 +38,21 @@ function performs this record linkage with a single line of code.
     df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person')
     df
 
-    #>                    A             B       sim        jw match_probability
-    #> 1    Timothy B. Ryan      Tim Ryan 0.7159697 0.7102778                 1
-    #> 2   James J. Pointer Jimmy Pointer 0.7865519 0.8182692                 1
-    #> 3 Jennifer C. Reilly          <NA>        NA        NA                NA
-    #>   validated age       hobby
-    #> 1       Yes  28 Woodworking
-    #> 2       Yes  40      Guitar
-    #> 3      <NA>  32        <NA>
+    #>                A                         B       sim        jw
+    #> 1      Joe Biden    Joseph Robinette Biden 0.7667135 0.7208273
+    #> 2   Donald Trump        Donald John Trump  0.8389039 0.9333333
+    #> 3   Barack Obama      Barack Hussein Obama 0.8456774 0.9200000
+    #> 4 George W. Bush        George Walker Bush 0.8446634 0.9301587
+    #> 5   Bill Clinton William Jefferson Clinton 0.8731945 0.5788889
+    #>   match_probability validated age      hobby
+    #> 1                 1       Yes  81   Football
+    #> 2                 1       Yes  77       Golf
+    #> 3                 1       Yes  62 Basketball
+    #> 4                 1       Yes  77    Reading
+    #> 5                 1       Yes  77  Saxophone
 
-The procedure works by using *pretrained text embeddings* from OpenAI’s
-GPT-3 to construct a measure of similarity for each pair of names. These
+The procedure works by using *pretrained text embeddings* from OpenAI to
+construct a measure of similarity for each pair of names. These
 similarity measures are then used as predictors in a statistical model
 to estimate the probability that two name pairs represent the same
 entity. In the guide below, I will walk step-by-step through what’s
@@ -79,7 +86,7 @@ Now you’re all set up!
 
 ## Example
 
-Let’s look at the example from the introduction, and walk through the
+Let’s look at the example from the introduction, walking through the
 steps that `fuzzylink()` takes to join the two dataframes.
 
 ### Step 1: Embedding
@@ -101,12 +108,9 @@ all_strings <- unique( c(strings_A, strings_B) )
 embeddings <- get_embeddings(all_strings)
 
 dim(embeddings)
-#> [1]  10 256
-rownames(embeddings)
-#>  [1] "Timothy B. Ryan"    "James J. Pointer"   "Jennifer C. Reilly"
-#>  [4] "Tim Ryan"           "Jimmy Pointer"      "Jessica Pointer"   
-#>  [7] "Tom Ryan"           "Jenny Romer"        "Jeremy Creilly"    
-#> [10] "Jennifer R. Riley"
+#> [1]  13 256
+head(embeddings['Bill Clinton',])
+#> [1]  0.08017267  0.07627309 -0.01617664 -0.07971001 -0.09848085 -0.04970309
 ```
 
 ### Step 2: Similarity Scores
@@ -117,20 +121,30 @@ completely unrelated and 1 is identical. If you include
 `blocking.variables` in the call to `fuzzylink()`, the function will
 only consider *within-block* name pairs (i.e. it will only compute
 similarity scores for records with an exact match on each blocking
-variable). I highly recommend blocking wherever possible, as it
+variable). I strongly recommend blocking wherever possible, as it
 significantly reduces cost and speeds up computation.
 
 ``` r
 sim <- get_similarity_matrix(embeddings, strings_A, strings_B)
 sim
-#>                     Tim Ryan Jimmy Pointer Jessica Pointer  Tom Ryan
-#> Timothy B. Ryan    0.7159697     0.3469817       0.3030329 0.6437172
-#> James J. Pointer   0.4271890     0.7865519       0.6706029 0.4177391
-#> Jennifer C. Reilly 0.4244224     0.2518819       0.4040852 0.3175173
-#>                    Jenny Romer Jeremy Creilly Jennifer R. Riley
-#> Timothy B. Ryan      0.3723864      0.4715908         0.6091323
-#> James J. Pointer     0.3486939      0.4728189         0.4957477
-#> Jennifer C. Reilly   0.4293938      0.4983237         0.7468081
+#>                Joseph Robinette Biden Donald John Trump  Barack Hussein Obama
+#> Joe Biden                   0.7666187          0.5532721            0.5309486
+#> Donald Trump                0.4316644          0.8389761            0.4478877
+#> Barack Obama                0.5172067          0.4756720            0.8456774
+#> George W. Bush              0.4942308          0.4878543            0.5681931
+#> Bill Clinton                0.4885142          0.5038318            0.5173374
+#>                George Walker Bush William Jefferson Clinton
+#> Joe Biden               0.5093871                 0.5426070
+#> Donald Trump            0.4805681                 0.4464012
+#> Barack Obama            0.4854325                 0.5131033
+#> George W. Bush          0.8446898                 0.6115912
+#> Bill Clinton            0.6233320                 0.8731945
+#>                George Herbert Walker Bush Biff Tannen Joe Riley
+#> Joe Biden                       0.4700685   0.3014880 0.3908584
+#> Donald Trump                    0.3943969   0.3438497 0.2331767
+#> Barack Obama                    0.4243461   0.2546198 0.3482104
+#> George W. Bush                  0.7335671   0.2458795 0.3608438
+#> Bill Clinton                    0.5951100   0.2212838 0.3196263
 ```
 
 ### Step 3: Create a Training Set
@@ -139,7 +153,7 @@ We would like to use those cosine similarity scores to predict whether
 two names refer to the same entity. In order to do that, we need to
 first create a labeled dataset to fit a statistical model. The
 `get_training_set()` function selects a sample of name pairs and labels
-them using the following prompt to GPT-3.5 (brackets denote input
+them using the following prompt to GPT-4 (brackets denote input
 variables).
 
     Decide if the following two names refer to the same {record_type}.
@@ -151,20 +165,20 @@ variables).
 ``` r
 train <- get_training_set(list(sim), record_type = 'person')
 train
-#> # A tibble: 21 × 5
-#>    A                  B                   sim    jw match
-#>    <fct>              <fct>             <dbl> <dbl> <chr>
-#>  1 Timothy B. Ryan    Tim Ryan          0.716 0.710 Yes  
-#>  2 James J. Pointer   Jimmy Pointer     0.787 0.818 Yes  
-#>  3 Timothy B. Ryan    Jennifer R. Riley 0.609 0.501 No   
-#>  4 Jennifer C. Reilly Tom Ryan          0.318 0.347 No   
-#>  5 Timothy B. Ryan    Jessica Pointer   0.303 0.428 No   
-#>  6 James J. Pointer   Jessica Pointer   0.671 0.778 No   
-#>  7 James J. Pointer   Jenny Romer       0.349 0.636 No   
-#>  8 Timothy B. Ryan    Jimmy Pointer     0.347 0.549 No   
-#>  9 Jennifer C. Reilly Jimmy Pointer     0.252 0.550 No   
-#> 10 Timothy B. Ryan    Jenny Romer       0.372 0.429 No   
-#> # ℹ 11 more rows
+#> # A tibble: 40 × 5
+#>    A              B                            sim    jw match
+#>    <fct>          <fct>                      <dbl> <dbl> <chr>
+#>  1 Bill Clinton   Barack Hussein Obama       0.517 0.56  No   
+#>  2 George W. Bush Joe Riley                  0.361 0.410 No   
+#>  3 Donald Trump   Joe Riley                  0.233 0.417 No   
+#>  4 Joe Biden      Barack Hussein Obama       0.531 0.535 No   
+#>  5 Bill Clinton   Joe Riley                  0.320 0.361 No   
+#>  6 Joe Biden      George Herbert Walker Bush 0.470 0.366 No   
+#>  7 Joe Biden      Joe Riley                  0.391 0.867 No   
+#>  8 Bill Clinton   George Walker Bush         0.623 0.361 No   
+#>  9 Barack Obama   William Jefferson Clinton  0.513 0.414 No   
+#> 10 Joe Biden      George Walker Bush         0.509 0.389 No   
+#> # ℹ 30 more rows
 ```
 
 ### Step 4: Fit Model
@@ -193,13 +207,13 @@ df <- sim |>
 df$match_probability <- predict(model, df, type = 'response')
 
 head(df)
-#>                    A             B       sim        jw match_probability
-#> 1    Timothy B. Ryan      Tim Ryan 0.7159697 0.7102778      1.000000e+00
-#> 2   James J. Pointer      Tim Ryan 0.4271890 0.4583333      2.220446e-16
-#> 3 Jennifer C. Reilly      Tim Ryan 0.4244224 0.4074074      2.220446e-16
-#> 4    Timothy B. Ryan Jimmy Pointer 0.3469817 0.5493284      2.220446e-16
-#> 5   James J. Pointer Jimmy Pointer 0.7865519 0.8182692      1.000000e+00
-#> 6 Jennifer C. Reilly Jimmy Pointer 0.2518819 0.5496337      2.220446e-16
+#>                A                      B       sim        jw match_probability
+#> 1      Joe Biden Joseph Robinette Biden 0.7666187 0.7208273      1.000000e+00
+#> 2   Donald Trump Joseph Robinette Biden 0.4316644 0.4217172      2.220446e-16
+#> 3   Barack Obama Joseph Robinette Biden 0.5172067 0.4191919      2.220446e-16
+#> 4 George W. Bush Joseph Robinette Biden 0.4942308 0.5200216      2.220446e-16
+#> 5   Bill Clinton Joseph Robinette Biden 0.4885142 0.4797980      2.220446e-16
+#> 6      Joe Biden     Donald John Trump  0.5532721 0.4444444      2.220446e-16
 ```
 
 ### Step 5: Validate Uncertain Matches
@@ -269,7 +283,7 @@ matches <- df |>
     # join with match labels from the training set
     left_join(train |> select(A, B, match),
               by = c('A', 'B')) |>
-    # only keep pairs that have been validated or have a match probability > 0.2
+    # only keep pairs that have been validated or have a match probability > 0.1
     filter((match_probability > 0.1 & is.na(match)) | match == 'Yes') |>
     right_join(dfA, by = c('A' = 'name'),
                relationship = 'many-to-many') |>
@@ -277,14 +291,18 @@ matches <- df |>
                      relationship = 'many-to-many')
 
 matches
-#>                    A             B       sim        jw match_probability match
-#> 1    Timothy B. Ryan      Tim Ryan 0.7159697 0.7102778                 1   Yes
-#> 2   James J. Pointer Jimmy Pointer 0.7865519 0.8182692                 1   Yes
-#> 3 Jennifer C. Reilly          <NA>        NA        NA                NA  <NA>
-#>   age       hobby
-#> 1  28 Woodworking
-#> 2  40      Guitar
-#> 3  32        <NA>
+#>                A                         B       sim        jw
+#> 1      Joe Biden    Joseph Robinette Biden 0.7666187 0.7208273
+#> 2   Donald Trump        Donald John Trump  0.8389761 0.9333333
+#> 3   Barack Obama      Barack Hussein Obama 0.8456774 0.9200000
+#> 4 George W. Bush        George Walker Bush 0.8446898 0.9301587
+#> 5   Bill Clinton William Jefferson Clinton 0.8731945 0.5788889
+#>   match_probability match age      hobby
+#> 1                 1   Yes  81   Football
+#> 2                 1   Yes  77       Golf
+#> 3                 1   Yes  62 Basketball
+#> 4                 1   Yes  77    Reading
+#> 5                 1   Yes  77  Saxophone
 ```
 
 ## A Note On Cost
@@ -297,45 +315,46 @@ for merging datasets of various sizes.
 
 | dfA       | dfB       | Approximate Cost (Default Settings) |
 |:----------|:----------|:------------------------------------|
-| 10        | 10        | \$0                                 |
-| 10        | 100       | \$0                                 |
-| 10        | 1,000     | \$0                                 |
-| 10        | 10,000    | \$0.01                              |
-| 10        | 100,000   | \$0.06                              |
-| 10        | 1,000,000 | \$0.59                              |
-| 100       | 10        | \$0.02                              |
-| 100       | 100       | \$0.02                              |
-| 100       | 1,000     | \$0.02                              |
-| 100       | 10,000    | \$0.03                              |
-| 100       | 100,000   | \$0.08                              |
-| 100       | 1,000,000 | \$0.61                              |
-| 1,000     | 10        | \$0.23                              |
-| 1,000     | 100       | \$0.23                              |
-| 1,000     | 1,000     | \$0.23                              |
-| 1,000     | 10,000    | \$0.23                              |
-| 1,000     | 100,000   | \$0.28                              |
-| 1,000     | 1,000,000 | \$0.81                              |
-| 10,000    | 10        | \$2.26                              |
-| 10,000    | 100       | \$2.26                              |
-| 10,000    | 1,000     | \$2.26                              |
-| 10,000    | 10,000    | \$2.26                              |
-| 10,000    | 100,000   | \$2.31                              |
-| 10,000    | 1,000,000 | \$2.84                              |
-| 100,000   | 10        | \$4.56                              |
-| 100,000   | 100       | \$4.56                              |
-| 100,000   | 1,000     | \$4.56                              |
-| 100,000   | 10,000    | \$4.56                              |
-| 100,000   | 100,000   | \$4.62                              |
-| 100,000   | 1,000,000 | \$5.14                              |
-| 1,000,000 | 10        | \$5.09                              |
-| 1,000,000 | 100       | \$5.09                              |
-| 1,000,000 | 1,000     | \$5.09                              |
-| 1,000,000 | 10,000    | \$5.09                              |
-| 1,000,000 | 100,000   | \$5.14                              |
-| 1,000,000 | 1,000,000 | \$5.67                              |
+| 10        | 10        | \$0.02                              |
+| 10        | 100       | \$0.02                              |
+| 10        | 1,000     | \$0.02                              |
+| 10        | 10,000    | \$0.02                              |
+| 10        | 100,000   | \$0.07                              |
+| 10        | 1,000,000 | \$0.6                               |
+| 100       | 10        | \$0.15                              |
+| 100       | 100       | \$0.15                              |
+| 100       | 1,000     | \$0.15                              |
+| 100       | 10,000    | \$0.16                              |
+| 100       | 100,000   | \$0.21                              |
+| 100       | 1,000,000 | \$0.74                              |
+| 1,000     | 10        | \$1.5                               |
+| 1,000     | 100       | \$1.5                               |
+| 1,000     | 1,000     | \$1.5                               |
+| 1,000     | 10,000    | \$1.51                              |
+| 1,000     | 100,000   | \$1.56                              |
+| 1,000     | 1,000,000 | \$2.09                              |
+| 10,000    | 10        | \$15.01                             |
+| 10,000    | 100       | \$15.01                             |
+| 10,000    | 1,000     | \$15.01                             |
+| 10,000    | 10,000    | \$15.01                             |
+| 10,000    | 100,000   | \$15.06                             |
+| 10,000    | 1,000,000 | \$15.59                             |
+| 100,000   | 10        | \$30.06                             |
+| 100,000   | 100       | \$30.06                             |
+| 100,000   | 1,000     | \$30.06                             |
+| 100,000   | 10,000    | \$30.06                             |
+| 100,000   | 100,000   | \$30.12                             |
+| 100,000   | 1,000,000 | \$30.64                             |
+| 1,000,000 | 10        | \$30.59                             |
+| 1,000,000 | 100       | \$30.59                             |
+| 1,000,000 | 1,000     | \$30.59                             |
+| 1,000,000 | 10,000    | \$30.59                             |
+| 1,000,000 | 100,000   | \$30.64                             |
+| 1,000,000 | 1,000,000 | \$31.17                             |
 
 Note that cost scales more quickly with the size of `dfA` than with
 `dfB`, because it is more costly to complete LLM prompts for validation
 than it is to retrieve embeddings. For particularly large datasets, one
-can reduce costs by blocking and/or reducing the maximum number of
-validations (`max_validations`).
+can reduce costs by using GPT-3.5 (`model = 'gpt-3.5-turbo'`), blocking
+(`blocking.variables`), or reducing the maximum number of validations
+(`max_validations`).
