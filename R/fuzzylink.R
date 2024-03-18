@@ -206,9 +206,9 @@ fuzzylink <- function(dfA, dfB,
         dplyr::group_by(A) |>
         dplyr::slice_max(match_probability, n = k) |>
         dplyr::ungroup() |>
-        dplyr::filter(is.na(match))# |>
+        dplyr::filter(is.na(match)) |>
         # validate in batches of 500
-        # dplyr::slice_max(match_probability, n = 500)
+        dplyr::slice_max(match_probability, n = 500)
 
     }
     return(mtv)
@@ -249,14 +249,15 @@ fuzzylink <- function(dfA, dfB,
       dplyr::bind_rows(matches_to_validate |>
                          dplyr::select(A,B,sim,jw,match))
 
-    # TODO: easier to just call 'break' here?
-    # if you've validated all pairs with match probability > p_lower, set validations_remaining = 0
-    # otherwise, decrement validations_remaining as normal, refine the model, and validate new batch of uncertain pairs
-    if(sum(matches_to_validate$match_probability >= p[1]) == 0){
-      validations_remaining <- 0
-    } else{
-      validations_remaining <- validations_remaining - nrow(matches_to_validate)
+    validations_remaining <- validations_remaining - nrow(matches_to_validate)
 
+    # if you've validated all pairs with match probability > p_lower, stop refining the model
+    if(sum(matches_to_validate$match_probability >= p[1]) == 0){
+      # check if the second-stage validation is complete. if yes, break the loop.
+      if(nrow(matches_to_validate) < 500){
+        break
+      }
+    } else{
       # refine the model (train only on the properly formatted labels)
       fit <- stats::glm(as.numeric(match == 'Yes') ~ sim + jw,
                         data = train |> dplyr::filter(match %in% c('Yes', 'No')),
@@ -264,9 +265,9 @@ fuzzylink <- function(dfA, dfB,
 
       df$match_probability <- stats::predict.glm(fit, df, type = 'response')
       # using the equation instead of stats::predict.glm() is *marginally* quicker?
-
-      matches_to_validate <- get_matches_to_validate(df)
     }
+    # get matches to validate for the next loop
+    matches_to_validate <- get_matches_to_validate(df)
 
   }
 
