@@ -206,9 +206,9 @@ fuzzylink <- function(dfA, dfB,
         dplyr::group_by(A) |>
         dplyr::slice_max(match_probability, n = k) |>
         dplyr::ungroup() |>
-        dplyr::filter(is.na(match)) |>
+        dplyr::filter(is.na(match))# |>
         # validate in batches of 500
-        dplyr::slice_max(match_probability, n = 500)
+        # dplyr::slice_max(match_probability, n = 500)
 
     }
     return(mtv)
