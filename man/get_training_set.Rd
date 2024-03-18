@@ -11,7 +11,8 @@ get_training_set(
   n = 500,
   record_type = "entity",
   model = "gpt-3.5-turbo-instruct",
-  openai_api_key = Sys.getenv("OPENAI_API_KEY")
+  openai_api_key = Sys.getenv("OPENAI_API_KEY"),
+  parallel = TRUE
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ get_training_set(
 \item{model}{Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'}
 
 \item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
+
+\item{parallel}{TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.}
 }
 \value{
 A dataset with string pairs \code{A} and \code{B}, along with a \code{match} column indicating whether they match.

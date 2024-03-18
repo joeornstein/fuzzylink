@@ -16,7 +16,8 @@ fuzzylink(
   embedding_dimensions = 256,
   max_validations = 1e+05,
   p = c(0.1, 0.95),
-  k = 20
+  k = 20,
+  parallel = TRUE
 )
 }
 \arguments{
@@ -41,6 +42,8 @@ fuzzylink(
 \item{p}{The range of estimated match probabilities within which \code{fuzzylink()} will validate record pairs using an LLM prompt. Defaults to c(0.1, 0.95)}
 
 \item{k}{Number of nearest neighbors to validate for records in \code{dfA} with no identified matches. Higher values may improve recall at expense of precision. Defaults to 20}
+
+\item{parallel}{TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.}
 }
 \value{
 A dataframe with all rows of \code{dfA} joined with any matches from \code{dfB}

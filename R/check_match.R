@@ -5,6 +5,7 @@
 #' @param model Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'
 #' @param record_type A character describing what type of entity `string1` and `string2` represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
+#' @param parallel TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.
 #'
 #' @return A vector the same length as `string1` and `string2`. "Yes" if the pair of strings match, "No" otherwise.
 #' @export
@@ -17,7 +18,8 @@
 check_match <- function(string1, string2,
                         model = 'gpt-3.5-turbo-instruct',
                         record_type = 'entity',
-                        openai_api_key = Sys.getenv('OPENAI_API_KEY')){
+                        openai_api_key = Sys.getenv('OPENAI_API_KEY'),
+                        parallel = TRUE){
 
   if(length(string1) != length(string2)){
     stop('Inputs must have the same number of elements.')
@@ -149,8 +151,12 @@ check_match <- function(string1, string2,
     reqs <- Map(f = format_request, prompt = prompt_list)
 
     # submit prompts in parallel (20 concurrent requests per host seems to be the optimum)
-    resps <- httr2::req_perform_parallel(reqs,
-                                         pool = curl::new_pool(host_con = 20))
+    if(parallel){
+      resps <- httr2::req_perform_parallel(reqs,
+                                           pool = curl::new_pool(host_con = 20))
+    } else{
+      resps <- httr2::req_perform_sequential(reqs)
+    }
 
     # parse the responses
     parsed <- resps |>

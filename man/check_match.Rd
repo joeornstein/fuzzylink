@@ -9,7 +9,8 @@ check_match(
   string2,
   model = "gpt-3.5-turbo-instruct",
   record_type = "entity",
-  openai_api_key = Sys.getenv("OPENAI_API_KEY")
+  openai_api_key = Sys.getenv("OPENAI_API_KEY"),
+  parallel = TRUE
 )
 }
 \arguments{
@@ -22,6 +23,8 @@ check_match(
 \item{record_type}{A character describing what type of entity \code{string1} and \code{string2} represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").}
 
 \item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
+
+\item{parallel}{TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.}
 }
 \value{
 A vector the same length as \code{string1} and \code{string2}. "Yes" if the pair of strings match, "No" otherwise.

@@ -11,6 +11,7 @@
 #' @param max_validations The maximum number of LLM prompts to submit during the validation stage. Defaults to 100,000
 #' @param p The range of estimated match probabilities within which `fuzzylink()` will validate record pairs using an LLM prompt. Defaults to c(0.1, 0.95)
 #' @param k Number of nearest neighbors to validate for records in `dfA` with no identified matches. Higher values may improve recall at expense of precision. Defaults to 20
+#' @param parallel TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.
 #'
 #' @return A dataframe with all rows of `dfA` joined with any matches from `dfB`
 #' @export
@@ -29,7 +30,8 @@ fuzzylink <- function(dfA, dfB,
                       embedding_dimensions = 256,
                       max_validations = 1e5,
                       p = c(0.1, 0.95),
-                      k = 20){
+                      k = 20,
+                      parallel = TRUE){
 
 
   # Check for errors in inputs
@@ -68,7 +70,8 @@ fuzzylink <- function(dfA, dfB,
   }
   embeddings <- get_embeddings(all_strings,
                                dimensions = embedding_dimensions,
-                               openai_api_key = openai_api_key)
+                               openai_api_key = openai_api_key,
+                               parallel = parallel)
 
   ## Step 2: Get similarity matrix within each block ------------
   if(verbose){
@@ -127,7 +130,8 @@ fuzzylink <- function(dfA, dfB,
         ')\n\n', sep = '')
   }
   train <- get_training_set(sim, record_type = record_type,
-                            model = model, openai_api_key = openai_api_key)
+                            model = model, openai_api_key = openai_api_key,
+                            parallel = parallel)
 
   ## Step 4: Fit model -------------------
   if(verbose){
@@ -237,7 +241,8 @@ fuzzylink <- function(dfA, dfB,
                                              matches_to_validate$B,
                                              model = model,
                                              record_type = record_type,
-                                             openai_api_key = openai_api_key)
+                                             openai_api_key = openai_api_key,
+                                             parallel = parallel)
 
     # append new labeled pairs to the train set
     train <- train |>

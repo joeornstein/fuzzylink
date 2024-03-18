@@ -8,6 +8,7 @@
 #' @param model Which variant of the GPT-3 embedding model to use. Defaults to 'text-embedding-3-large'.
 #' @param dimensions The dimension of the embedding vectors to return. Defaults to 256.
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
+#' @param parallel TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.
 #'
 #' @return A matrix of embedding vectors (one per row).
 #' @export
@@ -19,7 +20,8 @@
 get_embeddings <- function(text,
                            model = 'text-embedding-3-large',
                            dimensions = 256,
-                           openai_api_key = Sys.getenv("OPENAI_API_KEY")){
+                           openai_api_key = Sys.getenv("OPENAI_API_KEY"),
+                           parallel = TRUE){
 
   if(openai_api_key == ''){
     stop("No API key detected in system environment. You can enter it manually using the 'openai_api_key' argument.")
@@ -54,7 +56,12 @@ get_embeddings <- function(text,
   reqs <- lapply(chunks, format_request)
 
   # submit prompts in parallel (20 concurrent requests per host seems to be the optimum)
-  resps <- httr2::req_perform_parallel(reqs, pool = curl::new_pool(host_con = 20))
+  if(parallel){
+    resps <- httr2::req_perform_parallel(reqs, pool = curl::new_pool(host_con = 20))
+  } else{
+    resps <- httr2::req_perform_sequential(reqs)
+  }
+
 
   # parse the responses
   parsed <- resps |>
