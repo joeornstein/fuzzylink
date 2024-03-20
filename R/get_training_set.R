@@ -51,18 +51,6 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 10, n = 500,
     # keep a random sample of at most n
     dplyr::slice_sample(n = n)
 
-  # if using stratified sampling
-  # train <- sim |>
-  #   # split embedding distance into equal-sized bins
-  #   dplyr::mutate(bin = cut(sim, breaks = num_bins)) |>
-  #   # draw randomly from each bin to create the training set
-  #   dplyr::group_by(bin) |>
-  #   dplyr::slice_sample(n = samples_per_bin) |>
-  #   dplyr::ungroup() |>
-  #   dplyr::select(-bin) |>
-  #   # shuffle rows
-  #   dplyr::slice_sample(prop = 1)
-
   # add lexical string distance measures
   train$jw <- stringdist::stringsim(train$A, train$B, method = 'jw', p = 0.1)
 
@@ -83,10 +71,6 @@ get_training_set <- function(sim, num_bins = 50, samples_per_bin = 10, n = 500,
   if(manual_few_shot){
     train <- dplyr::bind_rows(few_shot_examples, train)
   }
-
-  # filter out improperly formatted labels
-  # train <- train |>
-  #   dplyr::filter(match %in% c('Yes', 'No'))
 
   return(train)
 

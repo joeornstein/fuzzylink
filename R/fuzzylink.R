@@ -214,7 +214,6 @@ fuzzylink <- function(dfA, dfB,
     return(mtv)
   }
 
-
   matches_to_validate <- get_matches_to_validate(df)
 
     # dplyr::filter(match_probability > 0.2,
@@ -292,21 +291,6 @@ fuzzylink <- function(dfA, dfB,
                      by = c('B' = by, blocking.variables),
                      relationship = 'many-to-many') |>
     dplyr::rename(validated = match)
-
-  # } else{ # otherwise, no need to include blocking variables in the joins
-  #   matches <- df |>
-  #     # join with match labels from the training set
-  #     dplyr::left_join(train |>
-  #                        dplyr::select(A, B, match),
-  #                      by = c('A', 'B')) |>
-  #     # only keep pairs that have been validated or have a match probability > 0.2
-  #     dplyr::filter((match_probability > 0.2 & is.na(match)) | match == 'Yes') |>
-  #     dplyr::right_join(dfA, by = c('A' = by),
-  #                       relationship = 'many-to-many') |>
-  #     # dplyr::select(-dplyr::all_of(blocking.variables)) |>
-  #     dplyr::left_join(dfB, by = c('B' = by),
-  #                      relationship = 'many-to-many')
-  # }
 
   if(is.null(blocking.variables)) matches <- dplyr::select(matches, -block)
 
