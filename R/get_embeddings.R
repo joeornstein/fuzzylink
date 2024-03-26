@@ -21,7 +21,7 @@ get_embeddings <- function(text,
                            model = 'text-embedding-3-large',
                            dimensions = 256,
                            openai_api_key = Sys.getenv("OPENAI_API_KEY"),
-                           parallel = TRUE){
+                           parallel = FALSE){
 
   if(openai_api_key == ''){
     stop("No API key detected in system environment. You can enter it manually using the 'openai_api_key' argument.")
@@ -31,7 +31,7 @@ get_embeddings <- function(text,
   # embeddings endpoint will only take so many tokens at a time
 
   # max characters per chunk is approximately max tokens times 4
-  max_characters <- 7500 * 4 # 8192 is max tokens, so a little buffer
+  max_characters <- 7000 * 4 # 8192 is max tokens, so include a little buffer
   # Calculate cumulative sum of character lengths
   cumulative_length <- cumsum(nchar(text))
   # Find the indices where to split
@@ -39,7 +39,7 @@ get_embeddings <- function(text,
   # Split the vector based on the calculated indices
   chunks <- split(text, split_indices)
 
-  # format a list of API requests
+  # format an API request
   format_request <- function(chunk,
                              base_url = "https://api.openai.com/v1/embeddings"){
 
