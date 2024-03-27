@@ -19,7 +19,7 @@ check_match <- function(string1, string2,
                         model = 'gpt-3.5-turbo-instruct',
                         record_type = 'entity',
                         openai_api_key = Sys.getenv('OPENAI_API_KEY'),
-                        parallel = FALSE){
+                        parallel = TRUE){
 
   if(length(string1) != length(string2)){
     stop('Inputs must have the same number of elements.')

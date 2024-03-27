@@ -9,7 +9,7 @@ get_embeddings(
   model = "text-embedding-3-large",
   dimensions = 256,
   openai_api_key = Sys.getenv("OPENAI_API_KEY"),
-  parallel = FALSE
+  parallel = TRUE
 )
 }
 \arguments{

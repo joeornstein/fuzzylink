@@ -31,7 +31,7 @@ fuzzylink <- function(dfA, dfB,
                       max_validations = 1e5,
                       p = c(0.1, 0.95),
                       k = 20,
-                      parallel = FALSE){
+                      parallel = TRUE){
 
 
   # Check for errors in inputs

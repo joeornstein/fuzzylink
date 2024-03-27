@@ -19,7 +19,7 @@
 get_training_set <- function(sim, num_bins = 50, samples_per_bin = 10, n = 500,
                              record_type = 'entity', model = 'gpt-3.5-turbo-instruct',
                              openai_api_key = Sys.getenv('OPENAI_API_KEY'),
-                             parallel = FALSE){
+                             parallel = TRUE){
 
   if(openai_api_key == ''){
     stop("No API key detected in system environment. You can enter it manually using the 'openai_api_key' argument.")

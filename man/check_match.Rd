@@ -10,7 +10,7 @@ check_match(
   model = "gpt-3.5-turbo-instruct",
   record_type = "entity",
   openai_api_key = Sys.getenv("OPENAI_API_KEY"),
-  parallel = FALSE
+  parallel = TRUE
 )
 }
 \arguments{

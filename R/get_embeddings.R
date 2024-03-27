@@ -88,8 +88,8 @@ get_embeddings <- function(text,
     stop('Error: HTTP 400 Bad Request. Likely due to a problem batching parallel API requests. Please contact package author with a reprex.')
   }
 
-  time_to_wait <- httr2::resps_failures(resps)[[1]] |>
-    httr2::resp_header('')
+  # time_to_wait <- httr2::resps_failures(resps)[[1]] |>
+  #   httr2::resp_header('')
 
 
   # parse the responses
