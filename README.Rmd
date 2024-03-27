@@ -108,6 +108,7 @@ Here is some code to reproduce the example above and make sure that everything i
 
 ```{r, eval = FALSE}
 library(tidyverse)
+library(fuzzylink)
 
 dfA <- tribble(~name, ~age,
                'Joe Biden', 81,
@@ -127,7 +128,11 @@ dfB <- tribble(~name, ~hobby,
                'Joe Riley', 'Jogging')
 
 df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person')
+
+df
 ```
+
+If the `df` object links all the presidents to their correct name in `dfB`, everything is running smoothly! (Note that you may see a warning from `glm.fit`. This is normal. The `stats` package gets suspicious whenever the model fit is *too* perfect.)
 
 ### Arguments
 
