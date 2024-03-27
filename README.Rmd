@@ -58,8 +58,6 @@ dfB <- tribble(~name, ~hobby,
                'Biff Tannen', 'Bullying',
                'Joe Riley', 'Jogging') |> 
   as.data.frame()
-
-
 ```
 
 ```{r}
@@ -92,7 +90,7 @@ You can install the development version of `fuzzylink` from [GitHub](https://git
 devtools::install_github("joeornstein/fuzzylink")
 ```
 
-You will also need an account with OpenAI. You can sign up [here](https://beta.openai.com/signup), after which you will need to create an API key [here](https://platform.openai.com/account/api-keys). For best performance, you may also want to provide credit card information (this significantly boosts your API rate limit, even if you're not spending money). 
+You will also need an account with OpenAI. You can sign up [here](https://beta.openai.com/signup), after which you will need to create an API key [here](https://platform.openai.com/account/api-keys). For best performance, I **strongly recommend** purchasing at least $5 in API credits, which will significantly increase your API rate limits.
 
 Once your account is created, copy-paste your API key into the following line of R code.
 
@@ -106,7 +104,84 @@ Now you're all set up!
 
 ## Example
 
-Let's look at the example from the introduction, walking through the steps that `fuzzylink()` takes to join the two dataframes.
+Here is some code to reproduce the example above and make sure that everything is working on your computer.
+
+```{r, eval = FALSE}
+library(tidyverse)
+
+dfA <- tribble(~name, ~age,
+               'Joe Biden', 81,
+               'Donald Trump', 77,
+               'Barack Obama', 62,
+               'George W. Bush', 77,
+               'Bill Clinton', 77)
+
+dfB <- tribble(~name, ~hobby,
+               'Joseph Robinette Biden', 'Football',
+               'Donald John Trump ', 'Golf',
+               'Barack Hussein Obama', 'Basketball',
+               'George Walker Bush', 'Reading',
+               'William Jefferson Clinton', 'Saxophone',
+               'George Herbert Walker Bush', 'Skydiving',
+               'Biff Tannen', 'Bullying',
+               'Joe Riley', 'Jogging')
+
+df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person')
+```
+
+### Arguments
+
+- The `by` argument specifies the name of the fuzzy matching variable that you want to use to link records. The dataframes `dfA` and `dfB` must both have a column with this name. 
+
+- The `record_type` argument should be a singular noun describing the type of entity the `by` variable represents (e.g. "person", "organization", "interest group", "city"). It is used as part of a language model prompt when training the statistical model (see Step 3 below).
+
+- The `model` argument specifies which OpenAI language model to prompt. It defaults to 'gpt-3.5-turbo-instruct', but for more difficult problems you can try 'gpt-4' or 'gpt-4-turbo-preview'. Note that this will typically increase accuracy at the expsense of cost and runtime (see "A Note on Cost" below).
+
+- Several parameters---including `p`, `k`, `embedding_dimensions`, `max_validations`, and `parallel`---are for advanced users who wish to customize the behavior of the algorithm. See the package documentation for more details.
+
+- If there are any variables that must match *exactly* in order to link two records, you will want to include them in the `blocking.variables` argument. As a practical matter, I **strongly recommend** including blocking variables wherever possible, as they reduce the time and cost necessary to compute pairwise distance metrics. Suppose, for example, that our two illustrative datasets have a column called `state`, and we want to instruct `fuzzylink()` to only link people who live within the same state.
+
+```{r}
+dfA <- tribble(~name, ~state, ~age,
+               'Joe Biden', 'Delaware', 81,
+               'Donald Trump', 'New York', 77,
+               'Barack Obama', 'Illinois', 62,
+               'George W. Bush', 'Texas', 77,
+               'Bill Clinton', 'Arkansas', 77)
+
+dfB <- tribble(~name, ~state, ~hobby,
+               'Joseph Robinette Biden', 'Delaware', 'Football',
+               'Donald John Trump ', 'Florida', 'Golf',
+               'Barack Hussein Obama', 'Illinois', 'Basketball',
+               'George Walker Bush', 'Texas', 'Reading',
+               'William Jefferson Clinton', 'Arkansas', 'Saxophone',
+               'George Herbert Walker Bush', 'Texas', 'Skydiving',
+               'Biff Tannen', 'California', 'Bullying',
+               'Joe Riley', 'South Carolina', 'Jogging')
+```
+
+```{r, eval=FALSE}
+df <- fuzzylink(dfA, dfB, 
+                by = 'name',
+                blocking.variables = 'state',
+                record_type = 'person')
+```
+
+```{r, echo=FALSE}
+df <- fuzzylink(dfA, dfB, 
+                by = 'name',
+                blocking.variables = 'state',
+                record_type = 'person',
+                verbose = FALSE)
+```
+
+Note that because Donald Trump is listed under two different states---New York in `dfA` and Florida in `dfB`--the `fuzzylink()` function no longer returns a match for this record; all blocking variables must match exactly before the function will link two records together. You can specify as many blocking variables as needed by inputting their column names as a vector.
+
+The function returns a few additional columns along with the merged dataframe. The column `match_probability` reports the model's estimated probability that the pair of records refer to the same entity. This column should be used to aid in validation and can be used for computing weighted averages if a record in `dfA` is matched to multiple records in `dFB`. The columns `sim` and `jw` are string distance measures that the model uses to predict whether two records are a match. And if you included `blocking.variables` in the function call, there will be a column called `block` with an ID variable denoting which block the records belong to.
+
+## Under The Hood
+
+If you'd like to know more details about about how `fuzzylink()` works, you can read the accompanying [research paper](https://joeornstein.github.io/publications/fuzzylink.pdf). In this section, we'll take a look under the hood at the previous example, walking through each of the steps that `fuzzylink()` takes to join the two dataframes.
 
 ### Step 1: Embedding
 
@@ -138,11 +213,11 @@ sim
 We would like to use those cosine similarity scores to predict whether two names refer to the same entity. In order to do that, we need to first create a labeled dataset to fit a statistical model. The `get_training_set()` function selects a sample of name pairs and labels them using the following prompt to GPT-4 (brackets denote input variables).
 
 ```
-Decide if the following two names refer to the same {record_type}.
+Decide if the following two names refer to the same {record_type}. Misspellings, alternative names, and acronyms may be acceptable matches. Think carefully. Respond "Yes" or "No".'
 
 Name A: {A}
 Name B: {B}
-Same {record_type} (Yes or No):
+Response:
 ```
 
 ```{r}
