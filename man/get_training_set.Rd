@@ -12,7 +12,7 @@ get_training_set(
   record_type = "entity",
   model = "gpt-3.5-turbo-instruct",
   openai_api_key = Sys.getenv("OPENAI_API_KEY"),
-  parallel = TRUE
+  parallel = FALSE
 )
 }
 \arguments{

@@ -17,7 +17,7 @@ fuzzylink(
   max_validations = 1e+05,
   p = c(0.1, 0.95),
   k = 20,
-  parallel = TRUE
+  parallel = FALSE
 )
 }
 \arguments{
