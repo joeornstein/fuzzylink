@@ -140,7 +140,7 @@ If the `df` object links all the presidents to their correct name in `dfB`, ever
 
 - The `record_type` argument should be a singular noun describing the type of entity the `by` variable represents (e.g. "person", "organization", "interest group", "city"). It is used as part of a language model prompt when training the statistical model (see Step 3 below).
 
-- The `model` argument specifies which OpenAI language model to prompt. It defaults to 'gpt-3.5-turbo-instruct', but for more difficult problems you can try 'gpt-4' or 'gpt-4-turbo-preview'. Note that this will typically increase accuracy at the expsense of cost and runtime (see "A Note on Cost" below).
+- The `model` argument specifies which OpenAI language model to prompt. It defaults to 'gpt-3.5-turbo-instruct', but for more difficult problems you can try 'gpt-4' or 'gpt-4-turbo-preview'. Note that this will typically increase accuracy at the expense of cost and runtime (see "A Note on Cost" below).
 
 - Several parameters---including `p`, `k`, `embedding_dimensions`, `max_validations`, and `parallel`---are for advanced users who wish to customize the behavior of the algorithm. See the package documentation for more details.
 
@@ -170,6 +170,7 @@ df <- fuzzylink(dfA, dfB,
                 by = 'name',
                 blocking.variables = 'state',
                 record_type = 'person')
+df
 ```
 
 ```{r, echo=FALSE}
@@ -178,6 +179,7 @@ df <- fuzzylink(dfA, dfB,
                 blocking.variables = 'state',
                 record_type = 'person',
                 verbose = FALSE)
+df
 ```
 
 Note that because Donald Trump is listed under two different states---New York in `dfA` and Florida in `dfB`--the `fuzzylink()` function no longer returns a match for this record; all blocking variables must match exactly before the function will link two records together. You can specify as many blocking variables as needed by inputting their column names as a vector.
