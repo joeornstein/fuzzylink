@@ -129,8 +129,8 @@ check_match <- function(string1, string2,
     }
 
     # function to return a formatted API request
-    format_request <- function(base_url = "https://api.openai.com/v1/chat/completions",
-                               prompt){
+    format_request <- function(prompt,
+                               base_url = "https://api.openai.com/v1/chat/completions"){
 
       httr2::request(base_url) |>
         # headers
@@ -143,12 +143,20 @@ check_match <- function(string1, string2,
                                   max_tokens = 1))
     }
 
+    # get the user's rate limits
+    req <- format_request(format_chat_prompt(1))
+    resp <- httr2::req_perform(req)
+    # requests per minute
+    rpm <- as.numeric(httr2::resp_header(resp, 'x-ratelimit-limit-requests'))
+    # tokens per minute
+    tpm <- as.numeric(httr2::resp_header(resp, 'x-ratelimit-limit-tokens'))
 
     # format prompts
     prompt_list <- lapply(1:length(string1), format_chat_prompt)
 
     # format a list of requests
-    reqs <- Map(f = format_request, prompt = prompt_list)
+    reqs <- lapply(prompt_list, format_request)
+    #Map(f = format_request, prompt = prompt_list)
 
     # submit prompts in parallel (20 concurrent requests per host seems to be the optimum)
     if(parallel){

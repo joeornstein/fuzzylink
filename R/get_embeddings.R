@@ -21,25 +21,14 @@ get_embeddings <- function(text,
                            model = 'text-embedding-3-large',
                            dimensions = 256,
                            openai_api_key = Sys.getenv("OPENAI_API_KEY"),
-                           parallel = FALSE){
+                           parallel = TRUE){
+
 
   if(openai_api_key == ''){
     stop("No API key detected in system environment. You can enter it manually using the 'openai_api_key' argument.")
   }
 
-  # split the embeddings into chunks, because the OpenAI
-  # embeddings endpoint will only take so many tokens at a time
-
-  # max characters per chunk is approximately max tokens times 4
-  max_characters <- 7000 * 4 # 8192 is max tokens, so include a little buffer
-  # Calculate cumulative sum of character lengths
-  cumulative_length <- cumsum(nchar(text))
-  # Find the indices where to split
-  split_indices <- cumulative_length %/% max_characters
-  # Split the vector based on the calculated indices
-  chunks <- split(text, split_indices)
-
-  # format an API request
+  # format an API request to embeddings endpoint
   format_request <- function(chunk,
                              base_url = "https://api.openai.com/v1/embeddings"){
 
@@ -53,14 +42,54 @@ get_embeddings <- function(text,
                                 dimensions = dimensions))
   }
 
+  # get the user's rate limits
+  req <- format_request('test')
+  resp <- httr2::req_perform(req)
+  # requests per minute
+  rpm <- as.numeric(httr2::resp_header(resp, 'x-ratelimit-limit-requests'))
+  # tokens per minute
+  tpm <- as.numeric(httr2::resp_header(resp, 'x-ratelimit-limit-tokens'))
+
+  # max tokens per request is currently 8192
+  tpr <- 8192
+
+  # "effective" rpm may be smaller than rpm if we're splitting into chunks of 8192
+  rpm <- min(c(rpm, floor(tpm/tpr)))
+
+  # split the embeddings into chunks, because the OpenAI
+  # embeddings endpoint will only take so many tokens at a time
+
+  # max characters per chunk is approximately max tokens times 2 (*very* conservative)
+  max_characters <- tpr * 2
+  # Calculate cumulative sum of character lengths
+  cumulative_length <- cumsum(nchar(text))
+  # Find the indices where to split
+  split_indices <- cumulative_length %/% max_characters
+  # Split the vector based on the calculated indices
+  chunks <- split(text, split_indices)
+
+  # format list of requests
   reqs <- lapply(chunks, format_request)
+
+  # throttle requests per second (currently only works with req_perform_sequential)
+  # reqs <- reqs |> lapply(httr2::req_throttle, rate = rpm/60)
 
   # submit prompts in parallel (20 concurrent requests per host seems to be the optimum)
   if(parallel){
-    resps <- httr2::req_perform_parallel(reqs, pool = curl::new_pool(host_con = 20))
+    resps <- httr2::req_perform_parallel(reqs,
+                                         pool = curl::new_pool(host_con = 20),
+                                         on_error = 'continue')
   } else{
     resps <- httr2::req_perform_sequential(reqs)
   }
+
+  status_codes <- resps |> lapply(function(x) x$status) |> unlist()
+  if(any(status_codes) == '400'){
+    stop('Error: HTTP 400 Bad Request. Likely due to a problem batching parallel API requests. Please contact package author with a reprex.')
+  }
+
+  time_to_wait <- httr2::resps_failures(resps)[[1]] |>
+    httr2::resp_header('')
 
 
   # parse the responses
