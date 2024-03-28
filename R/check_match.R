@@ -60,7 +60,7 @@ check_match <- function(string1, string2,
     )
 
     # batch prompts to handle API rate limits
-    max_prompts <- 2048
+    max_prompts <- 1500 # 2048
     start_index <- 1
 
     while(start_index <= length(p)){
@@ -157,6 +157,10 @@ check_match <- function(string1, string2,
     # format a list of requests
     reqs <- lapply(prompt_list, format_request)
     #Map(f = format_request, prompt = prompt_list)
+
+    # 1. break up reqs into chunks of size tpm
+    # 2. request each chunk in parallel, making sure it takes no shorter than 1 minute
+    # 3. combine the response lists
 
     # submit prompts in parallel (20 concurrent requests per host seems to be the optimum)
     if(parallel){
