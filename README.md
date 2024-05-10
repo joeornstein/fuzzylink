@@ -6,9 +6,12 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of the `fuzzylink` package is to allow users to merge datasets
-with non-exact matches on a key identifying variable. Suppose, for
-example, you have the following two datasets:
+The R package `fuzzylink` implements a probabilistic record linkage
+procedure proposed in [Ornstein
+(2024)](https://joeornstein.github.io/publications/fuzzylink.pdf). This
+method allows users to merge datasets with fuzzy matches on a key
+identifying variable. Suppose, for example, you have the following two
+datasets:
 
 ``` r
 dfA
@@ -182,7 +185,7 @@ df
 ```
 
     #>                A                         B       sim block        jw
-    #> 1      Joe Biden    Joseph Robinette Biden 0.7666187     1 0.7208273
+    #> 1      Joe Biden    Joseph Robinette Biden 0.7667135     1 0.7208273
     #> 2   Barack Obama      Barack Hussein Obama 0.8456774     3 0.9200000
     #> 3 George W. Bush        George Walker Bush 0.8446634     4 0.9301587
     #> 4   Bill Clinton William Jefferson Clinton 0.8731945     5 0.5788889
@@ -260,22 +263,22 @@ significantly reduces cost and speeds up computation.
 sim <- get_similarity_matrix(embeddings, strings_A, strings_B)
 sim
 #>                Joseph Robinette Biden Donald John Trump  Barack Hussein Obama
-#> Joe Biden                   0.7667135          0.5532632            0.5310556
+#> Joe Biden                   0.7666187          0.5532721            0.5309486
 #> Donald Trump                0.4317744          0.8389039            0.4480156
 #> Barack Obama                0.5172067          0.4756720            0.8456774
-#> George W. Bush              0.4942232          0.4877941            0.5681344
+#> George W. Bush              0.4942308          0.4878543            0.5681931
 #> Bill Clinton                0.4885142          0.5038318            0.5173374
 #>                George Walker Bush William Jefferson Clinton
-#> Joe Biden               0.5095864                 0.5428064
+#> Joe Biden               0.5093797                 0.5426070
 #> Donald Trump            0.4807618                 0.4465016
 #> Barack Obama            0.4853952                 0.5131033
-#> George W. Bush          0.8445983                 0.6114193
+#> George W. Bush          0.8446634                 0.6115912
 #> Bill Clinton            0.6233374                 0.8731945
 #>                George Herbert Walker Bush Biff Tannen Joe Riley
-#> Joe Biden                       0.4703468   0.3017206 0.3910782
+#> Joe Biden                       0.4701206   0.3014880 0.3908584
 #> Donald Trump                    0.3945427   0.3438834 0.2332212
 #> Barack Obama                    0.4242546   0.2546198 0.3482104
-#> George W. Bush                  0.7334878   0.2459114 0.3607879
+#> George W. Bush                  0.7335619   0.2458795 0.3608438
 #> Bill Clinton                    0.5951578   0.2212838 0.3196263
 ```
 
@@ -300,16 +303,16 @@ train
 #> # A tibble: 40 × 5
 #>    A              B                              sim    jw match
 #>    <fct>          <fct>                        <dbl> <dbl> <chr>
-#>  1 Joe Biden      "Donald John Trump "         0.553 0.444 No   
-#>  2 George W. Bush "Barack Hussein Obama"       0.568 0.437 No   
-#>  3 George W. Bush "Joe Riley"                  0.361 0.410 No   
-#>  4 Joe Biden      "Biff Tannen"                0.302 0.503 No   
-#>  5 George W. Bush "George Herbert Walker Bush" 0.733 0.870 No   
-#>  6 Bill Clinton   "Biff Tannen"                0.221 0.699 No   
-#>  7 Donald Trump   "George Walker Bush"         0.481 0.5   No   
-#>  8 Donald Trump   "George Herbert Walker Bush" 0.395 0.344 No   
-#>  9 Joe Biden      "George Walker Bush"         0.510 0.389 No   
-#> 10 Donald Trump   "Biff Tannen"                0.344 0.399 No   
+#>  1 Joe Biden      "Barack Hussein Obama"       0.531 0.535 No   
+#>  2 Barack Obama   "Biff Tannen"                0.255 0.457 No   
+#>  3 Donald Trump   "Biff Tannen"                0.344 0.399 No   
+#>  4 Bill Clinton   "Joseph Robinette Biden"     0.489 0.480 No   
+#>  5 Donald Trump   "William Jefferson Clinton"  0.447 0.372 No   
+#>  6 Donald Trump   "Donald John Trump "         0.839 0.933 Yes  
+#>  7 George W. Bush "Donald John Trump "         0.488 0.445 No   
+#>  8 Joe Biden      "Joe Riley"                  0.391 0.867 No   
+#>  9 George W. Bush "Joe Riley"                  0.361 0.410 No   
+#> 10 Bill Clinton   "George Herbert Walker Bush" 0.595 0.371 No   
 #> # ℹ 30 more rows
 ```
 
@@ -340,12 +343,12 @@ df$match_probability <- predict(model, df, type = 'response')
 
 head(df)
 #>                A                      B       sim        jw match_probability
-#> 1      Joe Biden Joseph Robinette Biden 0.7667135 0.7208273      1.000000e+00
+#> 1      Joe Biden Joseph Robinette Biden 0.7666187 0.7208273      1.000000e+00
 #> 2   Donald Trump Joseph Robinette Biden 0.4317744 0.4217172      2.220446e-16
 #> 3   Barack Obama Joseph Robinette Biden 0.5172067 0.4191919      2.220446e-16
-#> 4 George W. Bush Joseph Robinette Biden 0.4942232 0.5200216      2.220446e-16
+#> 4 George W. Bush Joseph Robinette Biden 0.4942308 0.5200216      2.220446e-16
 #> 5   Bill Clinton Joseph Robinette Biden 0.4885142 0.4797980      2.220446e-16
-#> 6      Joe Biden     Donald John Trump  0.5532632 0.4444444      2.220446e-16
+#> 6      Joe Biden     Donald John Trump  0.5532721 0.4444444      2.220446e-16
 ```
 
 ### Step 5: Validate Uncertain Matches
@@ -424,10 +427,10 @@ matches <- df |>
 
 matches
 #>                A                         B       sim        jw
-#> 1      Joe Biden    Joseph Robinette Biden 0.7667135 0.7208273
+#> 1      Joe Biden    Joseph Robinette Biden 0.7666187 0.7208273
 #> 2   Donald Trump        Donald John Trump  0.8389039 0.9333333
 #> 3   Barack Obama      Barack Hussein Obama 0.8456774 0.9200000
-#> 4 George W. Bush        George Walker Bush 0.8445983 0.9301587
+#> 4 George W. Bush        George Walker Bush 0.8446634 0.9301587
 #> 5   Bill Clinton William Jefferson Clinton 0.8731945 0.5788889
 #>   match_probability match  state.x age  state.y      hobby
 #> 1                 1   Yes Delaware  81 Delaware   Football

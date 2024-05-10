@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of the `fuzzylink` package is to allow users to merge datasets with non-exact matches on a key identifying variable. Suppose, for example, you have the following two datasets:
+The R package `fuzzylink` implements a probabilistic record linkage procedure proposed in [Ornstein (2024)](https://joeornstein.github.io/publications/fuzzylink.pdf). This method allows users to merge datasets with fuzzy matches on a key identifying variable. Suppose, for example, you have the following two datasets:
 
 ```{r, echo = FALSE}
 library(tidyverse)
