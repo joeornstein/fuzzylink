@@ -12,6 +12,7 @@
 #' @param p The range of estimated match probabilities within which `fuzzylink()` will validate record pairs using an LLM prompt. Defaults to c(0.1, 0.95)
 #' @param k Number of nearest neighbors to validate for records in `dfA` with no identified matches. Higher values may improve recall at expense of precision. Defaults to 20
 #' @param parallel TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.
+#' @param return_all_pairs If TRUE, returns *every* within-block record pair from dfA and dfB, not just pairs with match probability greater than p[1]. Defaults to FALSE.
 #'
 #' @return A dataframe with all rows of `dfA` joined with any matches from `dfB`
 #' @export
@@ -31,7 +32,8 @@ fuzzylink <- function(dfA, dfB,
                       max_validations = 1e5,
                       p = c(0.1, 0.95),
                       k = 20,
-                      parallel = TRUE){
+                      parallel = TRUE,
+                      return_all_pairs = FALSE){
 
 
   # Check for errors in inputs
@@ -282,24 +284,32 @@ fuzzylink <- function(dfA, dfB,
     df <- dplyr::left_join(df, blocks, by = 'block')
   }
 
-  matches <- df |>
-    # join with match labels from the training set
-    dplyr::left_join(train |>
-                       dplyr::select(A, B, match),
-                     by = c('A', 'B')) |>
-    # only keep pairs that have been validated or have a match probability > p_lower
-    dplyr::filter((match_probability > p[1] &
-                     is.na(match)) | match == 'Yes') |>
-    dplyr::right_join(dfA,
-                      by = c('A' = by, blocking.variables),
-                      relationship = 'many-to-many') |>
-    dplyr::left_join(dfB,
-                     by = c('B' = by, blocking.variables),
-                     relationship = 'many-to-many') |>
-    dplyr::rename(validated = match)
+  if(return_all_pairs){
+    matches <- df |>
+      # join with match labels from the training set
+      dplyr::left_join(train |>
+                         dplyr::select(A, B, match),
+                       by = c('A', 'B')) |>
+      dplyr::rename(validated = match)
+  } else{
+    matches <- df |>
+      # join with match labels from the training set
+      dplyr::left_join(train |>
+                         dplyr::select(A, B, match),
+                       by = c('A', 'B')) |>
+      # only keep pairs that have been validated or have a match probability > p_lower
+      dplyr::filter((match_probability > p[1] &
+                       is.na(match)) | match == 'Yes') |>
+      dplyr::right_join(dfA,
+                        by = c('A' = by, blocking.variables),
+                        relationship = 'many-to-many') |>
+      dplyr::left_join(dfB,
+                       by = c('B' = by, blocking.variables),
+                       relationship = 'many-to-many') |>
+      dplyr::rename(validated = match)
+  }
 
   if(is.null(blocking.variables)) matches <- dplyr::select(matches, -block)
-
 
   if(verbose){
     cat('Done! (',

@@ -17,7 +17,8 @@ fuzzylink(
   max_validations = 1e+05,
   p = c(0.1, 0.95),
   k = 20,
-  parallel = TRUE
+  parallel = TRUE,
+  return_all_pairs = FALSE
 )
 }
 \arguments{
@@ -44,6 +45,8 @@ fuzzylink(
 \item{k}{Number of nearest neighbors to validate for records in \code{dfA} with no identified matches. Higher values may improve recall at expense of precision. Defaults to 20}
 
 \item{parallel}{TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.}
+
+\item{return_all_pairs}{If TRUE, returns \emph{every} within-block record pair from dfA and dfB, not just pairs with match probability greater than p\link{1}. Defaults to FALSE.}
 }
 \value{
 A dataframe with all rows of \code{dfA} joined with any matches from \code{dfB}
