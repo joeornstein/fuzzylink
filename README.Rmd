@@ -79,7 +79,7 @@ df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person', verbose = FALSE)
 df
 ```
 
-The procedure works by using *pretrained text embeddings* from OpenAI to construct a measure of similarity for each pair of names. These similarity measures are then used as predictors in a statistical model to estimate the probability that two name pairs represent the same entity. In the guide below, I will walk step-by-step through what's happening under the hood when we call the `fuzzylink()` function.
+The procedure works by using *pretrained text embeddings* from OpenAI to construct a measure of similarity for each pair of names. These similarity measures are then used as predictors in a statistical model to estimate the probability that two name pairs represent the same entity. In the guide below, I will walk step-by-step through what's happening under the hood when we call the `fuzzylink()` function. See [Ornstein (2024)](https://joeornstein.github.io/publications/fuzzylink.pdf) for technical details.
 
 ## Installation
 

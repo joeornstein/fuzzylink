@@ -1,0 +1,7 @@
+url: https://joeornstein.github.io/fuzzylink
+template:
+  bootstrap: 5
+
+navbar:
+  structure:
+    right: [search, github]
