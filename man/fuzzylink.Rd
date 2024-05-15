@@ -14,6 +14,7 @@ fuzzylink(
   model = "gpt-3.5-turbo-instruct",
   openai_api_key = Sys.getenv("OPENAI_API_KEY"),
   embedding_dimensions = 256,
+  additional_instructions = NULL,
   max_validations = 1e+05,
   p = c(0.1, 0.95),
   k = 20,
@@ -37,6 +38,8 @@ fuzzylink(
 \item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
 
 \item{embedding_dimensions}{The dimension of the embedding vectors to retrieve. Defaults to 256}
+
+\item{additional_instructions}{A string containing additional instructions to include in the LLM prompt during validation.}
 
 \item{max_validations}{The maximum number of LLM prompts to submit during the validation stage. Defaults to 100,000}
 

@@ -8,6 +8,7 @@
 #' @param model Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
 #' @param embedding_dimensions The dimension of the embedding vectors to retrieve. Defaults to 256
+#' @param additional_instructions A string containing additional instructions to include in the LLM prompt during validation.
 #' @param max_validations The maximum number of LLM prompts to submit during the validation stage. Defaults to 100,000
 #' @param p The range of estimated match probabilities within which `fuzzylink()` will validate record pairs using an LLM prompt. Defaults to c(0.1, 0.95)
 #' @param k Number of nearest neighbors to validate for records in `dfA` with no identified matches. Higher values may improve recall at expense of precision. Defaults to 20
@@ -29,6 +30,7 @@ fuzzylink <- function(dfA, dfB,
                       model = 'gpt-3.5-turbo-instruct',
                       openai_api_key = Sys.getenv('OPENAI_API_KEY'),
                       embedding_dimensions = 256,
+                      additional_instructions = NULL,
                       max_validations = 1e5,
                       p = c(0.1, 0.95),
                       k = 20,
@@ -138,6 +140,7 @@ fuzzylink <- function(dfA, dfB,
         ')\n\n', sep = '')
   }
   train <- get_training_set(sim, record_type = record_type,
+                            additional_instructions = additional_instructions,
                             model = model, openai_api_key = openai_api_key,
                             parallel = parallel)
 
@@ -248,6 +251,7 @@ fuzzylink <- function(dfA, dfB,
                                              matches_to_validate$B,
                                              model = model,
                                              record_type = record_type,
+                                             additional_instructions = additional_instructions,
                                              openai_api_key = openai_api_key,
                                              parallel = parallel)
 

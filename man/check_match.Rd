@@ -9,6 +9,7 @@ check_match(
   string2,
   model = "gpt-3.5-turbo-instruct",
   record_type = "entity",
+  additional_instructions = NULL,
   openai_api_key = Sys.getenv("OPENAI_API_KEY"),
   parallel = TRUE
 )

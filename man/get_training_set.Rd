@@ -10,6 +10,7 @@ get_training_set(
   samples_per_bin = 10,
   n = 500,
   record_type = "entity",
+  additional_instructions = NULL,
   model = "gpt-3.5-turbo-instruct",
   openai_api_key = Sys.getenv("OPENAI_API_KEY"),
   parallel = TRUE
@@ -25,6 +26,8 @@ get_training_set(
 \item{n}{Sample size for the training dataset}
 
 \item{record_type}{A character describing what type of entity the rows and columns of \code{sim} represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").}
+
+\item{additional_instructions}{A string containing additional instructions to include in the LLM prompt during validation.}
 
 \item{model}{Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'}
 

@@ -18,6 +18,7 @@
 check_match <- function(string1, string2,
                         model = 'gpt-3.5-turbo-instruct',
                         record_type = 'entity',
+                        additional_instructions = NULL,
                         openai_api_key = Sys.getenv('OPENAI_API_KEY'),
                         parallel = TRUE){
 
@@ -27,6 +28,11 @@ check_match <- function(string1, string2,
 
   if(openai_api_key == ''){
     stop("No API key detected in system environment. You can enter it manually using the 'openai_api_key' argument.")
+  }
+
+  # pad the additional instructions, if non-NULL
+  if(!is.null(additional_instructions)){
+    additional_instructions <- paste0(additional_instructions, ' ')
   }
 
   # encode strings as characters
@@ -118,10 +124,14 @@ check_match <- function(string1, string2,
 
     # function to return a chat prompt formatted as a list of lists
     format_chat_prompt <- function(i){
+
       p <- list()
       p[[1]] <- list(role = 'user',
                      content = paste0('Decide if the following two names refer to the same ',
-                                      record_type, '. Misspellings, alternative names, and acronyms may be acceptable matches. Think carefully. Respond "Yes" or "No".'))
+                                      record_type,
+                                      '. Misspellings, alternative names, and acronyms may be acceptable matches. ',
+                                      additional_instructions,
+                                      'Think carefully. Respond "Yes" or "No".'))
       p[[2]] <- list(role = 'user',
                      content = paste0('Name A: ', string1[i], '\nName B: ', string2[i]))
 
