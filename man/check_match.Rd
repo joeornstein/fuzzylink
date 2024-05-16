@@ -9,7 +9,7 @@ check_match(
   string2,
   model = "gpt-3.5-turbo-instruct",
   record_type = "entity",
-  additional_instructions = NULL,
+  instructions = NULL,
   openai_api_key = Sys.getenv("OPENAI_API_KEY"),
   parallel = TRUE
 )
@@ -22,6 +22,8 @@ check_match(
 \item{model}{Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'}
 
 \item{record_type}{A character describing what type of entity \code{string1} and \code{string2} represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").}
+
+\item{instructions}{A string containing additional instructions to include in the LLM prompt.}
 
 \item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
 

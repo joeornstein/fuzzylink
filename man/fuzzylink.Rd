@@ -11,10 +11,10 @@ fuzzylink(
   blocking.variables = NULL,
   verbose = TRUE,
   record_type = "entity",
+  instructions = NULL,
   model = "gpt-3.5-turbo-instruct",
   openai_api_key = Sys.getenv("OPENAI_API_KEY"),
   embedding_dimensions = 256,
-  additional_instructions = NULL,
   max_validations = 1e+05,
   p = c(0.1, 0.95),
   k = 20,
@@ -33,13 +33,13 @@ fuzzylink(
 
 \item{record_type}{A character describing what type of entity the \code{by} variable represents. Should be a singular noun (e.g. "person", "organization", "interest group", "city").}
 
+\item{instructions}{A string containing additional instructions to include in the LLM prompt during validation.}
+
 \item{model}{Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'}
 
 \item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
 
 \item{embedding_dimensions}{The dimension of the embedding vectors to retrieve. Defaults to 256}
-
-\item{additional_instructions}{A string containing additional instructions to include in the LLM prompt during validation.}
 
 \item{max_validations}{The maximum number of LLM prompts to submit during the validation stage. Defaults to 100,000}
 
@@ -49,7 +49,7 @@ fuzzylink(
 
 \item{parallel}{TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.}
 
-\item{return_all_pairs}{If TRUE, returns \emph{every} within-block record pair from dfA and dfB, not just pairs with match probability greater than p\link{1}. Defaults to FALSE.}
+\item{return_all_pairs}{If TRUE, returns \emph{every} within-block record pair from dfA and dfB, not just validated pairs. Defaults to FALSE.}
 }
 \value{
 A dataframe with all rows of \code{dfA} joined with any matches from \code{dfB}
@@ -61,5 +61,8 @@ Probabilistic Record Linkage Using Pretrained Text Embeddings
 dfA <- data.frame(state.x77)
 dfA$name <- rownames(dfA)
 dfB <- data.frame(name = state.abb, state.division)
-df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'US state government')
+df <- fuzzylink(dfA, dfB,
+                by = 'name',
+                record_type = 'US state government',
+                instructions = 'The first dataset contains full US state names. The second dataset contains state acronyms.')
 }

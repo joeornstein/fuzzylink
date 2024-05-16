@@ -5,15 +5,15 @@
 #' @param blocking.variables A character vector of variables that must match exactly in order to match two records
 #' @param verbose TRUE to print progress updates, FALSE for no output
 #' @param record_type A character describing what type of entity the `by` variable represents. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
+#' @param instructions A string containing additional instructions to include in the LLM prompt during validation.
 #' @param model Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
 #' @param embedding_dimensions The dimension of the embedding vectors to retrieve. Defaults to 256
-#' @param additional_instructions A string containing additional instructions to include in the LLM prompt during validation.
 #' @param max_validations The maximum number of LLM prompts to submit during the validation stage. Defaults to 100,000
 #' @param p The range of estimated match probabilities within which `fuzzylink()` will validate record pairs using an LLM prompt. Defaults to c(0.1, 0.95)
 #' @param k Number of nearest neighbors to validate for records in `dfA` with no identified matches. Higher values may improve recall at expense of precision. Defaults to 20
 #' @param parallel TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.
-#' @param return_all_pairs If TRUE, returns *every* within-block record pair from dfA and dfB, not just pairs with match probability greater than p[1]. Defaults to FALSE.
+#' @param return_all_pairs If TRUE, returns *every* within-block record pair from dfA and dfB, not just validated pairs. Defaults to FALSE.
 #'
 #' @return A dataframe with all rows of `dfA` joined with any matches from `dfB`
 #' @export
@@ -22,15 +22,18 @@
 #' dfA <- data.frame(state.x77)
 #' dfA$name <- rownames(dfA)
 #' dfB <- data.frame(name = state.abb, state.division)
-#' df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'US state government')
+#' df <- fuzzylink(dfA, dfB,
+#'                 by = 'name',
+#'                 record_type = 'US state government',
+#'                 instructions = 'The first dataset contains full US state names. The second dataset contains state acronyms.')
 fuzzylink <- function(dfA, dfB,
                       by, blocking.variables = NULL,
                       verbose = TRUE,
                       record_type = 'entity',
+                      instructions = NULL,
                       model = 'gpt-3.5-turbo-instruct',
                       openai_api_key = Sys.getenv('OPENAI_API_KEY'),
                       embedding_dimensions = 256,
-                      additional_instructions = NULL,
                       max_validations = 1e5,
                       p = c(0.1, 0.95),
                       k = 20,
@@ -140,7 +143,7 @@ fuzzylink <- function(dfA, dfB,
         ')\n\n', sep = '')
   }
   train <- get_training_set(sim, record_type = record_type,
-                            additional_instructions = additional_instructions,
+                            instructions = instructions,
                             model = model, openai_api_key = openai_api_key,
                             parallel = parallel)
 
@@ -251,7 +254,7 @@ fuzzylink <- function(dfA, dfB,
                                              matches_to_validate$B,
                                              model = model,
                                              record_type = record_type,
-                                             additional_instructions = additional_instructions,
+                                             instructions = instructions,
                                              openai_api_key = openai_api_key,
                                              parallel = parallel)
 

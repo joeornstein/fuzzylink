@@ -46,7 +46,7 @@ function performs this record linkage with a single line of code.
     #> 2   Donald Trump        Donald John Trump  0.8389039 0.9333333
     #> 3   Barack Obama      Barack Hussein Obama 0.8456774 0.9200000
     #> 4 George W. Bush        George Walker Bush 0.8446634 0.9301587
-    #> 5   Bill Clinton William Jefferson Clinton 0.8731945 0.5788889
+    #> 5   Bill Clinton William Jefferson Clinton 0.8731628 0.5788889
     #>   match_probability validated age      hobby
     #> 1                 1       Yes  81   Football
     #> 2                 1       Yes  77       Golf
@@ -137,11 +137,17 @@ whenever the model fit is *too* perfect.)
   language model prompt when training the statistical model (see Step 3
   below).
 
+- The `instructions` argument should be a string containing additional
+  instructions to include in the language model prompt. Format these
+  like you would format instructions to a human research assistant,
+  including any relevant information that you think would help the model
+  make accurate classifications.
+
 - The `model` argument specifies which OpenAI language model to prompt.
   It defaults to ‘gpt-3.5-turbo-instruct’, but for more difficult
-  problems you can try ‘gpt-4’ or ‘gpt-4-turbo-preview’. Note that this
-  will typically increase accuracy at the expense of cost and runtime
-  (see “A Note on Cost” below).
+  problems you can try ‘gpt-4o’. Note that this will typically increase
+  accuracy at the expense of cost and runtime (see “A Note on Cost”
+  below).
 
 - Several parameters—including `p`, `k`, `embedding_dimensions`,
   `max_validations`, and `parallel`—are for advanced users who wish to
@@ -185,7 +191,7 @@ df
 ```
 
     #>                A                         B       sim block        jw
-    #> 1      Joe Biden    Joseph Robinette Biden 0.7667135     1 0.7208273
+    #> 1      Joe Biden    Joseph Robinette Biden 0.7666187     1 0.7208273
     #> 2   Barack Obama      Barack Hussein Obama 0.8456774     3 0.9200000
     #> 3 George W. Bush        George Walker Bush 0.8446634     4 0.9301587
     #> 4   Bill Clinton William Jefferson Clinton 0.8731945     5 0.5788889
@@ -288,10 +294,10 @@ We would like to use those cosine similarity scores to predict whether
 two names refer to the same entity. In order to do that, we need to
 first create a labeled dataset to fit a statistical model. The
 `get_training_set()` function selects a sample of name pairs and labels
-them using the following prompt to GPT-4 (brackets denote input
+them using the following prompt to GPT-3.5 (brackets denote input
 variables).
 
-    Decide if the following two names refer to the same {record_type}. Misspellings, alternative names, and acronyms may be acceptable matches. Think carefully. Respond "Yes" or "No".'
+    Decide if the following two names refer to the same {record_type}. {instructions} Think carefully. Respond "Yes" or "No".'
 
     Name A: {A}
     Name B: {B}
@@ -303,16 +309,16 @@ train
 #> # A tibble: 40 × 5
 #>    A              B                              sim    jw match
 #>    <fct>          <fct>                        <dbl> <dbl> <chr>
-#>  1 Joe Biden      "Barack Hussein Obama"       0.531 0.535 No   
-#>  2 Barack Obama   "Biff Tannen"                0.255 0.457 No   
-#>  3 Donald Trump   "Biff Tannen"                0.344 0.399 No   
-#>  4 Bill Clinton   "Joseph Robinette Biden"     0.489 0.480 No   
-#>  5 Donald Trump   "William Jefferson Clinton"  0.447 0.372 No   
-#>  6 Donald Trump   "Donald John Trump "         0.839 0.933 Yes  
-#>  7 George W. Bush "Donald John Trump "         0.488 0.445 No   
-#>  8 Joe Biden      "Joe Riley"                  0.391 0.867 No   
-#>  9 George W. Bush "Joe Riley"                  0.361 0.410 No   
-#> 10 Bill Clinton   "George Herbert Walker Bush" 0.595 0.371 No   
+#>  1 Barack Obama   "George Herbert Walker Bush" 0.424 0.496 No   
+#>  2 Donald Trump   "Donald John Trump "         0.839 0.933 Yes  
+#>  3 Bill Clinton   "Joseph Robinette Biden"     0.489 0.480 No   
+#>  4 George W. Bush "George Walker Bush"         0.845 0.930 Yes  
+#>  5 Donald Trump   "George Walker Bush"         0.481 0.5   No   
+#>  6 Donald Trump   "Joseph Robinette Biden"     0.432 0.422 No   
+#>  7 Joe Biden      "Joe Riley"                  0.391 0.867 No   
+#>  8 Joe Biden      "George Herbert Walker Bush" 0.470 0.366 No   
+#>  9 Bill Clinton   "Barack Hussein Obama"       0.517 0.56  No   
+#> 10 Bill Clinton   "George Walker Bush"         0.623 0.361 No   
 #> # ℹ 30 more rows
 ```
 

@@ -4,6 +4,7 @@
 #' @param string2 A string or vector of strings
 #' @param model Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'
 #' @param record_type A character describing what type of entity `string1` and `string2` represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
+#' @param instructions A string containing additional instructions to include in the LLM prompt.
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
 #' @param parallel TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.
 #'
@@ -18,7 +19,7 @@
 check_match <- function(string1, string2,
                         model = 'gpt-3.5-turbo-instruct',
                         record_type = 'entity',
-                        additional_instructions = NULL,
+                        instructions = NULL,
                         openai_api_key = Sys.getenv('OPENAI_API_KEY'),
                         parallel = TRUE){
 
@@ -30,9 +31,9 @@ check_match <- function(string1, string2,
     stop("No API key detected in system environment. You can enter it manually using the 'openai_api_key' argument.")
   }
 
-  # pad the additional instructions, if non-NULL
-  if(!is.null(additional_instructions)){
-    additional_instructions <- paste0(additional_instructions, ' ')
+  # if non-NULL, pad the instructions
+  if(!is.null(instructions)){
+    instructions <- paste0(instructions, ' ')
   }
 
   # encode strings as characters
@@ -43,8 +44,9 @@ check_match <- function(string1, string2,
   if(model %in% c('gpt-3.5-turbo-instruct', 'davinci-002', 'babbage-002')){
 
     # format the prompt
-    p <- paste0('Decide if the following two names refer to the same ', record_type,
-                '. Think carefully. Respond \"Yes\" or \"No\".\n\n',
+    p <- paste0('Decide if the following two names refer to the same ',
+                record_type, '. ', instructions,
+                'Think carefully. Respond \"Yes\" or \"No\".\n\n',
                 'Name A: ', string1, '\nName B: ', string2,
                 '\n\nResponse:')
 
@@ -128,9 +130,8 @@ check_match <- function(string1, string2,
       p <- list()
       p[[1]] <- list(role = 'user',
                      content = paste0('Decide if the following two names refer to the same ',
-                                      record_type,
-                                      '. Misspellings, alternative names, and acronyms may be acceptable matches. ',
-                                      additional_instructions,
+                                      record_type, instructions,
+                                      ## '. Misspellings, alternative names, and acronyms may be acceptable matches. ',
                                       'Think carefully. Respond "Yes" or "No".'))
       p[[2]] <- list(role = 'user',
                      content = paste0('Name A: ', string1[i], '\nName B: ', string2[i]))

@@ -140,7 +140,9 @@ If the `df` object links all the presidents to their correct name in `dfB`, ever
 
 - The `record_type` argument should be a singular noun describing the type of entity the `by` variable represents (e.g. "person", "organization", "interest group", "city"). It is used as part of a language model prompt when training the statistical model (see Step 3 below).
 
-- The `model` argument specifies which OpenAI language model to prompt. It defaults to 'gpt-3.5-turbo-instruct', but for more difficult problems you can try 'gpt-4' or 'gpt-4-turbo-preview'. Note that this will typically increase accuracy at the expense of cost and runtime (see "A Note on Cost" below).
+- The `instructions` argument should be a string containing additional instructions to include in the language model prompt. Format these like you would format instructions to a human research assistant, including any relevant information that you think would help the model make accurate classifications.
+
+- The `model` argument specifies which OpenAI language model to prompt. It defaults to 'gpt-3.5-turbo-instruct', but for more difficult problems you can try 'gpt-4o'. Note that this will typically increase accuracy at the expense of cost and runtime (see "A Note on Cost" below).
 
 - Several parameters---including `p`, `k`, `embedding_dimensions`, `max_validations`, and `parallel`---are for advanced users who wish to customize the behavior of the algorithm. See the package documentation for more details.
 
@@ -217,10 +219,10 @@ sim
 
 ### Step 3: Create a Training Set
 
-We would like to use those cosine similarity scores to predict whether two names refer to the same entity. In order to do that, we need to first create a labeled dataset to fit a statistical model. The `get_training_set()` function selects a sample of name pairs and labels them using the following prompt to GPT-4 (brackets denote input variables).
+We would like to use those cosine similarity scores to predict whether two names refer to the same entity. In order to do that, we need to first create a labeled dataset to fit a statistical model. The `get_training_set()` function selects a sample of name pairs and labels them using the following prompt to GPT-3.5 (brackets denote input variables).
 
 ```
-Decide if the following two names refer to the same {record_type}. Misspellings, alternative names, and acronyms may be acceptable matches. Think carefully. Respond "Yes" or "No".'
+Decide if the following two names refer to the same {record_type}. {instructions} Think carefully. Respond "Yes" or "No".'
 
 Name A: {A}
 Name B: {B}
