@@ -52,6 +52,9 @@ get_embeddings <- function(text,
     # max characters per chunk is approximately max tokens times 2 (*very* conservative)
     max_characters <- tpr * 2
 
+    # requests per minute rate limit
+    rpm <- 5*60
+
     # Calculate cumulative sum of character lengths
     cumulative_length <- cumsum(nchar(text))
     # Find the indices where to split
@@ -114,7 +117,9 @@ get_embeddings <- function(text,
                                          pool = curl::new_pool(host_con = 20),
                                          on_error = 'continue')
   } else{
-    resps <- httr2::req_perform_sequential(reqs)
+    resps <- reqs |>
+      lapply(httr2::req_throttle, rate = rpm / 60) |>
+      httr2::req_perform_sequential()
   }
 
   status_codes <- resps |> lapply(function(x) x$status) |> unlist()
