@@ -166,8 +166,6 @@ check_match <- function(string1, string2,
                                   max_tokens = 1))
     }
 
-
-
     # get the user's rate limits
     if(stringr::str_detect(model, 'mistral|mixtral')){
       tpm <- 2e6
@@ -193,11 +191,13 @@ check_match <- function(string1, string2,
     # 3. combine the response lists
 
     # submit prompts in parallel (20 concurrent requests per host seems to be the optimum)
-    if(parallel){
+    if(parallel & stringr::str_detect(model, 'mistral|mixtral', negate = TRUE)){
       resps <- httr2::req_perform_parallel(reqs,
                                            pool = curl::new_pool(host_con = 20))
     } else{
-      resps <- httr2::req_perform_sequential(reqs)
+      resps <- reqs |>
+        lapply(httr2::req_throttle, rate = rpm / 60) |>
+        httr2::req_perform_sequential()
     }
 
     # parse the responses
