@@ -2,7 +2,7 @@
 % Please edit documentation in R/get_embeddings.R
 \name{get_embeddings}
 \alias{get_embeddings}
-\title{Get pretrained GPT-3 text embeddings}
+\title{Get pretrained text embeddings}
 \usage{
 get_embeddings(
   text,
@@ -15,9 +15,9 @@ get_embeddings(
 \arguments{
 \item{text}{A character vector}
 
-\item{model}{Which variant of the GPT-3 embedding model to use. Defaults to 'text-embedding-3-large'.}
+\item{model}{Which embedding model to use. Defaults to 'text-embedding-3-large'.}
 
-\item{dimensions}{The dimension of the embedding vectors to return. Defaults to 256.}
+\item{dimensions}{The dimension of the embedding vectors to return. Defaults to 256. Note that the 'mistral-embed' model will always return 1024 vectors.}
 
 \item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
 
@@ -27,7 +27,7 @@ get_embeddings(
 A matrix of embedding vectors (one per row).
 }
 \description{
-Get pretrained text embeddings from the OpenAI API. Automatically batches requests to handle rate limits.
+Get pretrained text embeddings from the OpenAI or Mistral API. Automatically batches requests to handle rate limits.
 }
 \examples{
 embeddings <- get_embeddings(c('dog', 'cat', 'canine', 'feline'))

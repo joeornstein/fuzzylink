@@ -19,7 +19,7 @@ check_match(
 
 \item{string2}{A string or vector of strings}
 
-\item{model}{Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'}
+\item{model}{Which LLM to prompt; defaults to 'gpt-3.5-turbo-instruct'}
 
 \item{record_type}{A character describing what type of entity \code{string1} and \code{string2} represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").}
 

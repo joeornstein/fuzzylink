@@ -2,7 +2,7 @@
 #'
 #' @param string1 A string or vector of strings
 #' @param string2 A string or vector of strings
-#' @param model Which OpenAI model to prompt; defaults to 'gpt-3.5-turbo-instruct'
+#' @param model Which LLM to prompt; defaults to 'gpt-3.5-turbo-instruct'
 #' @param record_type A character describing what type of entity `string1` and `string2` represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
 #' @param instructions A string containing additional instructions to include in the LLM prompt.
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
@@ -141,11 +141,23 @@ check_match <- function(string1, string2,
 
     # function to return a formatted API request
     format_request <- function(prompt,
-                               base_url = "https://api.openai.com/v1/chat/completions"){
+                               base_url = "https://api.openai.com/v1/chat/completions",
+                               api_key = openai_api_key){
+
+      # if using a Mistral model, change base_url and api_key,
+      # but everything else is the same!
+      if(stringr::str_detect(model, 'mistral|mixtral')){
+        base_url <- 'https://api.mistral.ai/v1/chat/completions'
+        api_key <- Sys.getenv('MISTRAL_API_KEY')
+
+        if(api_key == ''){
+          stop("No API key detected in system environment. Add to Renviron as MISTRAL_API_KEY.")
+        }
+      }
 
       httr2::request(base_url) |>
         # headers
-        httr2::req_headers('Authorization' = paste("Bearer", openai_api_key)) |>
+        httr2::req_headers('Authorization' = paste("Bearer", api_key)) |>
         httr2::req_headers("Content-Type" = "application/json") |>
         # body
         httr2::req_body_json(list(model = model,
@@ -154,13 +166,20 @@ check_match <- function(string1, string2,
                                   max_tokens = 1))
     }
 
+
+
     # get the user's rate limits
-    req <- format_request(format_chat_prompt(1))
-    resp <- httr2::req_perform(req)
-    # requests per minute
-    rpm <- as.numeric(httr2::resp_header(resp, 'x-ratelimit-limit-requests'))
-    # tokens per minute
-    tpm <- as.numeric(httr2::resp_header(resp, 'x-ratelimit-limit-tokens'))
+    if(stringr::str_detect(model, 'mistral|mixtral')){
+      tpm <- 2e6
+      rpm <- 5*60
+    } else{
+      req <- format_request(format_chat_prompt(1))
+      resp <- httr2::req_perform(req)
+      # requests per minute
+      rpm <- as.numeric(httr2::resp_header(resp, 'x-ratelimit-limit-requests'))
+      # tokens per minute
+      tpm <- as.numeric(httr2::resp_header(resp, 'x-ratelimit-limit-tokens'))
+    }
 
     # format prompts
     prompt_list <- lapply(1:length(string1), format_chat_prompt)
