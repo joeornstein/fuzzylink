@@ -10,6 +10,7 @@
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
 #' @param embedding_dimensions The dimension of the embedding vectors to retrieve. Defaults to 256
 #' @param embedding_model Which pretrained embedding model to use; defaults to 'text-embedding-3-large' (OpenAI), but will also accept 'mistral-embed'.
+#' @param fmla By default, logistic regression model predicts whether two records match as a linear combination of embedding similarity and Jaro-Winkler similarity (`match ~ sim + jw`). Change this input for alternate specifications.
 #' @param max_validations The maximum number of LLM prompts to submit during the validation stage. Defaults to 100,000
 #' @param p The range of estimated match probabilities within which `fuzzylink()` will validate record pairs using an LLM prompt. Defaults to c(0.1, 0.95)
 #' @param k Number of nearest neighbors to validate for records in `dfA` with no identified matches. Higher values may improve recall at expense of precision. Defaults to 20
@@ -26,7 +27,7 @@
 #' df <- fuzzylink(dfA, dfB,
 #'                 by = 'name',
 #'                 record_type = 'US state government',
-#'                 instructions = 'The first dataset contains full US state names. The second dataset contains state acronyms.')
+#'                 instructions = 'The first dataset contains full US state names. The second dataset contains US postal codes.')
 fuzzylink <- function(dfA, dfB,
                       by, blocking.variables = NULL,
                       verbose = TRUE,
@@ -36,6 +37,7 @@ fuzzylink <- function(dfA, dfB,
                       openai_api_key = Sys.getenv('OPENAI_API_KEY'),
                       embedding_dimensions = 256,
                       embedding_model = 'text-embedding-3-large',
+                      fmla = match ~ sim + jw,
                       max_validations = 1e5,
                       p = c(0.1, 0.95),
                       k = 20,
@@ -156,8 +158,10 @@ fuzzylink <- function(dfA, dfB,
         format(Sys.time(), '%X'),
         ')\n\n', sep = '')
   }
-  fit <- stats::glm(as.numeric(match == 'Yes') ~ sim + jw,
-                    data = train |> dplyr::filter(match %in% c('Yes', 'No')),
+  fit <- stats::glm(fmla,
+                    data = train |>
+                      dplyr::filter(match %in% c('Yes', 'No')) |>
+                      dplyr::mutate(match = as.numeric(match == 'Yes')),
                     family = 'binomial')
 
   # Step 5: Create matched dataset ---------------
@@ -276,8 +280,10 @@ fuzzylink <- function(dfA, dfB,
       }
     } else{
       # refine the model (train only on the properly formatted labels)
-      fit <- stats::glm(as.numeric(match == 'Yes') ~ sim + jw,
-                        data = train |> dplyr::filter(match %in% c('Yes', 'No')),
+      fit <- stats::glm(fmla,
+                        data = train |>
+                          dplyr::filter(match %in% c('Yes', 'No')) |>
+                          dplyr::mutate(match = as.numeric(match == 'Yes')),
                         family = 'binomial')
 
       df$match_probability <- stats::predict.glm(fit, df, type = 'response')

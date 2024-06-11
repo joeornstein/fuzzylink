@@ -16,6 +16,7 @@ fuzzylink(
   openai_api_key = Sys.getenv("OPENAI_API_KEY"),
   embedding_dimensions = 256,
   embedding_model = "text-embedding-3-large",
+  fmla = match ~ sim + jw,
   max_validations = 1e+05,
   p = c(0.1, 0.95),
   k = 20,
@@ -44,6 +45,8 @@ fuzzylink(
 
 \item{embedding_model}{Which pretrained embedding model to use; defaults to 'text-embedding-3-large' (OpenAI), but will also accept 'mistral-embed'.}
 
+\item{fmla}{By default, logistic regression model predicts whether two records match as a linear combination of embedding similarity and Jaro-Winkler similarity (\code{match ~ sim + jw}). Change this input for alternate specifications.}
+
 \item{max_validations}{The maximum number of LLM prompts to submit during the validation stage. Defaults to 100,000}
 
 \item{p}{The range of estimated match probabilities within which \code{fuzzylink()} will validate record pairs using an LLM prompt. Defaults to c(0.1, 0.95)}
@@ -67,5 +70,5 @@ dfB <- data.frame(name = state.abb, state.division)
 df <- fuzzylink(dfA, dfB,
                 by = 'name',
                 record_type = 'US state government',
-                instructions = 'The first dataset contains full US state names. The second dataset contains state acronyms.')
+                instructions = 'The first dataset contains full US state names. The second dataset contains US postal codes.')
 }
