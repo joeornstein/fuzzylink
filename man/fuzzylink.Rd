@@ -43,7 +43,7 @@ fuzzylink(
 
 \item{embedding_dimensions}{The dimension of the embedding vectors to retrieve. Defaults to 256}
 
-\item{embedding_model}{Which pretrained embedding model to use; defaults to 'text-embedding-3-large' (OpenAI), but will also accept 'mistral-embed'.}
+\item{embedding_model}{Which pretrained embedding model to use; defaults to 'text-embedding-3-large' (OpenAI), but will also accept 'mistral-embed' (Mistral).}
 
 \item{fmla}{By default, logistic regression model predicts whether two records match as a linear combination of embedding similarity and Jaro-Winkler similarity (\code{match ~ sim + jw}). Change this input for alternate specifications.}
 

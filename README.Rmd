@@ -79,7 +79,7 @@ df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person', verbose = FALSE)
 df
 ```
 
-The procedure works by using *pretrained text embeddings* from OpenAI to construct a measure of similarity for each pair of names. These similarity measures are then used as predictors in a statistical model to estimate the probability that two name pairs represent the same entity. In the guide below, I will walk step-by-step through what's happening under the hood when we call the `fuzzylink()` function. See [Ornstein (2024)](https://joeornstein.github.io/publications/fuzzylink.pdf) for technical details.
+The procedure works by using *pretrained text embeddings* to construct a measure of similarity for each pair of names. These similarity measures are then used as predictors in a statistical model to estimate the probability that two name pairs represent the same entity. In the guide below, I will walk step-by-step through what's happening under the hood when we call the `fuzzylink()` function. See [Ornstein (2024)](https://joeornstein.github.io/publications/fuzzylink.pdf) for technical details.
 
 ## Installation
 
@@ -90,7 +90,11 @@ You can install the development version of `fuzzylink` from [GitHub](https://git
 devtools::install_github("joeornstein/fuzzylink")
 ```
 
-You will also need an account with OpenAI. You can sign up [here](https://beta.openai.com/signup), after which you will need to create an API key [here](https://platform.openai.com/account/api-keys). For best performance, I **strongly recommend** purchasing at least $5 in API credits, which will significantly increase your API rate limits.
+You will also need API access to a large language model (LLM). The `fuzzylink` package currently supports both OpenAI and Mistral LLMs, but will default to using OpenAI unless specified by the user.
+
+### OpenAI
+
+You can sign up for an account [here](https://beta.openai.com/signup), after which you will need to create an API key [here](https://platform.openai.com/account/api-keys). For best performance, I **strongly recommend** purchasing at least $5 in API credits, which will significantly increase your API rate limits.
 
 Once your account is created, copy-paste your API key into the following line of R code.
 
@@ -98,6 +102,18 @@ Once your account is created, copy-paste your API key into the following line of
 library(fuzzylink)
 
 openai_api_key('YOUR API KEY GOES HERE', install = TRUE)
+```
+
+### Mistral
+
+If you prefer to use language models from Mistral, you can sign up for an account [here](https://mistral.ai/). As of writing, Mistral requires you to purchase prepaid credits before you can access their language models through the API. 
+
+Once you have a paid account, you can create an API key [here](https://console.mistral.ai/api-keys/), and copy-paste the API key into the following line of R code:
+
+```
+library(fuzzylink)
+
+mistral_api_key('YOUR API KEY GOES HERE', install = TRUE)
 ```
 
 Now you're all set up!
@@ -142,7 +158,9 @@ If the `df` object links all the presidents to their correct name in `dfB`, ever
 
 - The `instructions` argument should be a string containing additional instructions to include in the language model prompt. Format these like you would format instructions to a human research assistant, including any relevant information that you think would help the model make accurate classifications.
 
-- The `model` argument specifies which OpenAI language model to prompt. It defaults to 'gpt-3.5-turbo-instruct', but for more difficult problems you can try 'gpt-4o'. Note that this will typically increase accuracy at the expense of cost and runtime (see "A Note on Cost" below).
+- The `model` argument specifies which language model to prompt. It defaults to OpenAI's 'gpt-3.5-turbo-instruct', but for more difficult problems you can try 'gpt-4o'. Note that this will typically increase accuracy at the expense of cost and runtime. If you prefer an open-source language model, try 'open-mixtral-8x22b'.
+
+- The `embedding_model` argument specifies which pretrained text embeddings to use when modeling match probability. It defaults to OpenAI's 'text-embedding-3-large', but will also accept 'text-embedding-3-small' or Mistral's 'mistral-embed'. 
 
 - Several parameters---including `p`, `k`, `embedding_dimensions`, `max_validations`, and `parallel`---are for advanced users who wish to customize the behavior of the algorithm. See the package documentation for more details.
 

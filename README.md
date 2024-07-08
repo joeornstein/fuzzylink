@@ -42,11 +42,11 @@ function performs this record linkage with a single line of code.
     df
 
     #>                A                         B       sim        jw
-    #> 1      Joe Biden    Joseph Robinette Biden 0.7666187 0.7208273
-    #> 2   Donald Trump        Donald John Trump  0.8389039 0.9333333
-    #> 3   Barack Obama      Barack Hussein Obama 0.8456774 0.9200000
-    #> 4 George W. Bush        George Walker Bush 0.8446634 0.9301587
-    #> 5   Bill Clinton William Jefferson Clinton 0.8731628 0.5788889
+    #> 1      Joe Biden    Joseph Robinette Biden 0.7660045 0.7208273
+    #> 2   Donald Trump        Donald John Trump  0.8388933 0.9333333
+    #> 3   Barack Obama      Barack Hussein Obama 0.8457593 0.9200000
+    #> 4 George W. Bush        George Walker Bush 0.8446479 0.9301587
+    #> 5   Bill Clinton William Jefferson Clinton 0.8732562 0.5788889
     #>   match_probability validated age      hobby
     #> 1                 1       Yes  81   Football
     #> 2                 1       Yes  77       Golf
@@ -54,13 +54,12 @@ function performs this record linkage with a single line of code.
     #> 4                 1       Yes  77    Reading
     #> 5                 1       Yes  77  Saxophone
 
-The procedure works by using *pretrained text embeddings* from OpenAI to
-construct a measure of similarity for each pair of names. These
-similarity measures are then used as predictors in a statistical model
-to estimate the probability that two name pairs represent the same
-entity. In the guide below, I will walk step-by-step through what’s
-happening under the hood when we call the `fuzzylink()` function. See
-[Ornstein
+The procedure works by using *pretrained text embeddings* to construct a
+measure of similarity for each pair of names. These similarity measures
+are then used as predictors in a statistical model to estimate the
+probability that two name pairs represent the same entity. In the guide
+below, I will walk step-by-step through what’s happening under the hood
+when we call the `fuzzylink()` function. See [Ornstein
 (2024)](https://joeornstein.github.io/publications/fuzzylink.pdf) for
 technical details.
 
@@ -74,11 +73,17 @@ You can install the development version of `fuzzylink` from
 devtools::install_github("joeornstein/fuzzylink")
 ```
 
-You will also need an account with OpenAI. You can sign up
-[here](https://beta.openai.com/signup), after which you will need to
-create an API key [here](https://platform.openai.com/account/api-keys).
-For best performance, I **strongly recommend** purchasing at least \$5
-in API credits, which will significantly increase your API rate limits.
+You will also need API access to a large language model (LLM). The
+`fuzzylink` package currently supports both OpenAI and Mistral LLMs, but
+will default to using OpenAI unless specified by the user.
+
+### OpenAI
+
+You can sign up for an account [here](https://beta.openai.com/signup),
+after which you will need to create an API key
+[here](https://platform.openai.com/account/api-keys). For best
+performance, I **strongly recommend** purchasing at least \$5 in API
+credits, which will significantly increase your API rate limits.
 
 Once your account is created, copy-paste your API key into the following
 line of R code.
@@ -86,6 +91,21 @@ line of R code.
     library(fuzzylink)
 
     openai_api_key('YOUR API KEY GOES HERE', install = TRUE)
+
+### Mistral
+
+If you prefer to use language models from Mistral, you can sign up for
+an account [here](https://mistral.ai/). As of writing, Mistral requires
+you to purchase prepaid credits before you can access their language
+models through the API.
+
+Once you have a paid account, you can create an API key
+[here](https://console.mistral.ai/api-keys/), and copy-paste the API key
+into the following line of R code:
+
+    library(fuzzylink)
+
+    mistral_api_key('YOUR API KEY GOES HERE', install = TRUE)
 
 Now you’re all set up!
 
@@ -143,11 +163,16 @@ whenever the model fit is *too* perfect.)
   including any relevant information that you think would help the model
   make accurate classifications.
 
-- The `model` argument specifies which OpenAI language model to prompt.
-  It defaults to ‘gpt-3.5-turbo-instruct’, but for more difficult
+- The `model` argument specifies which language model to prompt. It
+  defaults to OpenAI’s ‘gpt-3.5-turbo-instruct’, but for more difficult
   problems you can try ‘gpt-4o’. Note that this will typically increase
-  accuracy at the expense of cost and runtime (see “A Note on Cost”
-  below).
+  accuracy at the expense of cost and runtime. If you prefer an
+  open-source language model, try ‘open-mixtral-8x22b’.
+
+- The `embedding_model` argument specifies which pretrained text
+  embeddings to use when modeling match probability. It defaults to
+  OpenAI’s ‘text-embedding-3-large’, but will also accept
+  ‘text-embedding-3-small’ or Mistral’s ‘mistral-embed’.
 
 - Several parameters—including `p`, `k`, `embedding_dimensions`,
   `max_validations`, and `parallel`—are for advanced users who wish to
@@ -191,10 +216,10 @@ df
 ```
 
     #>                A                         B       sim block        jw
-    #> 1      Joe Biden    Joseph Robinette Biden 0.7666187     1 0.7208273
-    #> 2   Barack Obama      Barack Hussein Obama 0.8456774     3 0.9200000
-    #> 3 George W. Bush        George Walker Bush 0.8446634     4 0.9301587
-    #> 4   Bill Clinton William Jefferson Clinton 0.8731945     5 0.5788889
+    #> 1      Joe Biden    Joseph Robinette Biden 0.7665511     1 0.7208273
+    #> 2   Barack Obama      Barack Hussein Obama 0.8458046     3 0.9200000
+    #> 3 George W. Bush        George Walker Bush 0.8447483     4 0.9301587
+    #> 4   Bill Clinton William Jefferson Clinton 0.8731902     5 0.5788889
     #> 5   Donald Trump                      <NA>        NA    NA        NA
     #>   match_probability    state validated age      hobby
     #> 1                 1 Delaware       Yes  81   Football
@@ -251,7 +276,7 @@ embeddings <- get_embeddings(all_strings)
 dim(embeddings)
 #> [1]  13 256
 head(embeddings['Bill Clinton',])
-#> [1]  0.08017267  0.07627309 -0.01617664 -0.07971001 -0.09848085 -0.04970309
+#> [1]  0.08031169  0.07614738 -0.01617801 -0.07958458 -0.09815873 -0.04967427
 ```
 
 ### Step 2: Similarity Scores
@@ -269,23 +294,23 @@ significantly reduces cost and speeds up computation.
 sim <- get_similarity_matrix(embeddings, strings_A, strings_B)
 sim
 #>                Joseph Robinette Biden Donald John Trump  Barack Hussein Obama
-#> Joe Biden                   0.7666187          0.5532721            0.5309486
-#> Donald Trump                0.4317744          0.8389039            0.4480156
-#> Barack Obama                0.5172067          0.4756720            0.8456774
-#> George W. Bush              0.4942308          0.4878543            0.5681931
-#> Bill Clinton                0.4885142          0.5038318            0.5173374
+#> Joe Biden                   0.7665511          0.5532816            0.5309110
+#> Donald Trump                0.4316448          0.8388565            0.4477471
+#> Barack Obama                0.5171871          0.4756583            0.8458046
+#> George W. Bush              0.4942466          0.4877767            0.5681277
+#> Bill Clinton                0.4886684          0.5037386            0.5174360
 #>                George Walker Bush William Jefferson Clinton
-#> Joe Biden               0.5093797                 0.5426070
-#> Donald Trump            0.4807618                 0.4465016
-#> Barack Obama            0.4853952                 0.5131033
-#> George W. Bush          0.8446634                 0.6115912
-#> Bill Clinton            0.6233374                 0.8731945
+#> Joe Biden               0.5094280                 0.5426318
+#> Donald Trump            0.4805295                 0.4462709
+#> Barack Obama            0.4854634                 0.5131122
+#> George W. Bush          0.8447483                 0.6113368
+#> Bill Clinton            0.6232500                 0.8731912
 #>                George Herbert Walker Bush Biff Tannen Joe Riley
-#> Joe Biden                       0.4701206   0.3014880 0.3908584
-#> Donald Trump                    0.3945427   0.3438834 0.2332212
-#> Barack Obama                    0.4242546   0.2546198 0.3482104
-#> George W. Bush                  0.7335619   0.2458795 0.3608438
-#> Bill Clinton                    0.5951578   0.2212838 0.3196263
+#> Joe Biden                       0.4701124   0.3016349 0.3906386
+#> Donald Trump                    0.3942993   0.3438548 0.2328768
+#> Barack Obama                    0.4243879   0.2546999 0.3480991
+#> George W. Bush                  0.7335260   0.2459214 0.3606344
+#> Bill Clinton                    0.5950811   0.2214671 0.3194544
 ```
 
 ### Step 3: Create a Training Set
@@ -309,16 +334,16 @@ train
 #> # A tibble: 40 × 5
 #>    A              B                              sim    jw match
 #>    <fct>          <fct>                        <dbl> <dbl> <chr>
-#>  1 Barack Obama   "George Herbert Walker Bush" 0.424 0.496 No   
-#>  2 Donald Trump   "Donald John Trump "         0.839 0.933 Yes  
-#>  3 Bill Clinton   "Joseph Robinette Biden"     0.489 0.480 No   
-#>  4 George W. Bush "George Walker Bush"         0.845 0.930 Yes  
-#>  5 Donald Trump   "George Walker Bush"         0.481 0.5   No   
-#>  6 Donald Trump   "Joseph Robinette Biden"     0.432 0.422 No   
-#>  7 Joe Biden      "Joe Riley"                  0.391 0.867 No   
-#>  8 Joe Biden      "George Herbert Walker Bush" 0.470 0.366 No   
-#>  9 Bill Clinton   "Barack Hussein Obama"       0.517 0.56  No   
-#> 10 Bill Clinton   "George Walker Bush"         0.623 0.361 No   
+#>  1 Donald Trump   "Biff Tannen"                0.344 0.399 No   
+#>  2 Donald Trump   "William Jefferson Clinton"  0.446 0.372 No   
+#>  3 Bill Clinton   "George Herbert Walker Bush" 0.595 0.371 No   
+#>  4 Donald Trump   "George Walker Bush"         0.481 0.5   No   
+#>  5 George W. Bush "Joe Riley"                  0.361 0.410 No   
+#>  6 George W. Bush "George Herbert Walker Bush" 0.734 0.870 No   
+#>  7 Bill Clinton   "William Jefferson Clinton"  0.873 0.579 Yes  
+#>  8 Joe Biden      "William Jefferson Clinton"  0.543 0.524 No   
+#>  9 Bill Clinton   "Donald John Trump "         0.504 0.465 No   
+#> 10 Donald Trump   "George Herbert Walker Bush" 0.394 0.344 No   
 #> # ℹ 30 more rows
 ```
 
@@ -349,12 +374,12 @@ df$match_probability <- predict(model, df, type = 'response')
 
 head(df)
 #>                A                      B       sim        jw match_probability
-#> 1      Joe Biden Joseph Robinette Biden 0.7666187 0.7208273      1.000000e+00
-#> 2   Donald Trump Joseph Robinette Biden 0.4317744 0.4217172      2.220446e-16
-#> 3   Barack Obama Joseph Robinette Biden 0.5172067 0.4191919      2.220446e-16
-#> 4 George W. Bush Joseph Robinette Biden 0.4942308 0.5200216      2.220446e-16
-#> 5   Bill Clinton Joseph Robinette Biden 0.4885142 0.4797980      2.220446e-16
-#> 6      Joe Biden     Donald John Trump  0.5532721 0.4444444      2.220446e-16
+#> 1      Joe Biden Joseph Robinette Biden 0.7665511 0.7208273      1.000000e+00
+#> 2   Donald Trump Joseph Robinette Biden 0.4316448 0.4217172      2.220446e-16
+#> 3   Barack Obama Joseph Robinette Biden 0.5171871 0.4191919      2.220446e-16
+#> 4 George W. Bush Joseph Robinette Biden 0.4942466 0.5200216      2.220446e-16
+#> 5   Bill Clinton Joseph Robinette Biden 0.4886684 0.4797980      2.220446e-16
+#> 6      Joe Biden     Donald John Trump  0.5532816 0.4444444      2.220446e-16
 ```
 
 ### Step 5: Validate Uncertain Matches
@@ -433,11 +458,11 @@ matches <- df |>
 
 matches
 #>                A                         B       sim        jw
-#> 1      Joe Biden    Joseph Robinette Biden 0.7666187 0.7208273
-#> 2   Donald Trump        Donald John Trump  0.8389039 0.9333333
-#> 3   Barack Obama      Barack Hussein Obama 0.8456774 0.9200000
-#> 4 George W. Bush        George Walker Bush 0.8446634 0.9301587
-#> 5   Bill Clinton William Jefferson Clinton 0.8731945 0.5788889
+#> 1      Joe Biden    Joseph Robinette Biden 0.7665511 0.7208273
+#> 2   Donald Trump        Donald John Trump  0.8388565 0.9333333
+#> 3   Barack Obama      Barack Hussein Obama 0.8458046 0.9200000
+#> 4 George W. Bush        George Walker Bush 0.8447483 0.9301587
+#> 5   Bill Clinton William Jefferson Clinton 0.8731912 0.5788889
 #>   match_probability match  state.x age  state.y      hobby
 #> 1                 1   Yes Delaware  81 Delaware   Football
 #> 2                 1   Yes New York  77  Florida       Golf
