@@ -7,7 +7,7 @@
 openai_api_key(key, overwrite = FALSE, install = FALSE)
 }
 \arguments{
-\item{key}{The API key provided to you from the OpenAI formated in quotes. A key can be acquired at \url{https://platform.openai.com/api-keys}}
+\item{key}{The API key provided to you from OpenAI formated in quotes. A key can be acquired at \url{https://platform.openai.com/api-keys}}
 
 \item{overwrite}{If this is set to TRUE, it will overwrite an existing OPENAI_API_KEY that you already have in your \code{.Renviron} file.}
 
