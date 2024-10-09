@@ -19,7 +19,7 @@ fuzzylink(
   fmla = match ~ sim + jw,
   max_validations = 1e+05,
   p = c(0.1, 0.95),
-  k = 20,
+  k = 0,
   parallel = TRUE,
   return_all_pairs = FALSE
 )
@@ -51,7 +51,7 @@ fuzzylink(
 
 \item{p}{The range of estimated match probabilities within which \code{fuzzylink()} will validate record pairs using an LLM prompt. Defaults to c(0.1, 0.95)}
 
-\item{k}{Number of nearest neighbors to validate for records in \code{dfA} with no identified matches. Higher values may improve recall at expense of precision. Defaults to 20}
+\item{k}{Number of nearest neighbors to validate for records in \code{dfA} with no identified matches. Higher values may improve recall at expense of precision. Defaults to 0}
 
 \item{parallel}{TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.}
 
