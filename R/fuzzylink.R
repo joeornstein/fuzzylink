@@ -216,7 +216,8 @@ fuzzylink <- function(dfA, dfB,
                          by = c('A', 'B')) |>
         # keep only records from A with no within-block validated matches
         dplyr::group_by(A, block) |>
-        dplyr::filter(sum(match == 'Yes', na.rm = TRUE) == 0) |>
+        dplyr::filter(sum(match == 'Yes' | match_probability > p[2],
+                          na.rm = TRUE) == 0) |>
         dplyr::ungroup() |>
         # remove records that have already been validated in range [p_lower, 1]
         dplyr::filter(match_probability < p[1]) |>
