@@ -13,7 +13,7 @@
 #' @param fmla By default, logistic regression model predicts whether two records match as a linear combination of embedding similarity and Jaro-Winkler similarity (`match ~ sim + jw`). Change this input for alternate specifications.
 #' @param max_validations The maximum number of LLM prompts to submit during the validation stage. Defaults to 100,000
 #' @param p The range of estimated match probabilities within which `fuzzylink()` will validate record pairs using an LLM prompt. Defaults to c(0.1, 0.95)
-#' @param k Number of nearest neighbors to validate for records in `dfA` with no identified matches. Higher values may improve recall at expense of precision. Defaults to 20
+#' @param k Number of nearest neighbors to validate for records in `dfA` with no identified matches. Higher values may improve recall at expense of precision. Defaults to 0
 #' @param parallel TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.
 #' @param return_all_pairs If TRUE, returns *every* within-block record pair from dfA and dfB, not just validated pairs. Defaults to FALSE.
 #'
@@ -40,7 +40,7 @@ fuzzylink <- function(dfA, dfB,
                       fmla = match ~ sim + jw,
                       max_validations = 1e5,
                       p = c(0.1, 0.95),
-                      k = 20,
+                      k = 0,
                       parallel = TRUE,
                       return_all_pairs = FALSE){
 
