@@ -342,7 +342,7 @@ matches
 
 ## A Note On Cost
 
-Because the `fuzzylink()` function makes several calls to the OpenAI API---which charges a [per-token fee](https://openai.com/pricing)---there is a monetary cost associated with each use. Based on the package defaults and API pricing as of March 2024, here is a table of approximate costs for merging datasets of various sizes.
+Because the `fuzzylink()` function makes several calls to the OpenAI API---which charges a [per-token fee](https://openai.com/api/pricing/)---there is a monetary cost associated with each use. Based on the package defaults and API pricing as of March 2024, here is a table of approximate costs for merging datasets of various sizes.
 
 ```{r, echo=FALSE}
 embedding_cost_per_token <- 0.13 / 1e6
