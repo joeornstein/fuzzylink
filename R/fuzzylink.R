@@ -11,7 +11,7 @@
 #' @param embedding_dimensions The dimension of the embedding vectors to retrieve. Defaults to 256
 #' @param embedding_model Which pretrained embedding model to use; defaults to 'text-embedding-3-large' (OpenAI), but will also accept 'mistral-embed' (Mistral).
 #' @param fmla By default, logistic regression model predicts whether two records match as a linear combination of embedding similarity and Jaro-Winkler similarity (`match ~ sim + jw`). Change this input for alternate specifications.
-#' @param max_validations The maximum number of LLM prompts to submit during the validation stage. Defaults to 100,000
+#' @param max_labels The maximum number of LLM prompts to submit when labeling record pairs. Defaults to 100,000
 #' @param p The range of estimated match probabilities within which `fuzzylink()` will validate record pairs using an LLM prompt. Defaults to c(0.1, 0.95)
 #' @param k Number of nearest neighbors to validate for records in `dfA` with no identified matches. Higher values may improve recall at expense of precision. Defaults to 0
 #' @param parallel TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.
@@ -38,7 +38,7 @@ fuzzylink <- function(dfA, dfB,
                       embedding_dimensions = 256,
                       embedding_model = 'text-embedding-3-large',
                       fmla = match ~ sim + jw,
-                      max_validations = 1e5,
+                      max_labels = 1e5,
                       p = c(0.1, 0.95),
                       k = 0,
                       parallel = TRUE,
@@ -186,7 +186,7 @@ fuzzylink <- function(dfA, dfB,
 
   ## Step 6: Validate uncertain matches --------------
 
-  validations_remaining <- max_validations
+  validations_remaining <- max_labels
 
   get_matches_to_validate <- function(df){
 
