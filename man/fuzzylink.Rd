@@ -12,14 +12,12 @@ fuzzylink(
   verbose = TRUE,
   record_type = "entity",
   instructions = NULL,
-  model = "gpt-3.5-turbo-instruct",
+  model = "gpt-4o",
   openai_api_key = Sys.getenv("OPENAI_API_KEY"),
   embedding_dimensions = 256,
   embedding_model = "text-embedding-3-large",
   fmla = match ~ sim + jw,
-  max_validations = 1e+05,
-  p = c(0.1, 0.95),
-  k = 0,
+  max_labels = 10000,
   parallel = TRUE,
   return_all_pairs = FALSE
 )
@@ -37,7 +35,7 @@ fuzzylink(
 
 \item{instructions}{A string containing additional instructions to include in the LLM prompt during validation.}
 
-\item{model}{Which LLM to prompt when validating matches; defaults to 'gpt-3.5-turbo-instruct'}
+\item{model}{Which LLM to prompt when validating matches; defaults to 'gpt-4o'}
 
 \item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
 
@@ -47,11 +45,7 @@ fuzzylink(
 
 \item{fmla}{By default, logistic regression model predicts whether two records match as a linear combination of embedding similarity and Jaro-Winkler similarity (\code{match ~ sim + jw}). Change this input for alternate specifications.}
 
-\item{max_validations}{The maximum number of LLM prompts to submit during the validation stage. Defaults to 100,000}
-
-\item{p}{The range of estimated match probabilities within which \code{fuzzylink()} will validate record pairs using an LLM prompt. Defaults to c(0.1, 0.95)}
-
-\item{k}{Number of nearest neighbors to validate for records in \code{dfA} with no identified matches. Higher values may improve recall at expense of precision. Defaults to 0}
+\item{max_labels}{The maximum number of LLM prompts to submit when labeling record pairs. Defaults to 10,000}
 
 \item{parallel}{TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.}
 
