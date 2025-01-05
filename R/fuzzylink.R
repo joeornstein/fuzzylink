@@ -6,12 +6,12 @@
 #' @param verbose TRUE to print progress updates, FALSE for no output
 #' @param record_type A character describing what type of entity the `by` variable represents. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
 #' @param instructions A string containing additional instructions to include in the LLM prompt during validation.
-#' @param model Which LLM to prompt when validating matches; defaults to 'gpt-3.5-turbo-instruct'
+#' @param model Which LLM to prompt when validating matches; defaults to 'gpt-4o'
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
 #' @param embedding_dimensions The dimension of the embedding vectors to retrieve. Defaults to 256
 #' @param embedding_model Which pretrained embedding model to use; defaults to 'text-embedding-3-large' (OpenAI), but will also accept 'mistral-embed' (Mistral).
 #' @param fmla By default, logistic regression model predicts whether two records match as a linear combination of embedding similarity and Jaro-Winkler similarity (`match ~ sim + jw`). Change this input for alternate specifications.
-#' @param max_labels The maximum number of LLM prompts to submit when labeling record pairs. Defaults to 100,000
+#' @param max_labels The maximum number of LLM prompts to submit when labeling record pairs. Defaults to 10,000
 #' @param p The range of estimated match probabilities within which `fuzzylink()` will validate record pairs using an LLM prompt. Defaults to c(0.1, 0.95)
 #' @param k Number of nearest neighbors to validate for records in `dfA` with no identified matches. Higher values may improve recall at expense of precision. Defaults to 0
 #' @param parallel TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.
@@ -33,14 +33,12 @@ fuzzylink <- function(dfA, dfB,
                       verbose = TRUE,
                       record_type = 'entity',
                       instructions = NULL,
-                      model = 'gpt-3.5-turbo-instruct',
+                      model = 'gpt-4o',
                       openai_api_key = Sys.getenv('OPENAI_API_KEY'),
                       embedding_dimensions = 256,
                       embedding_model = 'text-embedding-3-large',
                       fmla = match ~ sim + jw,
-                      max_labels = 1e5,
-                      p = c(0.1, 0.95),
-                      k = 0,
+                      max_labels = 1e4,
                       parallel = TRUE,
                       return_all_pairs = FALSE){
 
@@ -141,33 +139,9 @@ fuzzylink <- function(dfA, dfB,
     sim[[i]] <- get_similarity_matrix(embeddings, strings_A, strings_B)
   }
 
-  ## Step 3: Create training set -------------
+  ## Step 3: Label Training Set -------------
   if(verbose){
-    cat('Labeling training set (',
-        format(Sys.time(), '%X'),
-        ')\n\n', sep = '')
-  }
-  train <- get_training_set(sim, record_type = record_type,
-                            instructions = instructions,
-                            model = model, openai_api_key = openai_api_key,
-                            parallel = parallel)
-
-  ## Step 4: Fit model -------------------
-  if(verbose){
-    cat('Fitting model (',
-        format(Sys.time(), '%X'),
-        ')\n\n', sep = '')
-  }
-  fit <- stats::glm(fmla,
-                    data = train |>
-                      dplyr::filter(match %in% c('Yes', 'No')) |>
-                      dplyr::mutate(match = as.numeric(match == 'Yes')),
-                    family = 'binomial')
-
-  # Step 5: Create matched dataset ---------------
-
-  if(verbose){
-    cat('Linking datasets (',
+    cat('Labeling 500 Record Pairs (',
         format(Sys.time(), '%X'),
         ')\n\n', sep = '')
   }
@@ -182,117 +156,167 @@ fuzzylink <- function(dfA, dfB,
   # add lexical string distance measures
   df$jw <- stringdist::stringsim(df$A, df$B, method = 'jw', p = 0.1)
 
+  # label initial training set (n_t=500)
+  df$match <- NA
+  n_t <- 500
+  k <- max(floor(n_t / length(unique(df$A))), 1)
+  pairs_to_label <- df |>
+    # create index number
+    dplyr::mutate(index = dplyr::row_number()) |>
+    # remove any duplicate A/B pairs
+    dplyr::distinct(A, B, .keep_all = TRUE) |>
+    # get the k largest sim values in each group
+    dplyr::group_by(A) |>
+    dplyr::slice_max(sim, n = k) |>
+    dplyr::ungroup() |>
+    # only keep n_t record pairs
+    dplyr::slice_sample(n = n_t) |>
+    dplyr::pull(index)
+
+  df$match[pairs_to_label] <- check_match(
+    df$A[pairs_to_label],
+    df$B[pairs_to_label],
+    record_type = record_type,
+    instructions = instructions,
+    model = model,
+    openai_api_key = openai_api_key,
+    parallel = parallel
+  )
+
+
+  # train <- get_training_set(sim, record_type = record_type,
+  #                           instructions = instructions,
+  #                           model = model, openai_api_key = openai_api_key,
+  #                           parallel = parallel)
+
+  ## Step 4: Fit model -------------------
+  if(verbose){
+    cat('Fitting model (',
+        format(Sys.time(), '%X'),
+        ')\n\n', sep = '')
+  }
+  fit <- stats::glm(fmla,
+                    data = df |>
+                      dplyr::filter(match %in% c('Yes', 'No')) |>
+                      dplyr::mutate(match = as.numeric(match == 'Yes')),
+                    family = 'binomial')
+
+  # Step 5: Active Learning Loop ---------------
+
+  i <- 1
+  window_size <- 5
+  gradient_estimate <- 0
+  stop_threshold <- 0.01
+  kernel_sd <- 0.2
+  batch_size <- 100
+  stop_condition_met <- FALSE
   df$match_probability <- stats::predict.glm(fit, df, type = 'response')
 
-  ## Step 6: Validate uncertain matches --------------
-
-  validations_remaining <- max_labels
-
-  get_matches_to_validate <- function(df){
-
-    mtv <- df |>
-      # merge with labels from train set
-      dplyr::left_join(train |>
-                         dplyr::select(A, B, match),
-                       by = c('A', 'B')) |>
-      # keep name pairs within the user-specified uncertainty range
-      dplyr::filter(match_probability >= p[1],
-                    match_probability < p[2],
-                    is.na(match)) |>
-      # remove duplicate name pairs
-      dplyr::select(-block) |>
-      dplyr::distinct() |>
-      # validate in batches of 500
-      dplyr::slice_max(match_probability, n = 500)
-
-    # if there are no name pairs remaining within the uncertainty range,
-    # validate the k nearest neighbors of records in A with no validated matches
-    if(nrow(mtv) == 0){
-
-      mtv <- df |>
-        # merge with labels from train set
-        dplyr::left_join(train |>
-                           dplyr::select(A, B, match),
-                         by = c('A', 'B')) |>
-        # keep only records from A with no within-block validated matches
-        dplyr::group_by(A, block) |>
-        dplyr::filter(sum(match == 'Yes' | match_probability > p[2],
-                          na.rm = TRUE) == 0) |>
-        dplyr::ungroup() |>
-        # remove records that have already been validated in range [p_lower, 1]
-        dplyr::filter(match_probability < p[1]) |>
-        # get the k nearest within-block neighbors for each unvalidated record in dfA
-        dplyr::group_by(A, block) |>
-        dplyr::slice_max(match_probability, n = k) |>
-        dplyr::ungroup() |>
-        dplyr::filter(is.na(match)) |>
-        # remove duplicate name pairs
-        dplyr::select(-block) |>
-        dplyr::distinct() |>
-        # validate in batches of 500
-        dplyr::slice_max(match_probability, n = 500)
-
-    }
-    return(mtv)
-  }
-
-  matches_to_validate <- get_matches_to_validate(df)
-
-    # dplyr::filter(match_probability > 0.2,
-    #               match_probability < 0.9,
-    #               is.na(match))
-
-  while(nrow(matches_to_validate) > 0 & validations_remaining > 0){
-
-    # if you've reached the user-specified cap, only validate a sample
-    if(nrow(matches_to_validate) > validations_remaining){
-      matches_to_validate <- matches_to_validate |>
-        dplyr::slice_sample(n = validations_remaining)
-    }
+  while(!stop_condition_met){
 
     if(verbose){
-      cat('Validating ',
-          prettyNum(nrow(matches_to_validate), big.mark = ','),
-          ' matches (',
+      cat('Refining Model ',
+          i, ' (',
           format(Sys.time(), '%X'),
           ')\n\n', sep = '')
     }
 
-    matches_to_validate$match <- check_match(matches_to_validate$A,
-                                             matches_to_validate$B,
-                                             model = model,
-                                             record_type = record_type,
-                                             instructions = instructions,
-                                             openai_api_key = openai_api_key,
-                                             parallel = parallel)
-
-    # append new labeled pairs to the train set
-    train <- train |>
-      dplyr::bind_rows(matches_to_validate |>
-                         dplyr::select(A,B,sim,jw,match))
-
-    validations_remaining <- validations_remaining - nrow(matches_to_validate)
-
-    # if you've validated all pairs with match probability > p_lower, stop refining the model
-    if(sum(matches_to_validate$match_probability >= p[1]) == 0){
-      # check if the second-stage validation is complete. if yes, break the loop.
-      if(nrow(matches_to_validate) < 500){
-        break
-      }
-    } else{
-      # refine the model (train only on the properly formatted labels)
-      fit <- stats::glm(fmla,
-                        data = train |>
-                          dplyr::filter(match %in% c('Yes', 'No')) |>
-                          dplyr::mutate(match = as.numeric(match == 'Yes')),
-                        family = 'binomial')
-
-      df$match_probability <- stats::predict.glm(fit, df, type = 'response')
-      # using the equation instead of stats::predict.glm() is *marginally* quicker?
+    # Gaussian kernel
+    log_prob <- qlogis(df$match_probability)
+    p_draw <- ifelse(is.na(df$match),
+                     dnorm(log_prob, mean = 0, sd = kernel_sd),
+                     0)
+    if(sum(p_draw > 0) == 0){
+      break
     }
-    # get matches to validate for the next loop
-    matches_to_validate <- get_matches_to_validate(df)
 
+    pairs_to_label <- sample(
+      1:nrow(df),
+      size = ifelse(sum(p_draw > 0) < batch_size, sum(p_draw > 0), batch_size),
+      replace = FALSE,
+      prob = p_draw
+    )
+
+    # add the labels to the dataset
+    df$match[pairs_to_label] <- check_match(
+      df$A[pairs_to_label],
+      df$B[pairs_to_label],
+      record_type = record_type,
+      instructions = instructions,
+      model = model,
+      openai_api_key = openai_api_key,
+      parallel = parallel
+    )
+
+    # refit the model
+    fit <- stats::glm(fmla,
+                      data = df |>
+                        dplyr::filter(match %in% c('Yes', 'No')) |>
+                        dplyr::mutate(match = as.numeric(match == 'Yes')),
+                      family = 'binomial')
+
+    # re-estimate match probabilities
+    old_probs <- df$match_probability
+    df$match_probability <- stats::predict.glm(fit, df, type = 'response')
+    gradient_estimate[i] <- max(abs(old_probs - df$match_probability))
+
+    if(i >= window_size){
+      if(mean(gradient_estimate[(i-window_size+1):i]) < stop_threshold){
+        stop_condition_met <- TRUE
+      }
+    }
+
+    i <- i + 1
+  }
+
+  ## Step 6: Recall Search -----------------
+
+  # 1. Identify records in A without matches in B
+  # 2. Sample from kernel in batches of 100; label but do not update model.
+  # Loop 1-2 until either there are no remaining record pairs to label or you've hit
+  # user-specified label maximum
+
+  stop_condition_met <- FALSE
+  while(!stop_condition_met){
+
+    matches_found <- tapply(as.numeric(df$match == 'Yes'),
+                            list(df$A, df$block), sum, na.rm=TRUE)
+    no_matches_found <- apply(df, 1,
+                              function(row) matches_found[row["A"], row["block"]] == 0)
+
+    # Gaussian kernel
+    log_prob <- qlogis(df$match_probability)
+    p_draw <- ifelse(is.na(df$match) & no_matches_found,
+                     dnorm(log_prob, mean = 0, sd = kernel_sd),
+                     0)
+    if(sum(p_draw > 0) == 0){
+      break
+    }
+
+    print(paste0('Record Pairs Left To Search: ', sum(p_draw>0)))
+
+    pairs_to_label <- sample(
+      1:nrow(df),
+      size = ifelse(sum(p_draw > 0) < batch_size, sum(p_draw > 0), batch_size),
+      replace = FALSE,
+      prob = p_draw
+    )
+
+    # add the labels to the dataset
+    df$match[pairs_to_label] <- check_match(
+      df$A[pairs_to_label],
+      df$B[pairs_to_label],
+      record_type = record_type,
+      instructions = instructions,
+      model = model,
+      openai_api_key = openai_api_key,
+      parallel = parallel
+    )
+
+    # check if stopping condition has been met
+    if(sum(!is.na(df$match)) >= max_labels){
+      stop_condition_met <- TRUE
+    }
   }
 
   # if blocking, merge with the blocking variables prior to linking
@@ -301,32 +325,46 @@ fuzzylink <- function(dfA, dfB,
     df <- dplyr::left_join(df, blocks, by = 'block')
   }
 
-  if(return_all_pairs){
-    matches <- df |>
-      # join with match labels from the training set
-      dplyr::left_join(train |>
-                         dplyr::select(A, B, match),
-                       by = c('A', 'B')) |>
-      dplyr::rename(validated = match)
-  } else{
-    matches <- df |>
-      # join with match labels from the training set
-      dplyr::left_join(train |>
-                         dplyr::select(A, B, match),
-                       by = c('A', 'B')) |>
-      # only keep pairs that have been validated or have a match probability > p_lower
-      dplyr::filter((match_probability > p[1] &
+  if(!return_all_pairs){
+
+    # return the cutoff that maximizes expected F-score
+    get_cutoff <- function(df, fit){
+      df <- df[order(df$match_probability),]
+      df$expected_false_negatives <- cumsum(df$match_probability)
+      df$identified_false_negatives <- cumsum(ifelse(is.na(df$match), 0, as.numeric(df$match == 'Yes')))
+      df <- df[order(-df$match_probability),]
+      df$expected_false_positives <- cumsum(1-df$match_probability)
+      df$identified_false_positives <- cumsum(1 - ifelse(is.na(df$match_probability), 1, as.numeric(df$match == 'Yes')))
+      df$expected_true_positives <- cumsum(df$match_probability)
+      df$identified_true_positives <- cumsum(ifelse(is.na(df$match), 0, as.numeric(df$match == 'Yes')))
+
+      total_labeled_true <- sum(df$match == 'Yes', na.rm = TRUE)
+
+      df$tp <- total_labeled_true + (df$expected_true_positives - df$identified_true_positives)
+      df$fp <- df$expected_false_positives - df$identified_false_positives
+      df$fn <- df$expected_false_negatives - df$identified_false_negatives
+
+      df$expected_recall <- df$tp / (df$tp + df$fn)
+      df$expected_precision <- df$tp / (df$tp + df$fp)
+      df$expected_f1 = 2 * (df$expected_recall * df$expected_precision) /
+        (df$expected_recall + df$expected_precision)
+
+      return(df$match_probability[which.max(df$expected_f1)])
+    }
+
+    df <- df |>
+      # only keep pairs that have been labeled Yes or have a match probability > p_cutoff
+      dplyr::filter((match_probability > get_cutoff(df, fit) &
                        is.na(match)) | match == 'Yes') |>
       dplyr::right_join(dfA,
                         by = c('A' = by, blocking.variables),
                         relationship = 'many-to-many') |>
       dplyr::left_join(dfB,
                        by = c('B' = by, blocking.variables),
-                       relationship = 'many-to-many') |>
-      dplyr::rename(validated = match)
+                       relationship = 'many-to-many')
   }
 
-  if(is.null(blocking.variables)) matches <- dplyr::select(matches, -block)
+  if(is.null(blocking.variables)) df <- dplyr::select(df, -block)
 
   if(verbose){
     cat('Done! (',
@@ -334,6 +372,6 @@ fuzzylink <- function(dfA, dfB,
         ')\n', sep = '')
   }
 
-  return(matches)
+  return(df)
 
 }
