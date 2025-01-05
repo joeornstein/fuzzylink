@@ -28,7 +28,7 @@ check_match <- function(string1, string2,
   }
 
   if(openai_api_key == ''){
-    stop("No API key detected in system environment. You can enter it manually using the 'openai_api_key' argument.")
+    stop("No API key detected in system environment. You can add one using the 'openai_api_key()' function.")
   }
 
   # if non-NULL, pad the instructions
@@ -151,7 +151,7 @@ check_match <- function(string1, string2,
         api_key <- Sys.getenv('MISTRAL_API_KEY')
 
         if(api_key == ''){
-          stop("No API key detected in system environment. Add to Renviron as MISTRAL_API_KEY.")
+          stop("No API key detected in system environment. You can add one using the 'mistral_api_key()' function.")
         }
       }
 
