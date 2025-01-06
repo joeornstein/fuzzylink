@@ -139,7 +139,7 @@ fuzzylink <- function(dfA, dfB,
 
   ## Step 3: Label Training Set -------------
   if(verbose){
-    cat('Labeling 500 Record Pairs (',
+    cat('Labeling Initial Training Set (',
         format(Sys.time(), '%X'),
         ')\n\n', sep = '')
   }
@@ -154,15 +154,18 @@ fuzzylink <- function(dfA, dfB,
   # add lexical string distance measures
   df$jw <- stringdist::stringsim(df$A, df$B, method = 'jw', p = 0.1)
 
+  # the 'train' dataset removes duplicate A/B pairs
+  train <- df |>
+    dplyr::distinct(A, B, .keep_all = TRUE)
+
+
   # label initial training set (n_t=500)
-  df$match <- NA
+  train$match <- NA
   n_t <- 500
-  k <- max(floor(n_t / length(unique(df$A))), 1)
-  pairs_to_label <- df |>
+  k <- max(floor(n_t / length(unique(train$A))), 1)
+  pairs_to_label <- train |>
     # create index number
     dplyr::mutate(index = dplyr::row_number()) |>
-    # remove any duplicate A/B pairs
-    dplyr::distinct(A, B, .keep_all = TRUE) |>
     # get the k largest sim values in each group
     dplyr::group_by(A) |>
     dplyr::slice_max(sim, n = k) |>
@@ -171,9 +174,9 @@ fuzzylink <- function(dfA, dfB,
     dplyr::slice_sample(n = n_t) |>
     dplyr::pull(index)
 
-  df$match[pairs_to_label] <- check_match(
-    df$A[pairs_to_label],
-    df$B[pairs_to_label],
+  train$match[pairs_to_label] <- check_match(
+    train$A[pairs_to_label],
+    train$B[pairs_to_label],
     record_type = record_type,
     instructions = instructions,
     model = model,
@@ -194,7 +197,7 @@ fuzzylink <- function(dfA, dfB,
         ')\n\n', sep = '')
   }
   fit <- stats::glm(fmla,
-                    data = df |>
+                    data = train |>
                       dplyr::filter(match %in% c('Yes', 'No')) |>
                       dplyr::mutate(match = as.numeric(match == 'Yes')),
                     family = 'binomial')
@@ -208,7 +211,7 @@ fuzzylink <- function(dfA, dfB,
   kernel_sd <- 0.2
   batch_size <- 100
   stop_condition_met <- FALSE
-  df$match_probability <- stats::predict.glm(fit, df, type = 'response')
+  train$match_probability <- stats::predict.glm(fit, train, type = 'response')
 
   while(!stop_condition_met){
 
@@ -220,8 +223,8 @@ fuzzylink <- function(dfA, dfB,
     }
 
     # Gaussian kernel
-    log_prob <- qlogis(df$match_probability)
-    p_draw <- ifelse(is.na(df$match),
+    log_prob <- qlogis(train$match_probability)
+    p_draw <- ifelse(is.na(train$match),
                      dnorm(log_prob, mean = 0, sd = kernel_sd),
                      0)
     if(sum(p_draw > 0) == 0){
@@ -229,16 +232,16 @@ fuzzylink <- function(dfA, dfB,
     }
 
     pairs_to_label <- sample(
-      1:nrow(df),
+      1:nrow(train),
       size = ifelse(sum(p_draw > 0) < batch_size, sum(p_draw > 0), batch_size),
       replace = FALSE,
       prob = p_draw
     )
 
     # add the labels to the dataset
-    df$match[pairs_to_label] <- check_match(
-      df$A[pairs_to_label],
-      df$B[pairs_to_label],
+    train$match[pairs_to_label] <- check_match(
+      train$A[pairs_to_label],
+      train$B[pairs_to_label],
       record_type = record_type,
       instructions = instructions,
       model = model,
@@ -248,15 +251,15 @@ fuzzylink <- function(dfA, dfB,
 
     # refit the model
     fit <- stats::glm(fmla,
-                      data = df |>
+                      data = train |>
                         dplyr::filter(match %in% c('Yes', 'No')) |>
                         dplyr::mutate(match = as.numeric(match == 'Yes')),
                       family = 'binomial')
 
     # re-estimate match probabilities
-    old_probs <- df$match_probability
-    df$match_probability <- stats::predict.glm(fit, df, type = 'response')
-    gradient_estimate[i] <- max(abs(old_probs - df$match_probability))
+    old_probs <- train$match_probability
+    train$match_probability <- stats::predict.glm(fit, train, type = 'response')
+    gradient_estimate[i] <- max(abs(old_probs - train$match_probability))
 
     if(i >= window_size){
       if(mean(gradient_estimate[(i-window_size+1):i]) < stop_threshold){
@@ -269,24 +272,39 @@ fuzzylink <- function(dfA, dfB,
 
   ## Step 6: Recall Search -----------------
 
-  # 1. Identify records in A without matches in B
+  # 1. Identify records in A without in-block matches from B
   # 2. Sample from kernel in batches of 100; label but do not update model.
   # Loop 1-2 until either there are no remaining record pairs to label or you've hit
   # user-specified label maximum
 
+  df <- df |>
+    # merge with labels from train set
+    dplyr::left_join(train |>
+                       dplyr::select(A, B, match),
+                     by = c('A', 'B'))
+
+  df$match_probability <- predict(fit, df, type = 'response')
+
   stop_condition_met <- FALSE
   while(!stop_condition_met){
 
-    matches_found <- tapply(as.numeric(df$match == 'Yes'),
-                            list(df$A, df$block), sum, na.rm=TRUE)
-    no_matches_found <- apply(df, 1,
-                              function(row) matches_found[row["A"], row["block"]] == 0)
+    # find all records in A with no identified within-block matches
+    # and return any unlabeled record pairs
+    to_search <- df |>
+      dplyr::group_by(A, block) |>
+      dplyr::filter(sum(match == 'Yes', na.rm = TRUE) == 0) |>
+      dplyr::filter(is.na(match)) |>
+      dplyr::distinct(A, B, .keep_all = TRUE) |>
+      dplyr::ungroup()
+
+    if(nrow(to_search) == 0){
+      break
+    }
 
     # Gaussian kernel
-    log_prob <- qlogis(df$match_probability)
-    p_draw <- ifelse(is.na(df$match) & no_matches_found,
-                     dnorm(log_prob, mean = 0, sd = kernel_sd),
-                     0)
+    p_draw <- dnorm(qlogis(to_search$match_probability),
+                      mean = 0,
+                      sd = kernel_sd)
     if(sum(p_draw > 0) == 0){
       break
     }
@@ -294,16 +312,16 @@ fuzzylink <- function(dfA, dfB,
     print(paste0('Record Pairs Left To Search: ', sum(p_draw>0)))
 
     pairs_to_label <- sample(
-      1:nrow(df),
+      1:nrow(to_search),
       size = ifelse(sum(p_draw > 0) < batch_size, sum(p_draw > 0), batch_size),
       replace = FALSE,
       prob = p_draw
     )
 
     # add the labels to the dataset
-    df$match[pairs_to_label] <- check_match(
-      df$A[pairs_to_label],
-      df$B[pairs_to_label],
+    to_search$match[pairs_to_label] <- check_match(
+      to_search$A[pairs_to_label],
+      to_search$B[pairs_to_label],
       record_type = record_type,
       instructions = instructions,
       model = model,
@@ -311,11 +329,22 @@ fuzzylink <- function(dfA, dfB,
       parallel = parallel
     )
 
+    # merge into df, updating match values where they differ
+    to_search <- dplyr::select(to_search, A, B, match)
+    df <- df |>
+      dplyr::left_join(to_search,
+                       by = c("A", "B"),
+                       suffix = c(".1", ".2")) |>
+      dplyr::mutate(match = dplyr::coalesce(match.1, match.2)) |>
+      dplyr::select(-match.1, -match.2)
+
     # check if stopping condition has been met
     if(sum(!is.na(df$match)) >= max_labels){
       stop_condition_met <- TRUE
     }
   }
+
+  ## Step 7: Return Linked Datasets -----------------
 
   # if blocking, merge with the blocking variables prior to linking
   if(!is.null(blocking.variables)){
