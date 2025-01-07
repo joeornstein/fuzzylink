@@ -7,7 +7,7 @@
 check_match(
   string1,
   string2,
-  model = "gpt-3.5-turbo-instruct",
+  model = "gpt-4o",
   record_type = "entity",
   instructions = NULL,
   openai_api_key = Sys.getenv("OPENAI_API_KEY"),
@@ -19,7 +19,7 @@ check_match(
 
 \item{string2}{A string or vector of strings}
 
-\item{model}{Which LLM to prompt; defaults to 'gpt-3.5-turbo-instruct'}
+\item{model}{Which LLM to prompt; defaults to 'gpt-4o'}
 
 \item{record_type}{A character describing what type of entity \code{string1} and \code{string2} represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").}
 

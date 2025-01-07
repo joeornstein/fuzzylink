@@ -309,7 +309,7 @@ fuzzylink <- function(dfA, dfB,
       break
     }
 
-    print(paste0('Record Pairs Left To Search: ', sum(p_draw>0)))
+    cat(paste0('Record Pairs Left To Search: ', sum(p_draw>0), '\n\n'))
 
     pairs_to_label <- sample(
       1:nrow(to_search),
