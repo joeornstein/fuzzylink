@@ -162,8 +162,10 @@ check_match <- function(string1, string2,
         # body
         httr2::req_body_json(list(model = model,
                                   messages = prompt,
-                                  temperature = 0,
-                                  max_tokens = 1))
+                                  temperature = 0.0001,
+                                  max_tokens = 1,
+                                  logprobs = TRUE,
+                                  top_logprobs = 20))
     }
 
     # get the user's rate limits
@@ -205,8 +207,8 @@ check_match <- function(string1, string2,
       lapply(httr2::resp_body_string) |>
       lapply(jsonlite::fromJSON, flatten=TRUE)
 
-    # get the labels
-    labels <- sapply(parsed, function(x) x$choices$message.content)
+    # get the labels associated with the highest returned log probability
+    labels <- sapply(parsed, function(x) x$choices$logprobs.content[[1]]$top_logprobs[[1]][1,]$token)
   }
   return(labels)
 }
