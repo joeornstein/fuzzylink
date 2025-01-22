@@ -361,7 +361,7 @@ fuzzylink <- function(dfA, dfB,
       df$identified_false_negatives <- cumsum(ifelse(is.na(df$match), 0, as.numeric(df$match == 'Yes')))
       df <- df[order(-df$match_probability),]
       df$expected_false_positives <- cumsum(1-df$match_probability)
-      df$identified_false_positives <- cumsum(1 - ifelse(is.na(df$match_probability), 1, as.numeric(df$match == 'Yes')))
+      df$identified_false_positives <- cumsum(1 - ifelse(is.na(df$match), 1, as.numeric(df$match == 'Yes')))
       df$expected_true_positives <- cumsum(df$match_probability)
       df$identified_true_positives <- cumsum(ifelse(is.na(df$match), 0, as.numeric(df$match == 'Yes')))
 
