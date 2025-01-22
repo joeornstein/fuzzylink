@@ -277,6 +277,31 @@ fuzzylink <- function(dfA, dfB,
   # Loop 1-2 until either there are no remaining record pairs to label or you've hit
   # user-specified label maximum
 
+  # return the cutoff that maximizes expected F-score
+  get_cutoff <- function(df, fit){
+    df <- df[order(df$match_probability),]
+    df$expected_false_negatives <- cumsum(df$match_probability)
+    df$identified_false_negatives <- cumsum(ifelse(is.na(df$match), 0, as.numeric(df$match == 'Yes')))
+    df <- df[order(-df$match_probability),]
+    df$expected_false_positives <- cumsum(1-df$match_probability)
+    df$identified_false_positives <- cumsum(1 - ifelse(is.na(df$match), 1, as.numeric(df$match == 'Yes')))
+    df$expected_true_positives <- cumsum(df$match_probability)
+    df$identified_true_positives <- cumsum(ifelse(is.na(df$match), 0, as.numeric(df$match == 'Yes')))
+
+    total_labeled_true <- sum(df$match == 'Yes', na.rm = TRUE)
+
+    df$tp <- total_labeled_true + (df$expected_true_positives - df$identified_true_positives)
+    df$fp <- df$expected_false_positives - df$identified_false_positives
+    df$fn <- df$expected_false_negatives - df$identified_false_negatives
+
+    df$expected_recall <- df$tp / (df$tp + df$fn)
+    df$expected_precision <- df$tp / (df$tp + df$fp)
+    df$expected_f1 = 2 * (df$expected_recall * df$expected_precision) /
+      (df$expected_recall + df$expected_precision)
+
+    return(df$match_probability[which.max(df$expected_f1)])
+  }
+
   df <- df |>
     # merge with labels from train set
     dplyr::left_join(train |>
@@ -288,11 +313,13 @@ fuzzylink <- function(dfA, dfB,
   stop_condition_met <- FALSE
   while(!stop_condition_met){
 
-    # find all records in A with no identified within-block matches
+    # find all records in A with no within-block matches
     # and return any unlabeled record pairs
+    cutoff <- get_cutoff(df, fit)
     to_search <- df |>
       dplyr::group_by(A, block) |>
-      dplyr::filter(sum(match == 'Yes', na.rm = TRUE) == 0) |>
+      dplyr::filter(sum(match == 'Yes' | match_probability > cutoff,
+                        na.rm = TRUE) == 0) |>
       dplyr::filter(is.na(match)) |>
       dplyr::distinct(A, B, .keep_all = TRUE) |>
       dplyr::ungroup()
@@ -309,7 +336,11 @@ fuzzylink <- function(dfA, dfB,
       break
     }
 
-    cat(paste0('Record Pairs Left To Search: ', sum(p_draw>0), '\n\n'))
+    remaining_budget <- max_labels - sum(!is.na(df$match))
+    cat(paste0('Record Pairs Remaining To Label: ',
+               prettyNum(min(remaining_budget, sum(p_draw>0)),
+                         big.mark = ','),
+               '\n\n'))
 
     pairs_to_label <- sample(
       1:nrow(to_search),
@@ -353,31 +384,6 @@ fuzzylink <- function(dfA, dfB,
   }
 
   if(!return_all_pairs){
-
-    # return the cutoff that maximizes expected F-score
-    get_cutoff <- function(df, fit){
-      df <- df[order(df$match_probability),]
-      df$expected_false_negatives <- cumsum(df$match_probability)
-      df$identified_false_negatives <- cumsum(ifelse(is.na(df$match), 0, as.numeric(df$match == 'Yes')))
-      df <- df[order(-df$match_probability),]
-      df$expected_false_positives <- cumsum(1-df$match_probability)
-      df$identified_false_positives <- cumsum(1 - ifelse(is.na(df$match), 1, as.numeric(df$match == 'Yes')))
-      df$expected_true_positives <- cumsum(df$match_probability)
-      df$identified_true_positives <- cumsum(ifelse(is.na(df$match), 0, as.numeric(df$match == 'Yes')))
-
-      total_labeled_true <- sum(df$match == 'Yes', na.rm = TRUE)
-
-      df$tp <- total_labeled_true + (df$expected_true_positives - df$identified_true_positives)
-      df$fp <- df$expected_false_positives - df$identified_false_positives
-      df$fn <- df$expected_false_negatives - df$identified_false_negatives
-
-      df$expected_recall <- df$tp / (df$tp + df$fn)
-      df$expected_precision <- df$tp / (df$tp + df$fp)
-      df$expected_f1 = 2 * (df$expected_recall * df$expected_precision) /
-        (df$expected_recall + df$expected_precision)
-
-      return(df$match_probability[which.max(df$expected_f1)])
-    }
 
     df <- df |>
       # only keep pairs that have been labeled Yes or have a match probability > p_cutoff
