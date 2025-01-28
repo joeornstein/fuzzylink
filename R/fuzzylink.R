@@ -152,7 +152,8 @@ fuzzylink <- function(dfA, dfB,
   df <- dplyr::filter(df, !is.na(sim))
 
   # add lexical string distance measures
-  df$jw <- stringdist::stringsim(df$A, df$B, method = 'jw', p = 0.1)
+  df$jw <- stringdist::stringsim(tolower(df$A), tolower(df$B),
+                                 method = 'jw', p = 0.1)
 
   # the 'train' dataset removes duplicate A/B pairs
   train <- df |>
