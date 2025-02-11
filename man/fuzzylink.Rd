@@ -16,6 +16,7 @@ fuzzylink(
   openai_api_key = Sys.getenv("OPENAI_API_KEY"),
   embedding_dimensions = 256,
   embedding_model = "text-embedding-3-large",
+  learner = "glm",
   fmla = match ~ sim + jw,
   max_labels = 10000,
   parallel = TRUE,
@@ -42,6 +43,8 @@ fuzzylink(
 \item{embedding_dimensions}{The dimension of the embedding vectors to retrieve. Defaults to 256}
 
 \item{embedding_model}{Which pretrained embedding model to use; defaults to 'text-embedding-3-large' (OpenAI), but will also accept 'mistral-embed' (Mistral).}
+
+\item{learner}{Which supervised learner should be used to predict match probabilities. Defaults to logistic regression ('glm'), but will also accept random forest ('ranger').}
 
 \item{fmla}{By default, logistic regression model predicts whether two records match as a linear combination of embedding similarity and Jaro-Winkler similarity (\code{match ~ sim + jw}). Change this input for alternate specifications.}
 

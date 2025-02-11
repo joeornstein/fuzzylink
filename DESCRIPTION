@@ -20,7 +20,8 @@ Imports:
     httr,
     jsonlite,
     httr2,
-    curl
+    curl,
+    ranger
 Depends: 
     R (>= 2.10)
 LazyData: true
