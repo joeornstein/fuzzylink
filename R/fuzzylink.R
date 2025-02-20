@@ -6,7 +6,7 @@
 #' @param verbose TRUE to print progress updates, FALSE for no output
 #' @param record_type A character describing what type of entity the `by` variable represents. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
 #' @param instructions A string containing additional instructions to include in the LLM prompt during validation.
-#' @param model Which LLM to prompt when validating matches; defaults to 'gpt-4o'
+#' @param model Which LLM to prompt when validating matches; defaults to 'gpt-4o-2024-11-20	'
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
 #' @param embedding_dimensions The dimension of the embedding vectors to retrieve. Defaults to 256
 #' @param embedding_model Which pretrained embedding model to use; defaults to 'text-embedding-3-large' (OpenAI), but will also accept 'mistral-embed' (Mistral).
@@ -32,7 +32,7 @@ fuzzylink <- function(dfA, dfB,
                       verbose = TRUE,
                       record_type = 'entity',
                       instructions = NULL,
-                      model = 'gpt-4o',
+                      model = 'gpt-4o-2024-11-20',
                       openai_api_key = Sys.getenv('OPENAI_API_KEY'),
                       embedding_dimensions = 256,
                       embedding_model = 'text-embedding-3-large',

@@ -12,7 +12,7 @@ fuzzylink(
   verbose = TRUE,
   record_type = "entity",
   instructions = NULL,
-  model = "gpt-4o",
+  model = "gpt-4o-2024-11-20",
   openai_api_key = Sys.getenv("OPENAI_API_KEY"),
   embedding_dimensions = 256,
   embedding_model = "text-embedding-3-large",
@@ -36,7 +36,7 @@ fuzzylink(
 
 \item{instructions}{A string containing additional instructions to include in the LLM prompt during validation.}
 
-\item{model}{Which LLM to prompt when validating matches; defaults to 'gpt-4o'}
+\item{model}{Which LLM to prompt when validating matches; defaults to 'gpt-4o-2024-11-20    '}
 
 \item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
 
