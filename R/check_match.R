@@ -155,17 +155,29 @@ check_match <- function(string1, string2,
         }
       }
 
-      httr2::request(base_url) |>
-        # headers
-        httr2::req_headers('Authorization' = paste("Bearer", api_key)) |>
-        httr2::req_headers("Content-Type" = "application/json") |>
-        # body
-        httr2::req_body_json(list(model = model,
-                                  messages = prompt,
-                                  temperature = 0.0001,
-                                  max_tokens = 1,
-                                  logprobs = TRUE,
-                                  top_logprobs = 20))
+      # o3 models do not accept logprobs or temperature headers
+      if(model %in% c('o3-mini', 'o1', 'o1-mini')){
+        httr2::request(base_url) |>
+          # headers
+          httr2::req_headers('Authorization' = paste("Bearer", api_key)) |>
+          httr2::req_headers("Content-Type" = "application/json") |>
+          # body
+          httr2::req_body_json(list(model = model,
+                                    messages = prompt))
+      } else{
+        httr2::request(base_url) |>
+          # headers
+          httr2::req_headers('Authorization' = paste("Bearer", api_key)) |>
+          httr2::req_headers("Content-Type" = "application/json") |>
+          # body
+          httr2::req_body_json(list(model = model,
+                                    messages = prompt,
+                                    temperature = 0.0001,
+                                    max_tokens = 1,
+                                    logprobs = TRUE,
+                                    top_logprobs = 20))
+      }
+
     }
 
     # get the user's rate limits
@@ -208,7 +220,12 @@ check_match <- function(string1, string2,
       lapply(jsonlite::fromJSON, flatten=TRUE)
 
     # get the labels associated with the highest returned log probability
-    labels <- sapply(parsed, function(x) x$choices$logprobs.content[[1]]$top_logprobs[[1]][1,]$token)
+    if(model %in% c('o3-mini', 'o1', 'o1-mini')){
+      labels <- sapply(parsed, function(x) x$choices$message.content)
+    } else{
+      labels <- sapply(parsed, function(x) x$choices$logprobs.content[[1]]$top_logprobs[[1]][1,]$token)
+    }
+
   }
   return(labels)
 }
