@@ -252,9 +252,9 @@ fuzzylink <- function(dfA, dfB,
     }
 
     # Gaussian kernel
-    log_prob <- stats::qlogis(train$match_probability)
+    log_odds <- stats::qlogis(train$match_probability)
     p_draw <- ifelse(is.na(train$match),
-                     stats::dnorm(log_prob, mean = 0, sd = kernel_sd),
+                     stats::dnorm(log_odds, mean = 0, sd = kernel_sd),
                      0)
     if(sum(p_draw > 0) == 0){
       break
