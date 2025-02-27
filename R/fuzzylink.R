@@ -287,6 +287,8 @@ fuzzylink <- function(dfA, dfB,
                             y = factor(train$match[train$match %in% c('Yes', 'No')]),
                             probability = TRUE)
       train$match_probability <- stats::predict(fit, train)$predictions[,'Yes']
+      # for RF, only estimate gradient on out-of-sample observations
+      gradient_estimate[i] <- max(abs(old_probs - train$match_probability)[is.na(train$match)])
     } else{
       fit <- stats::glm(fmla,
                         data = train |>
@@ -295,8 +297,9 @@ fuzzylink <- function(dfA, dfB,
                         family = 'binomial')
 
       train$match_probability <- stats::predict.glm(fit, train, type = 'response')
+      gradient_estimate[i] <- max(abs(old_probs - train$match_probability))
     }
-    gradient_estimate[i] <- max(abs(old_probs - train$match_probability))
+
 
 
     if(i >= window_size){
