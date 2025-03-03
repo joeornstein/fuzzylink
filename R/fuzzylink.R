@@ -236,6 +236,7 @@ fuzzylink <- function(dfA, dfB,
   batch_size <- 100
   stop_condition_met <- FALSE
   if(learner == 'ranger'){
+    stop_threshold <- 0.1
     train$match_probability <- stats::predict(fit, train)$predictions[,'Yes']
   } else{
     train$match_probability <- stats::predict.glm(fit, train, type = 'response')
