@@ -127,12 +127,14 @@ get_embeddings <- function(text,
     stop(
       'Error: HTTP 400 Bad Request. Likely due to a problem batching parallel API requests. Please contact package author with a reprex.'
     )
-  }else if(any(status_codes) == 403){
+  } else if(any(status_codes) == 403){
 	 stop(
-       'Error: HTTP 403 Bad Request. Likely due to a problem with the api key. Please contact package author with a reprex.'
-  }else if(any(status_codes) == 429){
- stop(
-   'Error: HTTP 429 Bad Request. Likely due to a problem with the api key. Please contact package author with a reprex.'
+       'Error: HTTP 403 Bad Request. Likely due to a problem with the API key. Please contact package author with a reprex.'
+       )
+  } else if(any(status_codes) == 429){
+    stop(
+   'Error: HTTP 429 Bad Request. Likely due to a problem with the API key. Please contact package author with a reprex.'
+   )
   }
 
 
