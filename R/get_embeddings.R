@@ -72,7 +72,7 @@ get_embeddings <- function(text,
 
       # debug headers
       headers <- c(
-        "Authorization" = paste("Bearer", open_api_key),
+        Authorization = paste("Bearer", openai_api_key),
         "Content-Type" = "application/json"
       )
 
