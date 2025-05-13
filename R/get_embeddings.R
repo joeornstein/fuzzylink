@@ -65,27 +65,41 @@ get_embeddings <- function(text,
     if(openai_api_key == ''){
       stop("No API key detected in system environment. You can enter it manually using the 'openai_api_key' argument.")
     }
+    
+    is_project_scoped <- function(key) {
+      grepl("^sk-proj-", key)
+    }
+    
+    get_project_id <- function(api_key) {
+      if (!is_project_scoped(api_key)) return(NULL)
+      
+      project_id <- Sys.getenv("OPENAI_PROJECT_ID")
+      if (project_id == "") {
+        stop("You are using a project-scoped key (sk-proj-...), but OPENAI_PROJECT_ID is not set in your environment.\n\nPlease set it in your .Renviron file:\n\n  OPENAI_PROJECT_ID=project_xxxxxxxx\n")
+      }
+      return(project_id)
+    }
+    
 
     # format an API request to embeddings endpoint
-    format_request <- function(chunk,
-                               base_url = "https://api.openai.com/v1/embeddings"){
-
-      # debug headers
+    format_request <- function(chunk, base_url = "https://api.openai.com/v1/embeddings") {
+      project_id <- get_project_id(openai_api_key)
+      
       headers <- c(
         Authorization = paste("Bearer", openai_api_key),
-        "Content-Type" = "application/json"
+        `Content-Type` = "application/json"
       )
-
-      print(headers)
       
-
-      httr2::request(base_url) |>
-        # headers
-        httr2::req_headers(.headers = headers) |>
-        httr2::req_body_json(list(model = model,
-                                  input = chunk,
-                                  dimensions = dimensions))
+      if (!is.null(project_id)) {
+        headers["OpenAI-Project"] <- project_id
+      }
+      
+      httr2::req_body_json(
+        httr2::req_headers(httr2::request(base_url), .headers = headers),
+        list(model = model, input = chunk, dimensions = dimensions)
+      )
     }
+    
 
     # get the user's rate limits
     req <- format_request('test')
