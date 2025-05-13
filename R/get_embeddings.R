@@ -70,11 +70,18 @@ get_embeddings <- function(text,
     format_request <- function(chunk,
                                base_url = "https://api.openai.com/v1/embeddings"){
 
+      # debug headers
+      headers <- c(
+        "Authorization" = paste("Bearer", open_api_key),
+        "Content-Type" = "application/json"
+      )
+
+      print(headers)
+      
+
       httr2::request(base_url) |>
         # headers
-        httr2::req_headers('Authorization' = paste("Bearer", openai_api_key)) |>
-        httr2::req_headers("Content-Type" = "application/json") |>
-        # body
+        httr2::req_headers(.headers = headers) |>
         httr2::req_body_json(list(model = model,
                                   input = chunk,
                                   dimensions = dimensions))
