@@ -86,8 +86,8 @@ get_embeddings <- function(text,
       project_id <- get_project_id(openai_api_key)
       
       headers <- c(
-        Authorization = paste("Bearer", openai_api_key),
-        `Content-Type` = "application/json"
+        "Authorization" = paste("Bearer", openai_api_key),
+        "Content-Type" = "application/json"
       )
       
       if (!is.null(project_id)) {
