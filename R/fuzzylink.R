@@ -6,10 +6,11 @@
 #' @param verbose TRUE to print progress updates, FALSE for no output
 #' @param record_type A character describing what type of entity the `by` variable represents. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
 #' @param instructions A string containing additional instructions to include in the LLM prompt during validation.
-#' @param model Which LLM to prompt when validating matches; defaults to 'gpt-4o'
+#' @param model Which LLM to prompt when validating matches; defaults to 'gpt-4o-2024-11-20	'
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
 #' @param embedding_dimensions The dimension of the embedding vectors to retrieve. Defaults to 256
 #' @param embedding_model Which pretrained embedding model to use; defaults to 'text-embedding-3-large' (OpenAI), but will also accept 'mistral-embed' (Mistral).
+#' @param learner Which supervised learner should be used to predict match probabilities. Defaults to logistic regression ('glm'), but will also accept random forest ('ranger').
 #' @param fmla By default, logistic regression model predicts whether two records match as a linear combination of embedding similarity and Jaro-Winkler similarity (`match ~ sim + jw`). Change this input for alternate specifications.
 #' @param max_labels The maximum number of LLM prompts to submit when labeling record pairs. Defaults to 10,000
 #' @param parallel TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.
@@ -31,10 +32,11 @@ fuzzylink <- function(dfA, dfB,
                       verbose = TRUE,
                       record_type = 'entity',
                       instructions = NULL,
-                      model = 'gpt-4o',
+                      model = 'gpt-4o-2024-11-20',
                       openai_api_key = Sys.getenv('OPENAI_API_KEY'),
                       embedding_dimensions = 256,
                       embedding_model = 'text-embedding-3-large',
+                      learner = 'glm',
                       fmla = match ~ sim + jw,
                       max_labels = 1e4,
                       parallel = TRUE,
@@ -155,6 +157,17 @@ fuzzylink <- function(dfA, dfB,
   df$jw <- stringdist::stringsim(tolower(df$A), tolower(df$B),
                                  method = 'jw', p = 0.1)
 
+  # if using random forest as supervised learner, append full suite of
+  # lexical string distance measures
+  if(learner == 'ranger'){
+    df$osa = stringdist::stringdist(tolower(df$A), tolower(df$B), method = "osa")
+    df$cosine = stringdist::stringdist(tolower(df$A), tolower(df$B), method = "cosine")
+    df$jaccard = stringdist::stringdist(tolower(df$A), tolower(df$B), method = "jaccard")
+    df$lcs = stringdist::stringdist(tolower(df$A), tolower(df$B), method = "lcs")
+    df$qgram = stringdist::stringdist(tolower(df$A), tolower(df$B), method = "qgram")
+    df$soundex = stringdist::stringdist(tolower(df$A), tolower(df$B), method = "soundex")
+  }
+
   # the 'train' dataset removes duplicate A/B pairs
   train <- df |>
     dplyr::distinct(A, B, .keep_all = TRUE)
@@ -197,11 +210,21 @@ fuzzylink <- function(dfA, dfB,
         format(Sys.time(), '%X'),
         ')\n\n', sep = '')
   }
-  fit <- stats::glm(fmla,
-                    data = train |>
-                      dplyr::filter(match %in% c('Yes', 'No')) |>
-                      dplyr::mutate(match = as.numeric(match == 'Yes')),
-                    family = 'binomial')
+  if(learner == 'ranger'){
+    fit <- ranger::ranger(x = train |>
+                            dplyr::filter(match %in% c('Yes', 'No')) |>
+                            dplyr::select(sim, jw:soundex),
+                          y = factor(train$match[train$match %in% c('Yes', 'No')]),
+                          probability = TRUE)
+  } else{
+    fit <- stats::glm(fmla,
+                      data = train |>
+                        dplyr::filter(match %in% c('Yes', 'No')) |>
+                        dplyr::mutate(match = as.numeric(match == 'Yes')),
+                      family = 'binomial')
+  }
+
+
 
   # Step 5: Active Learning Loop ---------------
 
@@ -212,7 +235,13 @@ fuzzylink <- function(dfA, dfB,
   kernel_sd <- 0.2
   batch_size <- 100
   stop_condition_met <- FALSE
-  train$match_probability <- stats::predict.glm(fit, train, type = 'response')
+  if(learner == 'ranger'){
+    stop_threshold <- 0.1
+    train$match_probability <- stats::predict(fit, train)$predictions[,'Yes']
+  } else{
+    train$match_probability <- stats::predict.glm(fit, train, type = 'response')
+  }
+
 
   while(!stop_condition_met){
 
@@ -224,9 +253,9 @@ fuzzylink <- function(dfA, dfB,
     }
 
     # Gaussian kernel
-    log_prob <- qlogis(train$match_probability)
+    log_odds <- stats::qlogis(train$match_probability)
     p_draw <- ifelse(is.na(train$match),
-                     dnorm(log_prob, mean = 0, sd = kernel_sd),
+                     stats::dnorm(log_odds, mean = 0, sd = kernel_sd),
                      0)
     if(sum(p_draw > 0) == 0){
       break
@@ -250,17 +279,29 @@ fuzzylink <- function(dfA, dfB,
       parallel = parallel
     )
 
-    # refit the model
-    fit <- stats::glm(fmla,
-                      data = train |>
-                        dplyr::filter(match %in% c('Yes', 'No')) |>
-                        dplyr::mutate(match = as.numeric(match == 'Yes')),
-                      family = 'binomial')
-
-    # re-estimate match probabilities
+    # refit the model and re-estimate match probabilities
     old_probs <- train$match_probability
-    train$match_probability <- stats::predict.glm(fit, train, type = 'response')
-    gradient_estimate[i] <- max(abs(old_probs - train$match_probability))
+    if(learner == 'ranger'){
+      fit <- ranger::ranger(x = train |>
+                              dplyr::filter(match %in% c('Yes', 'No')) |>
+                              dplyr::select(sim, jw:soundex),
+                            y = factor(train$match[train$match %in% c('Yes', 'No')]),
+                            probability = TRUE)
+      train$match_probability <- stats::predict(fit, train)$predictions[,'Yes']
+      # for RF, only estimate gradient on out-of-sample observations
+      gradient_estimate[i] <- max(abs(old_probs - train$match_probability)[is.na(train$match)])
+    } else{
+      fit <- stats::glm(fmla,
+                        data = train |>
+                          dplyr::filter(match %in% c('Yes', 'No')) |>
+                          dplyr::mutate(match = as.numeric(match == 'Yes')),
+                        family = 'binomial')
+
+      train$match_probability <- stats::predict.glm(fit, train, type = 'response')
+      gradient_estimate[i] <- max(abs(old_probs - train$match_probability))
+    }
+
+
 
     if(i >= window_size){
       if(mean(gradient_estimate[(i-window_size+1):i]) < stop_threshold){
@@ -309,7 +350,11 @@ fuzzylink <- function(dfA, dfB,
                        dplyr::select(A, B, match),
                      by = c('A', 'B'))
 
-  df$match_probability <- predict(fit, df, type = 'response')
+  if(learner == 'ranger'){
+    df$match_probability <- stats::predict(fit, df)$predictions[,'Yes']
+  } else{
+    df$match_probability <- stats::predict.glm(fit, df, type = 'response')
+  }
 
   stop_condition_met <- FALSE
   while(!stop_condition_met){
@@ -330,7 +375,7 @@ fuzzylink <- function(dfA, dfB,
     }
 
     # Gaussian kernel
-    p_draw <- dnorm(qlogis(to_search$match_probability),
+    p_draw <- stats::dnorm(stats::qlogis(to_search$match_probability),
                       mean = 0,
                       sd = kernel_sd)
     if(sum(p_draw > 0) == 0){

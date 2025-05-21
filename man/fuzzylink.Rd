@@ -12,10 +12,11 @@ fuzzylink(
   verbose = TRUE,
   record_type = "entity",
   instructions = NULL,
-  model = "gpt-4o",
+  model = "gpt-4o-2024-11-20",
   openai_api_key = Sys.getenv("OPENAI_API_KEY"),
   embedding_dimensions = 256,
   embedding_model = "text-embedding-3-large",
+  learner = "glm",
   fmla = match ~ sim + jw,
   max_labels = 10000,
   parallel = TRUE,
@@ -35,13 +36,15 @@ fuzzylink(
 
 \item{instructions}{A string containing additional instructions to include in the LLM prompt during validation.}
 
-\item{model}{Which LLM to prompt when validating matches; defaults to 'gpt-4o'}
+\item{model}{Which LLM to prompt when validating matches; defaults to 'gpt-4o-2024-11-20    '}
 
 \item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
 
 \item{embedding_dimensions}{The dimension of the embedding vectors to retrieve. Defaults to 256}
 
 \item{embedding_model}{Which pretrained embedding model to use; defaults to 'text-embedding-3-large' (OpenAI), but will also accept 'mistral-embed' (Mistral).}
+
+\item{learner}{Which supervised learner should be used to predict match probabilities. Defaults to logistic regression ('glm'), but will also accept random forest ('ranger').}
 
 \item{fmla}{By default, logistic regression model predicts whether two records match as a linear combination of embedding similarity and Jaro-Winkler similarity (\code{match ~ sim + jw}). Change this input for alternate specifications.}
 

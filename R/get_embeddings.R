@@ -104,10 +104,21 @@ get_embeddings <- function(text,
   if (any(status_codes == 400)) {
     stop("Error: HTTP 400 Bad Request. Likely due to malformed input or batching.")
   }
+  if else if(any(status_codes) == 403){
+	 stop(
+       'Error: HTTP 403 Bad Request.'
+       )
+  } else if(any(status_codes) == 429){
+    stop(
+   'Error: HTTP 429 Bad Request'
+   )
+  }
   
   parsed <- lapply(lapply(resps, httr2::resp_body_string), jsonlite::fromJSON, flatten = TRUE)
   embeddings <- sapply(parsed, function(x) x$data$embedding)
   
+
+  # bind into a matrix
   if (length(chunks) > 1) embeddings <- lapply(embeddings, function(x) do.call(rbind, x))
   embeddings <- do.call(rbind, embeddings)
   rownames(embeddings) <- text
