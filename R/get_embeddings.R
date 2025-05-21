@@ -96,7 +96,7 @@ get_embeddings <- function(text,
 
   if (parallel & model != 'mistral-embed') {
     resps <- httr2::req_perform_parallel(reqs,
-                                         pool = curl::new_pool(host_con = 20),
+                                         max_active = 20,
                                          on_error = 'continue')
   } else {
     resps <- lapply(reqs, httr2::req_throttle, rate = rpm / 60) |>
