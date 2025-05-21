@@ -105,15 +105,14 @@ get_embeddings <- function(text,
 
   status_codes <- vapply(resps, function(x) x$status, numeric(1))
   if (any(status_codes == 400)) {
-    stop("Error: HTTP 400 Bad Request. Likely due to malformed input or batching.")
-  }
-  else if(any(status_codes) == 403){
+    stop("HTTP 400 Bad Request. Likely due to malformed input or batching.")
+  } else if(any(status_codes == 403)){
 	 stop(
-       'Error: HTTP 403 Bad Request.'
+       'HTTP 403 Bad Request.'
        )
-  } else if(any(status_codes) == 429){
+  } else if(any(status_codes == 429)){
     stop(
-   'Error: HTTP 429 Bad Request'
+   'HTTP 429 Bad Request'
    )
   }
 
