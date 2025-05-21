@@ -70,10 +70,13 @@ get_embeddings <- function(text,
         headers["OpenAI-Project"] <- project_id
       }
 
-      httr2::req_body_json(
-        httr2::req_headers(httr2::request(base_url), .headers = headers),
-        list(model = model, input = chunk, dimensions = dimensions)
-      )
+      httr2::request(base_url) |>
+        # headers
+        httr2::req_headers(!!!headers) |>
+        # body
+        httr2::req_body_json(list(model = model,
+                                  input = chunk,
+                                  dimensions = dimensions))
     }
 
     req <- format_request("test")
