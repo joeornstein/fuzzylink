@@ -1,5 +1,5 @@
 Package: fuzzylink
-Title: Probabilistic Record Linkage Using PreTrained Text Embeddings
+Title: Probabilistic Record Linkage Using Pretrained Text Embeddings
 Version: 0.2.0
 Authors@R: 
     person("Joe", "Ornstein", , "jornstein@uga.edu", role = c("aut", "cre"),

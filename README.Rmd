@@ -20,7 +20,7 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The R package `fuzzylink` implements a probabilistic record linkage procedure proposed in [Ornstein (2024)](https://joeornstein.github.io/publications/fuzzylink.pdf). This method allows users to merge datasets with fuzzy matches on a key identifying variable. Suppose, for example, you have the following two datasets:
+The R package `fuzzylink` implements a probabilistic record linkage procedure proposed in [Ornstein (2025)](https://joeornstein.github.io/publications/fuzzylink.pdf). This method allows users to merge datasets with fuzzy matches on a key identifying variable. Suppose, for example, you have the following two datasets:
 
 ```{r, echo = FALSE}
 library(tidyverse)
@@ -79,7 +79,7 @@ df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person', verbose = FALSE)
 df
 ```
 
-The procedure works by using *pretrained text embeddings* to construct a measure of similarity for each pair of names. These similarity measures are then used as predictors in a statistical model to estimate the probability that two name pairs represent the same entity. In the guide below, I will walk step-by-step through what's happening under the hood when we call the `fuzzylink()` function. See [Ornstein (2024)](https://joeornstein.github.io/publications/fuzzylink.pdf) for technical details.
+The procedure works by using *pretrained text embeddings* to construct a measure of similarity for each pair of names. These similarity measures are then used as predictors in a statistical model to estimate the probability that two name pairs represent the same entity. In the guide below, I will walk step-by-step through what's happening under the hood when we call the `fuzzylink()` function. See [Ornstein (2025)](https://joeornstein.github.io/publications/fuzzylink.pdf) for technical details.
 
 ## Installation
 
@@ -158,7 +158,7 @@ If the `df` object links all the presidents to their correct name in `dfB`, ever
 
 - The `instructions` argument should be a string containing additional instructions to include in the language model prompt. Format these like you would format instructions to a human research assistant, including any relevant information that you think would help the model make accurate classifications.
 
-- The `model` argument specifies which language model to prompt. It defaults to OpenAI's 'gpt-3.5-turbo-instruct', but for more difficult problems you can try 'gpt-4o'. Note that this will typically increase accuracy at the expense of cost and runtime. If you prefer an open-source language model, try 'open-mixtral-8x22b'.
+- The `model` argument specifies which language model to prompt. It defaults to OpenAI's 'gpt-4o', but for simpler problems, you can try 'gpt-3.5-turbo-instruct', which will significantly reduce cost and runtime. If you prefer an open-source language model, try 'open-mixtral-8x22b'.
 
 - The `embedding_model` argument specifies which pretrained text embeddings to use when modeling match probability. It defaults to OpenAI's 'text-embedding-3-large', but will also accept 'text-embedding-3-small' or Mistral's 'mistral-embed'. 
 
@@ -237,7 +237,7 @@ sim
 
 ### Step 3: Create a Training Set
 
-We would like to use those cosine similarity scores to predict whether two names refer to the same entity. In order to do that, we need to first create a labeled dataset to fit a statistical model. The `get_training_set()` function selects a sample of name pairs and labels them using the following prompt to GPT-3.5 (brackets denote input variables).
+We would like to use those cosine similarity scores to predict whether two names refer to the same entity. In order to do that, we need to first create a labeled dataset to fit a statistical model. The `get_training_set()` function selects a sample of name pairs and labels them using the following prompt to GPT-4o (brackets denote input variables).
 
 ```
 Decide if the following two names refer to the same {record_type}. {instructions} Think carefully. Respond "Yes" or "No".'
@@ -363,4 +363,4 @@ expand_grid(A = 10^(1:6),
   knitr::kable()
 ```
 
-Note that cost scales more quickly with the size of `dfA` than with `dfB`, because it is more costly to complete LLM prompts for validation than it is to retrieve embeddings. For particularly large datasets, one can reduce costs by using GPT-3.5 (`model = 'gpt-3.5-turbo'`), blocking (`blocking.variables`), or reducing the maximum number of validations (`max_validations`).
+Note that cost scales more quickly with the size of `dfA` than with `dfB`, because it is more costly to complete LLM prompts for validation than it is to retrieve embeddings. For particularly large datasets, one can reduce costs by using GPT-3.5 (`model = 'gpt-3.5-turbo-instruct'`), blocking (`blocking.variables`), or reducing the maximum number of pairs labeled by the LLM (`max_labels`).
