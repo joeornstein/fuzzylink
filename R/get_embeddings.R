@@ -75,16 +75,16 @@ get_embeddings <- function(text,
 
     # format an API request to embeddings endpoint
     format_request <- function(chunk, base_url = "https://api.openai.com/v1/embeddings") {
-      project_id <- get_project_id(openai_api_key)
+      # project_id <- get_project_id(openai_api_key)
 
       # ⚠️ Use a named character vector to avoid collapsing
       headers <- c(
         "Authorization" = paste("Bearer", openai_api_key),
         "Content-Type" = "application/json"
       )
-      if (!is.null(project_id)) {
-        headers["OpenAI-Project"] <- project_id
-      }
+      # if (!is.null(project_id)) {
+      #   headers["OpenAI-Project"] <- project_id
+      # }
 
       httr2::request(base_url) |>
         # headers
