@@ -57,21 +57,21 @@ get_embeddings <- function(text,
       stop("No API key detected. Set OPENAI_API_KEY in .Renviron or pass as argument.")
     }
 
-    is_project_scoped <- function(key) {
-      grepl("^sk-proj-", key)
-    }
-
-    get_project_id <- function(api_key) {
-      if (!is_project_scoped(api_key))
-        return(NULL)
-      project_id <- Sys.getenv("OPENAI_PROJECT_ID")
-      if (project_id == "") {
-        stop(
-          "You are using a project-scoped key (sk-proj-...), but OPENAI_PROJECT_ID is not set.\n\nAdd this line to your .Renviron:\nOPENAI_PROJECT_ID=project_xxxxxx\n"
-        )
-      }
-      return(project_id)
-    }
+    # is_project_scoped <- function(key) {
+    #   grepl("^sk-proj-", key)
+    # }
+    #
+    # get_project_id <- function(api_key) {
+    #   if (!is_project_scoped(api_key))
+    #     return(NULL)
+    #   project_id <- Sys.getenv("OPENAI_PROJECT_ID")
+    #   if (project_id == "") {
+    #     stop(
+    #       "You are using a project-scoped key (sk-proj-...), but OPENAI_PROJECT_ID is not set.\n\nAdd this line to your .Renviron:\nOPENAI_PROJECT_ID=project_xxxxxx\n"
+    #     )
+    #   }
+    #   return(project_id)
+    # }
 
     # format an API request to embeddings endpoint
     format_request <- function(chunk, base_url = "https://api.openai.com/v1/embeddings") {
