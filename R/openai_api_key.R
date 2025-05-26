@@ -4,7 +4,7 @@
 #' automatically called in package functions. If you do not have an \code{.Renviron} file, the function will create one for you.
 #' If you already have an \code{.Renviron} file, the function will append the key to your existing file, while making a backup of your
 #' original file for disaster recovery purposes.
-#' @param key The API key provided to you from OpenAI formated in quotes. A key can be acquired at \url{https://platform.openai.com/api-keys}
+#' @param key The API key provided to you from OpenAI formated in quotes.
 #' @param install if TRUE, will install the key in your \code{.Renviron} file for use in future sessions.  Defaults to FALSE.
 #' @param overwrite If this is set to TRUE, it will overwrite an existing OPENAI_API_KEY that you already have in your \code{.Renviron} file.
 #' @importFrom utils write.table read.table
