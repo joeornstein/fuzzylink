@@ -29,7 +29,7 @@ get_embeddings <- function(text,
     }
 
     # function to format an API request
-    format_request <- function(chunk, base_url = "https://api.mistral.ai/v1/embeddings") {
+    format_mistral_request <- function(chunk, base_url = "https://api.mistral.ai/v1/embeddings") {
       httr2::request(base_url) |>
         httr2::req_headers(
           "Content-Type" = 'application/json',
@@ -41,6 +41,9 @@ get_embeddings <- function(text,
 
     # split the embeddings into chunks, because the Mistral
     # embeddings endpoint will only take so many tokens at a time
+
+    # requests per minute
+    rpm <- 6 * 60
 
     # max tokens per request
     tpr <- 8192
@@ -127,7 +130,11 @@ get_embeddings <- function(text,
   }
 
   # format list of requests
-  reqs <- lapply(chunks, format_request)
+  if(model == 'mistral-embed'){
+    reqs <- lapply(chunks, format_mistral_request)
+  } else{
+    reqs <- lapply(chunks, format_request)
+  }
 
   # perform requests
   if (parallel & model != 'mistral-embed') {
