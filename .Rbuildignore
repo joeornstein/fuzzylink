@@ -8,3 +8,4 @@ data-raw/
 ^docs$
 ^pkgdown$
 ^cran-comments\.md$
+^CRAN-SUBMISSION$
