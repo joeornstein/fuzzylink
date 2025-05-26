@@ -44,7 +44,6 @@ fuzzylink <- function(dfA, dfB,
                       parallel = TRUE,
                       return_all_pairs = FALSE){
 
-
   # Check for errors in inputs
   if(is.null(dfA[[by]])){
     stop(cat("There is no variable called \'", by, "\' in dfA.", sep = ''))
@@ -456,3 +455,8 @@ fuzzylink <- function(dfA, dfB,
   return(df)
 
 }
+
+## quiets concerns of R CMD check re: dplyr pipelines
+utils::globalVariables(c('A', 'B', 'index', 'jw',
+                         'soundex', 'block', 'match_probability',
+                         'match.1', 'match.2'))
