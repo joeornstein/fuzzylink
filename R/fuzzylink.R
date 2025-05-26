@@ -20,6 +20,7 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' dfA <- data.frame(state.x77)
 #' dfA$name <- rownames(dfA)
 #' dfB <- data.frame(name = state.abb, state.division)
@@ -27,6 +28,7 @@
 #'                 by = 'name',
 #'                 record_type = 'US state government',
 #'                 instructions = 'The second dataset contains US postal codes.')
+#' }
 fuzzylink <- function(dfA, dfB,
                       by, blocking.variables = NULL,
                       verbose = TRUE,

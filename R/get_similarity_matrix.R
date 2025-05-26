@@ -12,10 +12,13 @@
 #' @export
 #'
 #' @examples
+#'
+#' \dontrun{
 #' embeddings <- get_embeddings(c('UPS', 'USPS', 'Postal Service'))
 #' get_similarity_matrix(embeddings)
 #' get_similarity_matrix(embeddings, 'Postal Service')
 #' get_similarity_matrix(embeddings, 'Postal Service', c('UPS', 'USPS'))
+#' }
 get_similarity_matrix <- function(embeddings,
                                   strings_A = NULL,
                                   strings_B = NULL){

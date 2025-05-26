@@ -61,6 +61,7 @@ A dataframe with all rows of \code{dfA} joined with any matches from \code{dfB}
 Probabilistic Record Linkage Using Pretrained Text Embeddings
 }
 \examples{
+\dontrun{
 dfA <- data.frame(state.x77)
 dfA$name <- rownames(dfA)
 dfB <- data.frame(name = state.abb, state.division)
@@ -68,4 +69,5 @@ df <- fuzzylink(dfA, dfB,
                 by = 'name',
                 record_type = 'US state government',
                 instructions = 'The second dataset contains US postal codes.')
+}
 }

@@ -36,8 +36,10 @@ A vector the same length as \code{string1} and \code{string2}. "Yes" if the pair
 Test whether two strings match with an LLM prompt.
 }
 \examples{
+\dontrun{
 check_match('UPS', 'United Parcel Service')
 check_match('UPS', 'United States Postal Service')
 check_match(c('USPS', 'USPS', 'USPS'),
             c('Post Office', 'United Parcel', 'US Postal Service'))
+}
 }

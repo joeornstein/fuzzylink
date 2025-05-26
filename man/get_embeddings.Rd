@@ -30,7 +30,9 @@ A matrix of embedding vectors (one per row).
 Get pretrained text embeddings from the OpenAI or Mistral API. Automatically batches requests to handle rate limits.
 }
 \examples{
+\dontrun{
 embeddings <- get_embeddings(c('dog', 'cat', 'canine', 'feline'))
 embeddings['dog',] |> dot(embeddings['canine',])
 embeddings['dog',] |> dot(embeddings['feline',])
+}
 }

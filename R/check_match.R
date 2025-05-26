@@ -12,10 +12,12 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' check_match('UPS', 'United Parcel Service')
 #' check_match('UPS', 'United States Postal Service')
 #' check_match(c('USPS', 'USPS', 'USPS'),
 #'             c('Post Office', 'United Parcel', 'US Postal Service'))
+#' }
 check_match <- function(string1, string2,
                         model = 'gpt-4o-2024-11-20',
                         record_type = 'entity',

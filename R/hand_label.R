@@ -6,7 +6,6 @@
 #' @param df A dataframe with a column called `A` and a column called `B`
 #'
 #' @return A labeled dataframe (`match` column)
-#' @export
 #'
 hand_label <- function(df){
 

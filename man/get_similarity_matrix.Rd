@@ -20,8 +20,11 @@ A matrix of cosine similarities between the embeddings of strings_A and the embe
 Create a matrix of pairwise similarities between each string in \code{strings_A} and \code{strings_B}.
 }
 \examples{
+
+\dontrun{
 embeddings <- get_embeddings(c('UPS', 'USPS', 'Postal Service'))
 get_similarity_matrix(embeddings)
 get_similarity_matrix(embeddings, 'Postal Service')
 get_similarity_matrix(embeddings, 'Postal Service', c('UPS', 'USPS'))
+}
 }

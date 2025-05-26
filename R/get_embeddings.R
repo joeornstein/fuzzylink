@@ -13,9 +13,11 @@
 #' @export
 #'
 #' @examples
+#' \dontrun{
 #' embeddings <- get_embeddings(c('dog', 'cat', 'canine', 'feline'))
 #' embeddings['dog',] |> dot(embeddings['canine',])
 #' embeddings['dog',] |> dot(embeddings['feline',])
+#' }
 get_embeddings <- function(text,
                            model = 'text-embedding-3-large',
                            dimensions = 256,
