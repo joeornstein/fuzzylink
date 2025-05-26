@@ -206,8 +206,7 @@ check_match <- function(string1, string2,
 
     # submit prompts in parallel (20 concurrent requests per host seems to be the optimum)
     if(parallel & stringr::str_detect(model, 'mistral|mixtral', negate = TRUE)){
-      resps <- httr2::req_perform_parallel(reqs,
-                                           pool = curl::new_pool(host_con = 20))
+      resps <- httr2::req_perform_parallel(reqs, max_active = 20)
     } else{
       resps <- reqs |>
         lapply(httr2::req_throttle, rate = rpm / 60) |>
