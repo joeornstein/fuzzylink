@@ -67,5 +67,5 @@ dfB <- data.frame(name = state.abb, state.division)
 df <- fuzzylink(dfA, dfB,
                 by = 'name',
                 record_type = 'US state government',
-                instructions = 'The first dataset contains full US state names. The second dataset contains US postal codes.')
+                instructions = 'The second dataset contains US postal codes.')
 }
