@@ -65,7 +65,13 @@ technical details.
 
 ## Installation
 
-You can install the development version of `fuzzylink` from
+You can install `fuzzylink` from CRAN with:
+
+``` r
+install.packages('fuzzylink')
+```
+
+Or you can install the development version from
 [GitHub](https://github.com/) with:
 
 ``` r
@@ -216,10 +222,10 @@ df
 ```
 
     #>                A                         B       sim block        jw match
-    #> 1      Joe Biden    Joseph Robinette Biden 0.7661285     1 0.7673401   Yes
-    #> 2   Barack Obama      Barack Hussein Obama 0.8457284     3 0.9200000   Yes
-    #> 3 George W. Bush        George Walker Bush 0.8445312     4 0.9301587   Yes
-    #> 4   Bill Clinton William Jefferson Clinton 0.8730800     5 0.5788889   Yes
+    #> 1      Joe Biden    Joseph Robinette Biden 0.7661541     1 0.7673401   Yes
+    #> 2   Barack Obama      Barack Hussein Obama 0.8456864     3 0.9200000   Yes
+    #> 3 George W. Bush        George Walker Bush 0.8447156     4 0.9301587   Yes
+    #> 4   Bill Clinton William Jefferson Clinton 0.8732390     5 0.5788889   Yes
     #> 5   Donald Trump                      <NA>        NA    NA        NA  <NA>
     #>   match_probability    state age      hobby
     #> 1                 1 Delaware  81   Football
@@ -276,7 +282,7 @@ embeddings <- get_embeddings(all_strings)
 dim(embeddings)
 #> [1]  13 256
 head(embeddings['Bill Clinton',])
-#> [1]  0.08017124  0.07613955 -0.01628375 -0.07957640 -0.09821473 -0.04966916
+#> [1]  0.08017783  0.07621191 -0.01634293 -0.07964904 -0.09842110 -0.04973934
 ```
 
 ### Step 2: Similarity Scores
@@ -294,23 +300,23 @@ significantly reduces cost and speeds up computation.
 sim <- get_similarity_matrix(embeddings, strings_A, strings_B)
 sim
 #>                Joseph Robinette Biden Donald John Trump  Barack Hussein Obama
-#> Joe Biden                   0.7661285          0.5531430            0.5262673
-#> Donald Trump                0.4315020          0.8388663            0.4477866
-#> Barack Obama                0.5170260          0.4756605            0.8457284
-#> George W. Bush              0.4940132          0.4877906            0.5680539
-#> Bill Clinton                0.4885266          0.5039268            0.5174566
+#> Joe Biden                   0.7661541          0.5530121            0.5265253
+#> Donald Trump                0.4317941          0.8388798            0.4479710
+#> Barack Obama                0.5172413          0.4756534            0.8456864
+#> George W. Bush              0.4941751          0.4878205            0.5682008
+#> Bill Clinton                0.4885209          0.5037970            0.5174010
 #>                George Walker Bush William Jefferson Clinton
-#> Joe Biden               0.5029197                 0.5407695
-#> Donald Trump            0.4805455                 0.4463142
-#> Barack Obama            0.4851386                 0.5128536
-#> George W. Bush          0.8445312                 0.6113071
-#> Bill Clinton            0.6231014                 0.8730800
+#> Joe Biden               0.5030733                 0.5409155
+#> Donald Trump            0.4804720                 0.4463279
+#> Barack Obama            0.4852450                 0.5130887
+#> George W. Bush          0.8447156                 0.6114024
+#> Bill Clinton            0.6232283                 0.8732390
 #>                George Herbert Walker Bush Biff Tannen Joe Riley
-#> Joe Biden                       0.4659178   0.3023257 0.3797427
-#> Donald Trump                    0.3943302   0.3437970 0.2331483
-#> Barack Obama                    0.4241720   0.2545664 0.3481560
-#> George W. Bush                  0.7333917   0.2458818 0.3609610
-#> Bill Clinton                    0.5950848   0.2213021 0.3196283
+#> Joe Biden                       0.4660231   0.3020480 0.3797024
+#> Donald Trump                    0.3942438   0.3439628 0.2332773
+#> Barack Obama                    0.4241361   0.2546025 0.3483385
+#> George W. Bush                  0.7334961   0.2458988 0.3609917
+#> Bill Clinton                    0.5949446   0.2213129 0.3196689
 ```
 
 ### Step 3: Create a Training Set
@@ -332,18 +338,18 @@ variables).
 train <- get_training_set(list(sim), record_type = 'person')
 train
 #> # A tibble: 40 × 5
-#>    A              B                              sim    jw match
-#>    <fct>          <fct>                        <dbl> <dbl> <chr>
-#>  1 Barack Obama   "Donald John Trump "         0.476 0.472 No   
-#>  2 George W. Bush "George Herbert Walker Bush" 0.733 0.870 No   
-#>  3 Barack Obama   "William Jefferson Clinton"  0.513 0.414 No   
-#>  4 Bill Clinton   "Barack Hussein Obama"       0.517 0.56  No   
-#>  5 Donald Trump   "Biff Tannen"                0.344 0.399 No   
-#>  6 Joe Biden      "Barack Hussein Obama"       0.526 0.535 No   
-#>  7 Joe Biden      "William Jefferson Clinton"  0.541 0.524 No   
-#>  8 Donald Trump   "George Herbert Walker Bush" 0.394 0.344 No   
-#>  9 Barack Obama   "Barack Hussein Obama"       0.846 0.92  Yes  
-#> 10 Barack Obama   "Joseph Robinette Biden"     0.517 0.419 No   
+#>    A              B                             sim    jw match
+#>    <fct>          <fct>                       <dbl> <dbl> <chr>
+#>  1 George W. Bush "Joseph Robinette Biden"    0.494 0.520 No   
+#>  2 Donald Trump   "Barack Hussein Obama"      0.448 0.489 No   
+#>  3 Barack Obama   "William Jefferson Clinton" 0.513 0.414 No   
+#>  4 Bill Clinton   "William Jefferson Clinton" 0.873 0.579 Yes  
+#>  5 Joe Biden      "Joseph Robinette Biden"    0.766 0.721 Yes  
+#>  6 Joe Biden      "Donald John Trump "        0.553 0.444 No   
+#>  7 Barack Obama   "Joe Riley"                 0.348 0.398 No   
+#>  8 Barack Obama   "Biff Tannen"               0.255 0.457 No   
+#>  9 Joe Biden      "Joe Riley"                 0.380 0.867 No   
+#> 10 Barack Obama   "Donald John Trump "        0.476 0.472 No   
 #> # ℹ 30 more rows
 ```
 
@@ -374,12 +380,12 @@ df$match_probability <- predict(model, df, type = 'response')
 
 head(df)
 #>                A                      B       sim        jw match_probability
-#> 1      Joe Biden Joseph Robinette Biden 0.7661285 0.7208273      1.000000e+00
-#> 2   Donald Trump Joseph Robinette Biden 0.4315020 0.4217172      2.220446e-16
-#> 3   Barack Obama Joseph Robinette Biden 0.5170260 0.4191919      2.220446e-16
-#> 4 George W. Bush Joseph Robinette Biden 0.4940132 0.5200216      2.220446e-16
-#> 5   Bill Clinton Joseph Robinette Biden 0.4885266 0.4797980      2.220446e-16
-#> 6      Joe Biden     Donald John Trump  0.5531430 0.4444444      2.220446e-16
+#> 1      Joe Biden Joseph Robinette Biden 0.7661541 0.7208273      1.000000e+00
+#> 2   Donald Trump Joseph Robinette Biden 0.4317941 0.4217172      2.220446e-16
+#> 3   Barack Obama Joseph Robinette Biden 0.5172413 0.4191919      2.220446e-16
+#> 4 George W. Bush Joseph Robinette Biden 0.4941751 0.5200216      2.220446e-16
+#> 5   Bill Clinton Joseph Robinette Biden 0.4885209 0.4797980      2.220446e-16
+#> 6      Joe Biden     Donald John Trump  0.5530121 0.4444444      2.220446e-16
 ```
 
 ### Step 5: Validate Uncertain Matches
@@ -458,11 +464,11 @@ matches <- df |>
 
 matches
 #>                A                         B       sim        jw
-#> 1      Joe Biden    Joseph Robinette Biden 0.7661285 0.7208273
-#> 2   Donald Trump        Donald John Trump  0.8388663 0.9333333
-#> 3   Barack Obama      Barack Hussein Obama 0.8457284 0.9200000
-#> 4 George W. Bush        George Walker Bush 0.8445312 0.9301587
-#> 5   Bill Clinton William Jefferson Clinton 0.8730800 0.5788889
+#> 1      Joe Biden    Joseph Robinette Biden 0.7661541 0.7208273
+#> 2   Donald Trump        Donald John Trump  0.8388798 0.9333333
+#> 3   Barack Obama      Barack Hussein Obama 0.8456864 0.9200000
+#> 4 George W. Bush        George Walker Bush 0.8447156 0.9301587
+#> 5   Bill Clinton William Jefferson Clinton 0.8732390 0.5788889
 #>   match_probability match  state.x age  state.y      hobby
 #> 1                 1   Yes Delaware  81 Delaware   Football
 #> 2                 1   Yes New York  77  Florida       Golf

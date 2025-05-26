@@ -83,7 +83,13 @@ The procedure works by using *pretrained text embeddings* to construct a measure
 
 ## Installation
 
-You can install the development version of `fuzzylink` from [GitHub](https://github.com/) with:
+You can install `fuzzylink` from CRAN with:
+
+```r
+install.packages('fuzzylink')
+```
+
+Or you can install the development version from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
