@@ -20,7 +20,6 @@ Imports:
     httr,
     jsonlite,
     httr2,
-    curl,
     ranger
 Depends: 
     R (>= 2.10)
