@@ -2,9 +2,9 @@ Package: fuzzylink
 Title: Probabilistic Record Linkage Using Pretrained Text Embeddings
 Version: 0.2.0
 Authors@R: 
-    person("Joe", "Ornstein", , "jornstein@uga.edu", role = c("aut", "cre"),
+    person("Joe", "Ornstein", , "jornstein@uga.edu", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-5704-2098"))
-Description: Links datasets through fuzzy string matching using pretrained text embeddings.
+Description: Links datasets through fuzzy string matching using pretrained text embeddings. Methods are described in Ornstein (2025) <https://joeornstein.github.io/publications/fuzzylink.pdf>.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
@@ -24,3 +24,5 @@ Imports:
 Depends: 
     R (>= 2.10)
 LazyData: true
+URL: https://github.com/joeornstein/fuzzylink
+BugReports: https://github.com/joeornstein/fuzzylink/issues
