@@ -4,7 +4,7 @@ Version: 0.2.0
 Authors@R: 
     person("Joe", "Ornstein", , "jornstein@uga.edu", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-5704-2098"))
-Description: Links datasets through fuzzy string matching using pretrained text embeddings. Methods are described in Ornstein (2025) <https://joeornstein.github.io/publications/fuzzylink.pdf>.
+Description: Links datasets through fuzzy string matching using pretrained text embeddings. Produces more accurate record linkage when lexical string distance metrics are a poor guide to match quality (e.g., "Patricia" is more lexically similar to "Patrick" than it is to "Trish"). Capable of performing multilingual record linkage. Methods are described in Ornstein (2025) <https://joeornstein.github.io/publications/fuzzylink.pdf>.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
