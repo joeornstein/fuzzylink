@@ -13,7 +13,7 @@ hand_label <- function(df){
 
   for(i in 1:nrow(df)){
 
-    cat(paste0('\n\n\n\n\n\n\n\n\nDo these match? (1=Yes, 0=No)\n',
+    message(paste0('\n\n\n\n\n\n\n\n\nDo these match? (1=Yes, 0=No)\n',
                df$A[i], '\n',
                df$B[i]))
 

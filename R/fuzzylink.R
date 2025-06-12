@@ -46,10 +46,10 @@ fuzzylink <- function(dfA, dfB,
 
   # Check for errors in inputs
   if(is.null(dfA[[by]])){
-    stop(cat("There is no variable called \'", by, "\' in dfA.", sep = ''))
+    stop("There is no variable called \'", by, "\' in dfA.")
   }
   if(is.null(dfB[[by]])){
-    stop(cat("There is no variable called \'", by, "\' in dfB.", sep = ''))
+    stop("There is no variable called \'", by, "\' in dfB.")
   }
   if(openai_api_key == ''){
     stop("No API key detected in system environment. You can enter it manually using the 'openai_api_key' argument.")
@@ -78,7 +78,7 @@ fuzzylink <- function(dfA, dfB,
   ## Step 1: Get embeddings ----------------
   all_strings <- unique(c(dfA[[by]], dfB[[by]]))
   if(verbose){
-    cat('Retrieving ',
+    message('Retrieving ',
         prettyNum(length(all_strings), big.mark = ','),
         ' embeddings (',
         format(Sys.time(), '%X'),
@@ -92,7 +92,7 @@ fuzzylink <- function(dfA, dfB,
 
   ## Step 2: Get similarity matrix within each block ------------
   if(verbose){
-    cat('Computing similarity matrix (',
+    message('Computing similarity matrix (',
         format(Sys.time(), '%X'),
         ')\n\n', sep = '')
   }
@@ -102,9 +102,9 @@ fuzzylink <- function(dfA, dfB,
     if(!is.null(blocking.variables)){
 
       # if(verbose){
-      #   cat('Block ', i, ' of ', nrow(blocks), ':\n', sep = '')
+      #   message('Block ', i, ' of ', nrow(blocks), ':\n', sep = '')
       #   print(data.frame(blocks[i,]))
-      #   cat('\n')
+      #   message('\n')
       # }
 
       # subset the data for each block from dfA and dfB
@@ -142,7 +142,7 @@ fuzzylink <- function(dfA, dfB,
 
   ## Step 3: Label Training Set -------------
   if(verbose){
-    cat('Labeling Initial Training Set (',
+    message('Labeling Initial Training Set (',
         format(Sys.time(), '%X'),
         ')\n\n', sep = '')
   }
@@ -207,7 +207,7 @@ fuzzylink <- function(dfA, dfB,
 
   ## Step 4: Fit model -------------------
   if(verbose){
-    cat('Fitting model (',
+    message('Fitting model (',
         format(Sys.time(), '%X'),
         ')\n\n', sep = '')
   }
@@ -247,7 +247,7 @@ fuzzylink <- function(dfA, dfB,
   while(!stop_condition_met){
 
     if(verbose){
-      cat('Refining Model ',
+      message('Refining Model ',
           i, ' (',
           format(Sys.time(), '%X'),
           ')\n\n', sep = '')
@@ -384,10 +384,13 @@ fuzzylink <- function(dfA, dfB,
     }
 
     remaining_budget <- max_labels - sum(!is.na(df$match))
-    cat(paste0('Record Pairs Remaining To Label: ',
-               prettyNum(min(remaining_budget, sum(p_draw>0)),
-                         big.mark = ','),
-               '\n\n'))
+    if(verbose){
+      message(paste0('Record Pairs Remaining To Label: ',
+                 prettyNum(min(remaining_budget, sum(p_draw>0)),
+                           big.mark = ','),
+                 '\n\n'))
+    }
+
 
     pairs_to_label <- sample(
       1:nrow(to_search),
@@ -447,7 +450,7 @@ fuzzylink <- function(dfA, dfB,
   if(is.null(blocking.variables)) df <- dplyr::select(df, -block)
 
   if(verbose){
-    cat('Done! (',
+    message('Done! (',
         format(Sys.time(), '%X'),
         ')\n', sep = '')
   }
