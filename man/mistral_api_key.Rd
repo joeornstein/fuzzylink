@@ -13,6 +13,9 @@ mistral_api_key(key, overwrite = FALSE, install = FALSE)
 
 \item{install}{if TRUE, will install the key in your \code{.Renviron} file for use in future sessions.  Defaults to FALSE.}
 }
+\value{
+No return value, called for side effects.
+}
 \description{
 This function will add your Mistral API key to your \code{.Renviron} file so it can be called securely without being stored
 in your code. After you have installed your key, it can be called any time by typing \code{Sys.getenv("MISTRAL_API_KEY")} and will be

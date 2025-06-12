@@ -8,6 +8,9 @@
 #' @param install if TRUE, will install the key in your \code{.Renviron} file for use in future sessions.  Defaults to FALSE.
 #' @param overwrite If this is set to TRUE, it will overwrite an existing OPENAI_API_KEY that you already have in your \code{.Renviron} file.
 #' @importFrom utils write.table read.table
+#'
+#' @return No return value, called for side effects.
+#'
 #' @examples
 #'
 #' \dontrun{
