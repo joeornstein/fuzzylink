@@ -149,10 +149,16 @@ get_embeddings <- function(text,
     x$status, numeric(1))
   if (any(status_codes == 400)) {
     stop("HTTP 400 Bad Request. Likely due to malformed input or batching.")
+  } else if (any(status_codes == 401)) {
+    stop('401 Unauthorized. Your API key is missing, invalid, or expired. Double-check your credentials.')
   } else if (any(status_codes == 403)) {
-    stop('HTTP 403 Bad Request.')
+    stop('403 Forbidden. Your API key does not have permission to perform this action.')
+  } else if (any(status_codes == 404)) {
+    stop('404 Not Found. Check the spelling of the `model` or `embedding_model` inputs.')
   } else if (any(status_codes == 429)) {
-    stop('HTTP 429 Bad Request')
+    stop('429 Too Many Requests. You have exceeded an API rate limit. Please `parallel = FALSE` for improved rate limit handling.')
+  } else if (any(status_codes %in% 500:504)) {
+      stop('500-504 Server Side Error. Something went wrong with the OpenAI server. Not your fault. Try again later.')
   }
 
   # parse the responses
