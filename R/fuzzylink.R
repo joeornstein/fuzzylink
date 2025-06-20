@@ -54,13 +54,15 @@ fuzzylink <- function(dfA, dfB,
   if(openai_api_key == ''){
     stop("No API key detected in system environment. You can enter it manually using the 'openai_api_key' argument.")
   }
-  if(any(is.na(dfA[[by]]))){
-    warning('Dropping ', sum(is.na(dfA[[by]])), ' observation(s) with missing values from dfA.')
-    dfA <- dfA[!is.na(dfA[[by]]),]
+  missing_dfA <- sum(!complete.cases(dfA[,c(by, blocking.variables), drop = FALSE]))
+  if(missing_dfA > 0){
+    warning('Dropping ', missing_dfA, ' observation(s) with missing values from dfA.')
+    dfA <- dfA[complete.cases(dfA[, c(by,blocking.variables), drop = FALSE]), ]
   }
-  if(any(is.na(dfB[[by]]))){
-    warning('Dropping ', sum(is.na(dfB[[by]])), ' observation(s) with missing values from dfA.')
-    dfB <- dfB[!is.na(dfB[[by]]),]
+  missing_dfB <- sum(!complete.cases(dfB[,c(by, blocking.variables), drop = FALSE]))
+  if(missing_dfB > 0){
+    warning('Dropping ', missing_dfB, ' observation(s) with missing values from dfB.')
+    dfB <- dfB[complete.cases(dfB[, c(by,blocking.variables), drop = FALSE]), ]
   }
 
 
