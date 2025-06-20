@@ -156,7 +156,7 @@ get_embeddings <- function(text,
   } else if (any(status_codes == 404)) {
     stop('404 Not Found. Check the spelling of the `model` or `embedding_model` inputs.')
   } else if (any(status_codes == 429)) {
-    stop('429 Too Many Requests. You have exceeded an API rate limit. Please `parallel = FALSE` for improved rate limit handling.')
+    stop('429 Too Many Requests. The API is not allowing you to retrieve this many embeddings. Please ensure that you have enough credits to use the API. You can also set `parallel = FALSE` for improved rate limit handling.')
   } else if (any(status_codes %in% 500:504)) {
       stop('500-504 Server Side Error. Something went wrong with the OpenAI server. Not your fault. Try again later.')
   }
