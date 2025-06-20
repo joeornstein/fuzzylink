@@ -54,6 +54,14 @@ fuzzylink <- function(dfA, dfB,
   if(openai_api_key == ''){
     stop("No API key detected in system environment. You can enter it manually using the 'openai_api_key' argument.")
   }
+  if(any(is.na(dfA[[by]]))){
+    warning('Dropping ', sum(is.na(dfA[[by]])), ' observation(s) with missing values from dfA.')
+    dfA <- dfA[!is.na(dfA[[by]]),]
+  }
+  if(any(is.na(dfB[[by]]))){
+    warning('Dropping ', sum(is.na(dfB[[by]])), ' observation(s) with missing values from dfA.')
+    dfB <- dfB[!is.na(dfB[[by]]),]
+  }
 
 
   ## Step 0: Blocking -----------------
