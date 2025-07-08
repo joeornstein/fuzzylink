@@ -1,5 +1,7 @@
 # fuzzylink 0.2.3
 
+* The algorithm now omits exact matches from the training set during the active learning loop. This avoids the superfluous step of labeling exact matches with the language model, and patches a bug wherein too many exact matches caused the loop to terminate prematurely.
+
 # fuzzylink 0.2.2
 
 * The algorithm now drops missing observations from `dfA` and `dfB` with a warning.
