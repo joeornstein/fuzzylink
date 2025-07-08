@@ -1,3 +1,5 @@
+# fuzzylink 0.2.2
+
 # fuzzylink 0.2.1
 
 * Updated package documentation and console messages. 
