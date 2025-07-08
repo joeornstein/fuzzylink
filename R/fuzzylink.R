@@ -183,8 +183,13 @@ fuzzylink <- function(dfA, dfB,
   train <- df |>
     dplyr::distinct(A, B, .keep_all = TRUE)
 
+  # omit exact matches from the train set during active learning loop
+  train_exact <- train[train$A == train$B,]
+  train_exact$match <- 'Yes'
+  train_exact$match_probability <- 1
 
   # label initial training set (n_t=500)
+  train <- train[train$A != train$B,]
   train$match <- NA
   n_t <- 500
   k <- max(floor(n_t / length(unique(train$A))), 1)
@@ -355,6 +360,9 @@ fuzzylink <- function(dfA, dfB,
     return(df$match_probability[which.max(df$expected_f1)])
   }
 
+  # add the exact matches back to train before remerging with df
+  train <- dplyr::bind_rows(train_exact, train)
+
   df <- df |>
     # merge with labels from train set
     dplyr::left_join(train |>
@@ -366,6 +374,9 @@ fuzzylink <- function(dfA, dfB,
   } else{
     df$match_probability <- stats::predict.glm(fit, df, type = 'response')
   }
+
+  # for exact matches, match_probability = 1
+  df$match_probability <- ifelse(df$A == df$B, 1, df$match_probability)
 
   stop_condition_met <- FALSE
   while(!stop_condition_met){
