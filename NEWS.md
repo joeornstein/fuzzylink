@@ -1,3 +1,5 @@
+# fuzzylink 0.2.3
+
 # fuzzylink 0.2.2
 
 * The algorithm now drops missing observations from `dfA` and `dfB` with a warning.
