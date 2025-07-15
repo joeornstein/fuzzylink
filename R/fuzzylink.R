@@ -163,6 +163,8 @@ fuzzylink <- function(dfA, dfB,
   namekey <- c(Var1 = 'A', Var2 = 'B', value = 'sim', L1 = 'block')
   names(df) <- namekey[names(df)]
   df <- dplyr::filter(df, !is.na(sim))
+  df$A <- as.character(df$A)
+  df$B <- as.character(df$B)
 
   # add lexical string distance measures
   df$jw <- stringdist::stringsim(tolower(df$A), tolower(df$B),
@@ -184,12 +186,15 @@ fuzzylink <- function(dfA, dfB,
     dplyr::distinct(A, B, .keep_all = TRUE)
 
   # omit exact matches from the train set during active learning loop
-  train_exact <- train[train$A == train$B,]
-  train_exact$match <- 'Yes'
-  train_exact$match_probability <- 1
+  num_exact <- sum(train$A == train$B)
+  if(num_exact > 0){
+    train_exact <- train[train$A == train$B,]
+    train_exact$match <- 'Yes'
+    train_exact$match_probability <- 1
+    train <- train[train$A != train$B,]
+  }
 
   # label initial training set (n_t=500)
-  train <- train[train$A != train$B,]
   train$match <- NA
   n_t <- 500
   k <- max(floor(n_t / length(unique(train$A))), 1)
@@ -361,7 +366,9 @@ fuzzylink <- function(dfA, dfB,
   }
 
   # add the exact matches back to train before remerging with df
-  train <- dplyr::bind_rows(train_exact, train)
+  if(num_exact > 0){
+    train <- dplyr::bind_rows(train_exact, train)
+  }
 
   df <- df |>
     # merge with labels from train set
