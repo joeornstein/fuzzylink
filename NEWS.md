@@ -1,3 +1,5 @@
+# fuzzylink 0.2.5
+
 # fuzzylink 0.2.4
 
 * Patched a bug introduced in 0.2.3, crashing the algorithm when there are no exact matches.
