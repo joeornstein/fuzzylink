@@ -129,7 +129,8 @@ check_match <- function(string1, string2,
   } else{ # if model is not one of the "Legacy" text models, use Chat Endpoint
 
     chat <- ellmer::chat_openai('Respond with "Yes" or "No".',
-                                model = model)
+                                model = model,
+                                api_key = openai_api_key)
 
     prompts <- ellmer::interpolate('Decide if the following two names refer to the same {{record_type}}. {{instructions}}\n\nName A: {{string1}}\nName B: {{string2}}')
 
