@@ -128,6 +128,9 @@ check_match <- function(string1, string2,
     stop('Apologies. This development version of fuzzylink does not support Mistral models. To use Mistral models, install the latest CRAN version.')
   } else{ # if model is not one of the "Legacy" text models, use Chat Endpoint
 
+    if(is.null(instructions)){
+      instructions <- ''
+    }
     chat <- ellmer::chat_openai('Respond with "Yes" or "No".',
                                 model = model,
                                 api_key = openai_api_key)
