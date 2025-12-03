@@ -133,7 +133,7 @@ check_match <- function(string1, string2,
     }
     chat <- ellmer::chat_openai('Respond with "Yes" or "No".',
                                 model = model,
-                                api_key = openai_api_key)
+                                credentials = function(){openai_api_key})
 
     prompts <- ellmer::interpolate('Decide if the following two names refer to the same {{record_type}}. {{instructions}}\n\nName A: {{string1}}\nName B: {{string2}}')
 

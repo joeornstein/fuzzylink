@@ -21,7 +21,7 @@ Imports:
     jsonlite,
     httr2 (>= 1.2.1),
     ranger,
-    ellmer (>= 0.3.2)
+    ellmer (>= 0.4.0)
 Depends: 
     R (>= 2.10)
 LazyData: true
