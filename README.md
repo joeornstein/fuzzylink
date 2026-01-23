@@ -4,7 +4,6 @@
 # fuzzylink
 
 <!-- badges: start -->
-
 <!-- badges: end -->
 
 The R package `fuzzylink` implements a probabilistic record linkage
@@ -42,7 +41,7 @@ function performs this record linkage with a single line of code.
     df
 
     #>                A                         B       sim        jw match
-    #> 1      Joe Biden    Joseph Robinette Biden 0.7661285 0.7673401   Yes
+    #> 1      Joe Biden    Joseph Robinette Biden 0.7661993 0.7673401   Yes
     #> 2   Donald Trump        Donald John Trump  0.8388663 0.9333333   Yes
     #> 3   Barack Obama      Barack Hussein Obama 0.8457284 0.9200000   Yes
     #> 4 George W. Bush        George Walker Bush 0.8445312 0.9301587   Yes
@@ -216,18 +215,18 @@ df <- fuzzylink(dfA, dfB,
 df
 ```
 
-    #>                A                         B       sim block        jw match
-    #> 1      Joe Biden    Joseph Robinette Biden 0.7660565     1 0.7673401   Yes
-    #> 2   Barack Obama      Barack Hussein Obama 0.8457001     3 0.9200000   Yes
-    #> 3 George W. Bush        George Walker Bush 0.8447794     4 0.9301587   Yes
-    #> 4   Bill Clinton William Jefferson Clinton 0.8732311     5 0.5788889   Yes
-    #> 5   Donald Trump                      <NA>        NA    NA        NA  <NA>
+    #>                A                      B       sim block        jw match
+    #> 1      Joe Biden Joseph Robinette Biden 0.7661285     1 0.7673401   Yes
+    #> 2   Barack Obama   Barack Hussein Obama 0.8457284     3 0.9200000   Yes
+    #> 3 George W. Bush     George Walker Bush 0.8445312     4 0.9301587   Yes
+    #> 4   Donald Trump                   <NA>        NA    NA        NA  <NA>
+    #> 5   Bill Clinton                   <NA>        NA    NA        NA  <NA>
     #>   match_probability    state age      hobby
     #> 1                 1 Delaware  81   Football
     #> 2                 1 Illinois  62 Basketball
     #> 3                 1    Texas  77    Reading
-    #> 4                 1 Arkansas  77  Saxophone
-    #> 5                NA New York  77       <NA>
+    #> 4                NA New York  77       <NA>
+    #> 5                NA Arkansas  77       <NA>
 
 Note that because Donald Trump is listed under two different states—New
 York in `dfA` and Florida in `dfB`–the `fuzzylink()` function no longer
