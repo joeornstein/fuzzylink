@@ -1,3 +1,5 @@
+# fuzzylink 0.3.0
+
 # fuzzylink 0.2.5
 
 * Updated documentation with publication DOI
