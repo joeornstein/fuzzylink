@@ -100,7 +100,7 @@ You will also need API access to a large language model (LLM). The `fuzzylink` p
 
 ### OpenAI
 
-You will need to create a developer account with OpenAI, and create an API key through their developer platform. For best performance, I **strongly recommend** purchasing at least $5 in API credits, which will significantly increase your API rate limits.
+Sign up for a developer account with OpenAI, then create an API key through your profile. For best performance, I **strongly recommend** purchasing at least $5 in API credits, which will significantly increase your API rate limits.
 
 Once your account is created, copy-paste your API key into the following line of R code.
 

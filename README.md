@@ -41,11 +41,11 @@ function performs this record linkage with a single line of code.
     df
 
     #>                A                         B       sim        jw match
-    #> 1      Joe Biden    Joseph Robinette Biden 0.7661993 0.7673401   Yes
-    #> 2   Donald Trump        Donald John Trump  0.8388663 0.9333333   Yes
-    #> 3   Barack Obama      Barack Hussein Obama 0.8457284 0.9200000   Yes
-    #> 4 George W. Bush        George Walker Bush 0.8445312 0.9301587   Yes
-    #> 5   Bill Clinton William Jefferson Clinton 0.8730800 0.5788889   Yes
+    #> 1      Joe Biden    Joseph Robinette Biden 0.7661646 0.7673401   Yes
+    #> 2   Donald Trump        Donald John Trump  0.8389718 0.9333333   Yes
+    #> 3   Barack Obama      Barack Hussein Obama 0.8457262 0.9200000   Yes
+    #> 4 George W. Bush        George Walker Bush 0.8446584 0.9301587   Yes
+    #> 5   Bill Clinton William Jefferson Clinton 0.8732367 0.5788889   Yes
     #>   match_probability age      hobby
     #> 1                 1  81   Football
     #> 2                 1  77       Golf
@@ -81,10 +81,10 @@ will default to using OpenAI unless specified by the user.
 
 ### OpenAI
 
-You will need to create a developer account with OpenAI, and create an
-API key through their developer platform. For best performance, I
-**strongly recommend** purchasing at least \$5 in API credits, which
-will significantly increase your API rate limits.
+Sign up for a developer account with OpenAI, then create an API key
+through your profile. For best performance, I **strongly recommend**
+purchasing at least \$5 in API credits, which will significantly
+increase your API rate limits.
 
 Once your account is created, copy-paste your API key into the following
 line of R code.
@@ -215,18 +215,18 @@ df <- fuzzylink(dfA, dfB,
 df
 ```
 
-    #>                A                      B       sim block        jw match
-    #> 1      Joe Biden Joseph Robinette Biden 0.7661285     1 0.7673401   Yes
-    #> 2   Barack Obama   Barack Hussein Obama 0.8457284     3 0.9200000   Yes
-    #> 3 George W. Bush     George Walker Bush 0.8445312     4 0.9301587   Yes
-    #> 4   Donald Trump                   <NA>        NA    NA        NA  <NA>
-    #> 5   Bill Clinton                   <NA>        NA    NA        NA  <NA>
+    #>                A                         B       sim block        jw match
+    #> 1      Joe Biden    Joseph Robinette Biden 0.7661285     1 0.7673401   Yes
+    #> 2   Barack Obama      Barack Hussein Obama 0.8457284     3 0.9200000   Yes
+    #> 3 George W. Bush        George Walker Bush 0.8445312     4 0.9301587   Yes
+    #> 4   Bill Clinton William Jefferson Clinton 0.8730800     5 0.5788889   Yes
+    #> 5   Donald Trump                      <NA>        NA    NA        NA  <NA>
     #>   match_probability    state age      hobby
     #> 1                 1 Delaware  81   Football
     #> 2                 1 Illinois  62 Basketball
     #> 3                 1    Texas  77    Reading
-    #> 4                NA New York  77       <NA>
-    #> 5                NA Arkansas  77       <NA>
+    #> 4                 1 Arkansas  77  Saxophone
+    #> 5                NA New York  77       <NA>
 
 Note that because Donald Trump is listed under two different states—New
 York in `dfA` and Florida in `dfB`–the `fuzzylink()` function no longer

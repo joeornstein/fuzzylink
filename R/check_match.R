@@ -19,7 +19,7 @@
 #'             c('Post Office', 'United Parcel', 'US Postal Service'))
 #' }
 check_match <- function(string1, string2,
-                        model = 'gpt-4o-2024-11-20',
+                        model = 'gpt-5.2', # 'gpt-4o-2024-11-20',
                         record_type = 'entity',
                         instructions = NULL,
                         openai_api_key = Sys.getenv('OPENAI_API_KEY'),
