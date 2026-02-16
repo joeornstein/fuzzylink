@@ -1,3 +1,5 @@
+# fuzzylink 0.3.1
+
 # fuzzylink 0.3.0
 
 * API calls for language model prompts are now passed through the `ellmer` package, improving speed, error handling, and rate limits.

@@ -124,8 +124,10 @@ check_match <- function(string1, string2,
 
     }
 
+    return(labels)
+
   } else if(stringr::str_detect(model, 'mistral|mixtral')){
-    stop('Apologies. This development version of fuzzylink does not support Mistral models. To use Mistral models, install the latest CRAN version.')
+    stop('Apologies. The current version of fuzzylink does not support Mistral models. Let me know over GitHub or email if these is a feature you would like to see reintroduced.')
   } else{ # if model is not one of the "Legacy" text models, use Chat Endpoint
 
     if(is.null(instructions)){
