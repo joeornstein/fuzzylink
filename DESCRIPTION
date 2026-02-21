@@ -25,5 +25,5 @@ Imports:
 Depends: 
     R (>= 4.1.0)
 LazyData: true
-URL: https://github.com/joeornstein/fuzzylink
+URL: https://joeornstein.github.io/software/fuzzylink, https://github.com/joeornstein/fuzzylink
 BugReports: https://github.com/joeornstein/fuzzylink/issues
