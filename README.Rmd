@@ -224,11 +224,11 @@ The function returns a few additional columns along with the merged dataframe. T
 
 ## A Note On Cost
 
-Because the `fuzzylink()` function makes several calls to the OpenAI API---which charges a per-token fee---there is a monetary cost associated with each use. Based on the package defaults and API pricing as of August 2025, here is a table of approximate costs for merging datasets of various sizes.
+Because the `fuzzylink()` function makes several calls to the OpenAI API---which charges a per-token fee---there is a monetary cost associated with each use. Based on the package defaults and API pricing as of February 2026, here is a table of approximate costs for merging datasets of various sizes.
 
 ```{r, echo=FALSE}
 embedding_cost_per_token <- 0.13 / 1e6
-completion_cost_per_token <- 2.5 / 1e6
+completion_cost_per_token <- 1.75 / 1e6
 tokens_per_string <- 4.5
 tokens_per_completion <- 30
 max_validations <- 1e4
