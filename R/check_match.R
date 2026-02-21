@@ -2,7 +2,7 @@
 #'
 #' @param string1 A string or vector of strings
 #' @param string2 A string or vector of strings
-#' @param model Which LLM to prompt; defaults to 'gpt-4o-2024-11-20'
+#' @param model Which LLM to prompt; defaults to 'gpt-5.2'. Also accepts Mistral models (e.g. 'mistral-large-latest') and Anthropic Claude models (e.g. 'claude-sonnet-4-5-20250929').
 #' @param record_type A character describing what type of entity `string1` and `string2` represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
 #' @param instructions A string containing additional instructions to include in the LLM prompt.
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
@@ -127,8 +127,42 @@ check_match <- function(string1, string2,
     return(labels)
 
   } else if(stringr::str_detect(model, 'mistral|mixtral')){
-    stop('Apologies. The current version of fuzzylink does not support Mistral models. Let me know over GitHub or email if these is a feature you would like to see reintroduced.')
-  } else{ # if model is not one of the "Legacy" text models, use Chat Endpoint
+
+    if(Sys.getenv('MISTRAL_API_KEY') == ''){
+      stop("No Mistral API key detected in system environment. You can add one using the 'mistral_api_key()' function.")
+    }
+    if(is.null(instructions)){
+      instructions <- ''
+    }
+    chat <- ellmer::chat_mistral('Respond with "Yes" or "No".',
+                                 model = model)
+
+    prompts <- ellmer::interpolate('Decide if the following two names refer to the same {{record_type}}. {{instructions}}\n\nName A: {{string1}}\nName B: {{string2}}')
+
+    labels <- ellmer::parallel_chat_text(chat, prompts)
+    labels <- stringr::str_to_title(stringr::str_extract(labels, '^\\w+'))
+
+    return(labels)
+
+  } else if(stringr::str_detect(model, 'claude')){
+
+    if(Sys.getenv('ANTHROPIC_API_KEY') == ''){
+      stop("No Anthropic API key detected in system environment. You can add one using the 'anthropic_api_key()' function.")
+    }
+    if(is.null(instructions)){
+      instructions <- ''
+    }
+    chat <- ellmer::chat_anthropic('Respond with "Yes" or "No".',
+                                   model = model)
+
+    prompts <- ellmer::interpolate('Decide if the following two names refer to the same {{record_type}}. {{instructions}}\n\nName A: {{string1}}\nName B: {{string2}}')
+
+    labels <- ellmer::parallel_chat_text(chat, prompts)
+    labels <- stringr::str_to_title(stringr::str_extract(labels, '^\\w+'))
+
+    return(labels)
+
+  } else{ # OpenAI chat models
 
     if(is.null(instructions)){
       instructions <- ''
@@ -140,6 +174,7 @@ check_match <- function(string1, string2,
     prompts <- ellmer::interpolate('Decide if the following two names refer to the same {{record_type}}. {{instructions}}\n\nName A: {{string1}}\nName B: {{string2}}')
 
     labels <- ellmer::parallel_chat_text(chat, prompts)
+    labels <- stringr::str_to_title(stringr::str_extract(labels, '^\\w+'))
 
     return(labels)
   }

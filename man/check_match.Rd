@@ -19,7 +19,7 @@ check_match(
 
 \item{string2}{A string or vector of strings}
 
-\item{model}{Which LLM to prompt; defaults to 'gpt-4o-2024-11-20'}
+\item{model}{Which LLM to prompt; defaults to 'gpt-5.2'. Also accepts Mistral models (e.g. 'mistral-large-latest') and Anthropic Claude models (e.g. 'claude-sonnet-4-5-20250929').}
 
 \item{record_type}{A character describing what type of entity \code{string1} and \code{string2} represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").}
 

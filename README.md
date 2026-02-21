@@ -4,6 +4,7 @@
 # fuzzylink
 
 <!-- badges: start -->
+
 <!-- badges: end -->
 
 The R package `fuzzylink` implements a probabilistic record linkage
@@ -21,15 +22,24 @@ dfA
 #> 4 George W. Bush  77
 #> 5   Bill Clinton  77
 dfB
-#>                         name      hobby
-#> 1     Joseph Robinette Biden   Football
-#> 2         Donald John Trump        Golf
-#> 3       Barack Hussein Obama Basketball
-#> 4         George Walker Bush    Reading
-#> 5  William Jefferson Clinton  Saxophone
-#> 6 George Herbert Walker Bush  Skydiving
-#> 7                Biff Tannen   Bullying
-#> 8                  Joe Riley    Jogging
+#>                         name
+#> 1     Joseph Robinette Biden
+#> 2         Donald John Trump 
+#> 3       Barack Hussein Obama
+#> 4         George Walker Bush
+#> 5  William Jefferson Clinton
+#> 6 George Herbert Walker Bush
+#> 7                Biff Tannen
+#> 8                  Joe Riley
+#>        hobby
+#> 1   Football
+#> 2       Golf
+#> 3 Basketball
+#> 4    Reading
+#> 5  Saxophone
+#> 6  Skydiving
+#> 7   Bullying
+#> 8    Jogging
 ```
 
 We would like a procedure that correctly identifies which records in
@@ -40,12 +50,24 @@ function performs this record linkage with a single line of code.
     df <- fuzzylink(dfA, dfB, by = 'name', record_type = 'person')
     df
 
-    #>                A                         B       sim        jw match
-    #> 1      Joe Biden    Joseph Robinette Biden 0.7661646 0.7673401   Yes
-    #> 2   Donald Trump        Donald John Trump  0.8389718 0.9333333   Yes
-    #> 3   Barack Obama      Barack Hussein Obama 0.8457262 0.9200000   Yes
-    #> 4 George W. Bush        George Walker Bush 0.8446584 0.9301587   Yes
-    #> 5   Bill Clinton William Jefferson Clinton 0.8732367 0.5788889   Yes
+    #>                A
+    #> 1      Joe Biden
+    #> 2   Donald Trump
+    #> 3   Barack Obama
+    #> 4 George W. Bush
+    #> 5   Bill Clinton
+    #>                           B
+    #> 1    Joseph Robinette Biden
+    #> 2        Donald John Trump 
+    #> 3      Barack Hussein Obama
+    #> 4        George Walker Bush
+    #> 5 William Jefferson Clinton
+    #>         sim        jw match
+    #> 1 0.7661285 0.7673401   Yes
+    #> 2 0.8388663 0.9333333   Yes
+    #> 3 0.8457284 0.9200000   Yes
+    #> 4 0.8445312 0.9301587   Yes
+    #> 5 0.8730800 0.5788889   Yes
     #>   match_probability age      hobby
     #> 1                 1  81   Football
     #> 2                 1  77       Golf
@@ -76,8 +98,9 @@ devtools::install_github("joeornstein/fuzzylink")
 ```
 
 You will also need API access to a large language model (LLM). The
-`fuzzylink` package currently supports both OpenAI and Mistral LLMs, but
-will default to using OpenAI unless specified by the user.
+`fuzzylink` package currently supports OpenAI, Mistral, and Anthropic
+Claude LLMs, but will default to using OpenAI unless specified by the
+user.
 
 ### OpenAI
 
@@ -107,6 +130,16 @@ into the following line of R code:
     library(fuzzylink)
 
     mistral_api_key('YOUR API KEY GOES HERE', install = TRUE)
+
+### Anthropic
+
+If you prefer to use Anthropic’s Claude models, you can sign up for an
+account [here](https://www.anthropic.com/). Once you have an API key,
+copy-paste it into the following line of R code:
+
+    library(fuzzylink)
+
+    anthropic_api_key('YOUR API KEY GOES HERE', install = TRUE)
 
 Now you’re all set up!
 
@@ -164,10 +197,11 @@ whenever the model fit is *too* perfect.)
   make accurate classifications.
 
 - The `model` argument specifies which language model to prompt. It
-  defaults to OpenAI’s ‘gpt-4o’, but for simpler problems, you can try
-  ‘gpt-3.5-turbo-instruct’, which will significantly reduce cost and
-  runtime. If you prefer an open-source language model, try
-  ‘open-mixtral-8x22b’.
+  defaults to OpenAI’s `'gpt-5.2'`, but also accepts Mistral models
+  (e.g. `'mistral-large-latest'`) and Anthropic Claude models
+  (e.g. `'claude-sonnet-4-5-20250929'`). For simpler problems, you can
+  try `'gpt-3.5-turbo-instruct'`, which will significantly reduce cost
+  and runtime.
 
 - The `embedding_model` argument specifies which pretrained text
   embeddings to use when modeling match probability. It defaults to
@@ -215,18 +249,36 @@ df <- fuzzylink(dfA, dfB,
 df
 ```
 
-    #>                A                         B       sim block        jw match
-    #> 1      Joe Biden    Joseph Robinette Biden 0.7661285     1 0.7673401   Yes
-    #> 2   Barack Obama      Barack Hussein Obama 0.8457284     3 0.9200000   Yes
-    #> 3 George W. Bush        George Walker Bush 0.8445312     4 0.9301587   Yes
-    #> 4   Bill Clinton William Jefferson Clinton 0.8730800     5 0.5788889   Yes
-    #> 5   Donald Trump                      <NA>        NA    NA        NA  <NA>
-    #>   match_probability    state age      hobby
-    #> 1                 1 Delaware  81   Football
-    #> 2                 1 Illinois  62 Basketball
-    #> 3                 1    Texas  77    Reading
-    #> 4                 1 Arkansas  77  Saxophone
-    #> 5                NA New York  77       <NA>
+    #>                A
+    #> 1      Joe Biden
+    #> 2   Barack Obama
+    #> 3 George W. Bush
+    #> 4   Bill Clinton
+    #> 5   Donald Trump
+    #>                           B
+    #> 1    Joseph Robinette Biden
+    #> 2      Barack Hussein Obama
+    #> 3        George Walker Bush
+    #> 4 William Jefferson Clinton
+    #> 5                      <NA>
+    #>         sim block        jw match
+    #> 1 0.7661285     1 0.7673401   Yes
+    #> 2 0.8457284     3 0.9200000   Yes
+    #> 3 0.8445312     4 0.9301587   Yes
+    #> 4 0.8730800     5 0.5788889   Yes
+    #> 5        NA    NA        NA  <NA>
+    #>   match_probability    state age
+    #> 1                 1 Delaware  81
+    #> 2                 1 Illinois  62
+    #> 3                 1    Texas  77
+    #> 4                 1 Arkansas  77
+    #> 5                NA New York  77
+    #>        hobby
+    #> 1   Football
+    #> 2 Basketball
+    #> 3    Reading
+    #> 4  Saxophone
+    #> 5       <NA>
 
 Note that because Donald Trump is listed under two different states—New
 York in `dfA` and Florida in `dfB`–the `fuzzylink()` function no longer

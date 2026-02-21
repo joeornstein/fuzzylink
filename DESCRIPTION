@@ -1,6 +1,6 @@
 Package: fuzzylink
 Title: Probabilistic Record Linkage Using Pretrained Text Embeddings
-Version: 0.3.1
+Version: 0.4.0
 Authors@R: 
     person("Joe", "Ornstein", , "jornstein@uga.edu", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-5704-2098"))

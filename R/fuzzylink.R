@@ -6,7 +6,7 @@
 #' @param verbose TRUE to print progress updates, FALSE for no output
 #' @param record_type A character describing what type of entity the `by` variable represents. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
 #' @param instructions A string containing additional instructions to include in the LLM prompt during validation.
-#' @param model Which LLM to prompt when validating matches; defaults to 'gpt-4.1'
+#' @param model Which LLM to prompt when validating matches; defaults to 'gpt-5.2'. Also accepts Mistral models (e.g. 'mistral-large-latest') and Anthropic Claude models (e.g. 'claude-sonnet-4-5-20250929').
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
 #' @param embedding_dimensions The dimension of the embedding vectors to retrieve. Defaults to 256
 #' @param embedding_model Which pretrained embedding model to use; defaults to 'text-embedding-3-large' (OpenAI), but will also accept 'mistral-embed' (Mistral).
@@ -34,7 +34,7 @@ fuzzylink <- function(dfA, dfB,
                       verbose = TRUE,
                       record_type = 'entity',
                       instructions = NULL,
-                      model = 'gpt-4.1',#'gpt-4o-2024-11-20',
+                      model = 'gpt-5.2',
                       openai_api_key = Sys.getenv('OPENAI_API_KEY'),
                       embedding_dimensions = 256,
                       embedding_model = 'text-embedding-3-large',
@@ -220,11 +220,6 @@ fuzzylink <- function(dfA, dfB,
   )
 
 
-  # train <- get_training_set(sim, record_type = record_type,
-  #                           instructions = instructions,
-  #                           model = model, openai_api_key = openai_api_key,
-  #                           parallel = parallel)
-
   ## Step 4: Fit model -------------------
   if(verbose){
     message('Fitting model (',
@@ -265,13 +260,6 @@ fuzzylink <- function(dfA, dfB,
 
 
   while(!stop_condition_met){
-
-    if(verbose){
-      message('Refining Model ',
-          i, ' (',
-          format(Sys.time(), '%X'),
-          ')\n\n', sep = '')
-    }
 
     # Gaussian kernel
     log_odds <- stats::qlogis(train$match_probability)
@@ -322,16 +310,24 @@ fuzzylink <- function(dfA, dfB,
       gradient_estimate[i] <- max(abs(old_probs - train$match_probability))
     }
 
-
-
     if(i >= window_size){
-      if(mean(gradient_estimate[(i-window_size+1):i]) < stop_threshold){
+      rolling_gradient <- mean(gradient_estimate[(i-window_size+1):i])
+      if(verbose){
+        message('\rRefining model (iteration ', i, ') | Gradient: ',
+                round(rolling_gradient, 4), ' (threshold: ', stop_threshold, ')     ',
+                appendLF = FALSE)
+      }
+      if(rolling_gradient < stop_threshold){
         stop_condition_met <- TRUE
       }
+    } else if(verbose){
+      message('\rRefining model (iteration ', i, ') | Gradient: estimating...',
+              appendLF = FALSE)
     }
 
     i <- i + 1
   }
+  if(verbose) message('')  # commit the final \r line with a newline
 
   ## Step 6: Recall Search -----------------
 
@@ -362,7 +358,12 @@ fuzzylink <- function(dfA, dfB,
     df$expected_f1 = 2 * (df$expected_recall * df$expected_precision) /
       (df$expected_recall + df$expected_precision)
 
-    return(df$match_probability[which.max(df$expected_f1)])
+    # Guard against NaN F1 scores (e.g. no true positives in data, or all
+    # probabilities near zero). Fall back to a 0.5 cutoff.
+    df$expected_f1[is.nan(df$expected_f1)] <- 0
+    best <- which.max(df$expected_f1)
+    if(length(best) == 0) return(0.5)
+    return(df$match_probability[best])
   }
 
   # add the exact matches back to train before remerging with df

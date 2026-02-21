@@ -1,3 +1,12 @@
+# fuzzylink 0.4.0
+
+* `fuzzylink()` now supports Anthropic Claude (e.g. `'claude-sonnet-4-5-20250929'`) and Mistral (e.g. `'mistral-large-latest'`) models in addition to OpenAI.
+* Updated default model to `gpt-5.2`.
+* Active learning loop now reports rolling gradient and stopping threshold in real time.
+* Fixed a potential edge case in `get_cutoff()` where NaN F1 scores could cause silent failures on datasets with no true matches.
+* Removed unused internal functions (`get_training_set()`, `hand_label()`, `estimate_tokens()`).
+* Fixed a bug in `check_match()` where verbose LLM responses (e.g. from Claude or Mistral) could cause match labels to be parsed incorrectly. Labels are now normalized by extracting the first word of each response.
+
 # fuzzylink 0.3.1
 
 * Patched `check_match()` to return labels from legacy OpenAI models.

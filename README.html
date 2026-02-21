@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style type="text/css">
+@font-face {
+font-family: octicons-link;
+src: url(data:font/woff;charset=utf-8;base64,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) format('woff');
+}
+body {
+-webkit-text-size-adjust: 100%;
+text-size-adjust: 100%;
+color: #333;
+font-family: "Helvetica Neue", Helvetica, "Segoe UI", Arial, freesans, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+font-size: 16px;
+line-height: 1.6;
+word-wrap: break-word;
+}
+a {
+background-color: transparent;
+}
+a:active,
+a:hover {
+outline: 0;
+}
+strong {
+font-weight: bold;
+}
+h1 {
+font-size: 2em;
+margin: 0.67em 0;
+}
+img {
+border: 0;
+}
+hr {
+box-sizing: content-box;
+height: 0;
+}
+pre {
+overflow: auto;
+}
+code,
+kbd,
+pre {
+font-family: monospace, monospace;
+font-size: 1em;
+}
+input {
+color: inherit;
+font: inherit;
+margin: 0;
+}
+html input[disabled] {
+cursor: default;
+}
+input {
+line-height: normal;
+}
+input[type="checkbox"] {
+box-sizing: border-box;
+padding: 0;
+}
+table {
+border-collapse: collapse;
+border-spacing: 0;
+}
+td,
+th {
+padding: 0;
+}
+* {
+box-sizing: border-box;
+}
+input {
+font: 13px / 1.4 Helvetica, arial, nimbussansl, liberationsans, freesans, clean, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+}
+a {
+color: #4078c0;
+text-decoration: none;
+}
+a:hover,
+a:active {
+text-decoration: underline;
+}
+hr {
+height: 0;
+margin: 15px 0;
+overflow: hidden;
+background: transparent;
+border: 0;
+border-bottom: 1px solid #ddd;
+}
+hr:before {
+display: table;
+content: "";
+}
+hr:after {
+display: table;
+clear: both;
+content: "";
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+margin-top: 15px;
+margin-bottom: 15px;
+line-height: 1.1;
+}
+h1 {
+font-size: 30px;
+}
+h2 {
+font-size: 21px;
+}
+h3 {
+font-size: 16px;
+}
+h4 {
+font-size: 14px;
+}
+h5 {
+font-size: 12px;
+}
+h6 {
+font-size: 11px;
+}
+blockquote {
+margin: 0;
+}
+ul,
+ol {
+padding: 0;
+margin-top: 0;
+margin-bottom: 0;
+}
+ol ol,
+ul ol {
+list-style-type: lower-roman;
+}
+ul ul ol,
+ul ol ol,
+ol ul ol,
+ol ol ol {
+list-style-type: lower-alpha;
+}
+dd {
+margin-left: 0;
+}
+code {
+font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
+font-size: 12px;
+}
+pre {
+margin-top: 0;
+margin-bottom: 0;
+font: 12px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+}
+.select::-ms-expand {
+opacity: 0;
+}
+.octicon {
+font: normal normal normal 16px/1 octicons-link;
+display: inline-block;
+text-decoration: none;
+text-rendering: auto;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+-webkit-user-select: none;
+-moz-user-select: none;
+-ms-user-select: none;
+user-select: none;
+}
+.octicon-link:before {
+content: '\f05c';
+}
+.markdown-body:before {
+display: table;
+content: "";
+}
+.markdown-body:after {
+display: table;
+clear: both;
+content: "";
+}
+.markdown-body>*:first-child {
+margin-top: 0 !important;
+}
+.markdown-body>*:last-child {
+margin-bottom: 0 !important;
+}
+a:not([href]) {
+color: inherit;
+text-decoration: none;
+}
+.anchor {
+display: inline-block;
+padding-right: 2px;
+margin-left: -18px;
+}
+.anchor:focus {
+outline: none;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+margin-top: 1em;
+margin-bottom: 16px;
+font-weight: bold;
+line-height: 1.4;
+}
+h1 .octicon-link,
+h2 .octicon-link,
+h3 .octicon-link,
+h4 .octicon-link,
+h5 .octicon-link,
+h6 .octicon-link {
+color: #000;
+vertical-align: middle;
+visibility: hidden;
+}
+h1:hover .anchor,
+h2:hover .anchor,
+h3:hover .anchor,
+h4:hover .anchor,
+h5:hover .anchor,
+h6:hover .anchor {
+text-decoration: none;
+}
+h1:hover .anchor .octicon-link,
+h2:hover .anchor .octicon-link,
+h3:hover .anchor .octicon-link,
+h4:hover .anchor .octicon-link,
+h5:hover .anchor .octicon-link,
+h6:hover .anchor .octicon-link {
+visibility: visible;
+}
+h1 {
+padding-bottom: 0.3em;
+font-size: 2.25em;
+line-height: 1.2;
+border-bottom: 1px solid #eee;
+}
+h1 .anchor {
+line-height: 1;
+}
+h2 {
+padding-bottom: 0.3em;
+font-size: 1.75em;
+line-height: 1.225;
+border-bottom: 1px solid #eee;
+}
+h2 .anchor {
+line-height: 1;
+}
+h3 {
+font-size: 1.5em;
+line-height: 1.43;
+}
+h3 .anchor {
+line-height: 1.2;
+}
+h4 {
+font-size: 1.25em;
+}
+h4 .anchor {
+line-height: 1.2;
+}
+h5 {
+font-size: 1em;
+}
+h5 .anchor {
+line-height: 1.1;
+}
+h6 {
+font-size: 1em;
+color: #777;
+}
+h6 .anchor {
+line-height: 1.1;
+}
+p,
+blockquote,
+ul,
+ol,
+dl,
+table,
+pre {
+margin-top: 0;
+margin-bottom: 16px;
+}
+hr {
+height: 4px;
+padding: 0;
+margin: 16px 0;
+background-color: #e7e7e7;
+border: 0 none;
+}
+ul,
+ol {
+padding-left: 2em;
+}
+ul ul,
+ul ol,
+ol ol,
+ol ul {
+margin-top: 0;
+margin-bottom: 0;
+}
+li>p {
+margin-top: 16px;
+}
+dl {
+padding: 0;
+}
+dl dt {
+padding: 0;
+margin-top: 16px;
+font-size: 1em;
+font-style: italic;
+font-weight: bold;
+}
+dl dd {
+padding: 0 16px;
+margin-bottom: 16px;
+}
+blockquote {
+padding: 0 15px;
+color: #777;
+border-left: 4px solid #ddd;
+}
+blockquote>:first-child {
+margin-top: 0;
+}
+blockquote>:last-child {
+margin-bottom: 0;
+}
+table {
+display: block;
+width: 100%;
+overflow: auto;
+word-break: normal;
+word-break: keep-all;
+}
+table th {
+font-weight: bold;
+}
+table th,
+table td {
+padding: 6px 13px;
+border: 1px solid #ddd;
+}
+table tr {
+background-color: #fff;
+border-top: 1px solid #ccc;
+}
+table tr:nth-child(2n) {
+background-color: #f8f8f8;
+}
+img {
+max-width: 100%;
+box-sizing: content-box;
+background-color: #fff;
+}
+code {
+padding: 0;
+padding-top: 0.2em;
+padding-bottom: 0.2em;
+margin: 0;
+font-size: 85%;
+background-color: rgba(0,0,0,0.04);
+border-radius: 3px;
+}
+code:before,
+code:after {
+letter-spacing: -0.2em;
+content: "\00a0";
+}
+pre>code {
+padding: 0;
+margin: 0;
+font-size: 100%;
+word-break: normal;
+white-space: pre;
+background: transparent;
+border: 0;
+}
+.highlight {
+margin-bottom: 16px;
+}
+.highlight pre,
+pre {
+padding: 16px;
+overflow: auto;
+font-size: 85%;
+line-height: 1.45;
+background-color: #f7f7f7;
+border-radius: 3px;
+}
+.highlight pre {
+margin-bottom: 0;
+word-break: normal;
+}
+pre {
+word-wrap: normal;
+}
+pre code {
+display: inline;
+max-width: initial;
+padding: 0;
+margin: 0;
+overflow: initial;
+line-height: inherit;
+word-wrap: normal;
+background-color: transparent;
+border: 0;
+}
+pre code:before,
+pre code:after {
+content: normal;
+}
+kbd {
+display: inline-block;
+padding: 3px 5px;
+font-size: 11px;
+line-height: 10px;
+color: #555;
+vertical-align: middle;
+background-color: #fcfcfc;
+border: solid 1px #ccc;
+border-bottom-color: #bbb;
+border-radius: 3px;
+box-shadow: inset 0 -1px 0 #bbb;
+}
+.pl-c {
+color: #969896;
+}
+.pl-c1,
+.pl-s .pl-v {
+color: #0086b3;
+}
+.pl-e,
+.pl-en {
+color: #795da3;
+}
+.pl-s .pl-s1,
+.pl-smi {
+color: #333;
+}
+.pl-ent {
+color: #63a35c;
+}
+.pl-k {
+color: #a71d5d;
+}
+.pl-pds,
+.pl-s,
+.pl-s .pl-pse .pl-s1,
+.pl-sr,
+.pl-sr .pl-cce,
+.pl-sr .pl-sra,
+.pl-sr .pl-sre {
+color: #183691;
+}
+.pl-v {
+color: #ed6a43;
+}
+.pl-id {
+color: #b52a1d;
+}
+.pl-ii {
+background-color: #b52a1d;
+color: #f8f8f8;
+}
+.pl-sr .pl-cce {
+color: #63a35c;
+font-weight: bold;
+}
+.pl-ml {
+color: #693a17;
+}
+.pl-mh,
+.pl-mh .pl-en,
+.pl-ms {
+color: #1d3e81;
+font-weight: bold;
+}
+.pl-mq {
+color: #008080;
+}
+.pl-mi {
+color: #333;
+font-style: italic;
+}
+.pl-mb {
+color: #333;
+font-weight: bold;
+}
+.pl-md {
+background-color: #ffecec;
+color: #bd2c00;
+}
+.pl-mi1 {
+background-color: #eaffea;
+color: #55a532;
+}
+.pl-mdr {
+color: #795da3;
+font-weight: bold;
+}
+.pl-mo {
+color: #1d3e81;
+}
+kbd {
+display: inline-block;
+padding: 3px 5px;
+font: 11px Consolas, "Liberation Mono", Menlo, Courier, monospace;
+line-height: 10px;
+color: #555;
+vertical-align: middle;
+background-color: #fcfcfc;
+border: solid 1px #ccc;
+border-bottom-color: #bbb;
+border-radius: 3px;
+box-shadow: inset 0 -1px 0 #bbb;
+}
+.task-list-item {
+list-style-type: none;
+}
+.task-list-item+.task-list-item {
+margin-top: 3px;
+}
+.task-list-item input {
+margin: 0 0.35em 0.25em -1.6em;
+vertical-align: middle;
+}
+:checked+.radio-label {
+z-index: 1;
+position: relative;
+border-color: #4078c0;
+}
+.sourceLine {
+display: inline-block;
+}
+code .kw { color: #000000; }
+code .dt { color: #ed6a43; }
+code .dv { color: #009999; }
+code .bn { color: #009999; }
+code .fl { color: #009999; }
+code .ch { color: #009999; }
+code .st { color: #183691; }
+code .co { color: #969896; }
+code .ot { color: #0086b3; }
+code .al { color: #a61717; }
+code .fu { color: #63a35c; }
+code .er { color: #a61717; background-color: #e3d2d2; }
+code .wa { color: #000000; }
+code .cn { color: #008080; }
+code .sc { color: #008080; }
+code .vs { color: #183691; }
+code .ss { color: #183691; }
+code .im { color: #000000; }
+code .va {color: #008080; }
+code .cf { color: #000000; }
+code .op { color: #000000; }
+code .bu { color: #000000; }
+code .ex { color: #000000; }
+code .pp { color: #999999; }
+code .at { color: #008080; }
+code .do { color: #969896; }
+code .an { color: #008080; }
+code .cv { color: #008080; }
+code .in { color: #008080; }
+</style>
+<style>
+body {
+box-sizing: border-box;
+min-width: 200px;
+max-width: 980px;
+margin: 0 auto;
+padding: 45px;
+padding-top: 0px;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+<h1 id="fuzzylink">fuzzylink</h1>
+<!-- badges: start -->
+
+<!-- badges: end -->
+
+<p>The R package <code>fuzzylink</code> implements a probabilistic
+record linkage procedure proposed in <a href="https://doi.org/10.1017/pan.2025.10016">Ornstein (2025)</a>. This
+method allows users to merge datasets with fuzzy matches on a key
+identifying variable. Suppose, for example, you have the following two
+datasets:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a>dfA</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co">#&gt;             name age</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; 1      Joe Biden  81</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a><span class="co">#&gt; 2   Donald Trump  77</span></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a><span class="co">#&gt; 3   Barack Obama  62</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a><span class="co">#&gt; 4 George W. Bush  77</span></span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a><span class="co">#&gt; 5   Bill Clinton  77</span></span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>dfB</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a><span class="co">#&gt;                         name</span></span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a><span class="co">#&gt; 1     Joseph Robinette Biden</span></span>
+<span id="cb1-11"><a href="#cb1-11" tabindex="-1"></a><span class="co">#&gt; 2         Donald John Trump </span></span>
+<span id="cb1-12"><a href="#cb1-12" tabindex="-1"></a><span class="co">#&gt; 3       Barack Hussein Obama</span></span>
+<span id="cb1-13"><a href="#cb1-13" tabindex="-1"></a><span class="co">#&gt; 4         George Walker Bush</span></span>
+<span id="cb1-14"><a href="#cb1-14" tabindex="-1"></a><span class="co">#&gt; 5  William Jefferson Clinton</span></span>
+<span id="cb1-15"><a href="#cb1-15" tabindex="-1"></a><span class="co">#&gt; 6 George Herbert Walker Bush</span></span>
+<span id="cb1-16"><a href="#cb1-16" tabindex="-1"></a><span class="co">#&gt; 7                Biff Tannen</span></span>
+<span id="cb1-17"><a href="#cb1-17" tabindex="-1"></a><span class="co">#&gt; 8                  Joe Riley</span></span>
+<span id="cb1-18"><a href="#cb1-18" tabindex="-1"></a><span class="co">#&gt;        hobby</span></span>
+<span id="cb1-19"><a href="#cb1-19" tabindex="-1"></a><span class="co">#&gt; 1   Football</span></span>
+<span id="cb1-20"><a href="#cb1-20" tabindex="-1"></a><span class="co">#&gt; 2       Golf</span></span>
+<span id="cb1-21"><a href="#cb1-21" tabindex="-1"></a><span class="co">#&gt; 3 Basketball</span></span>
+<span id="cb1-22"><a href="#cb1-22" tabindex="-1"></a><span class="co">#&gt; 4    Reading</span></span>
+<span id="cb1-23"><a href="#cb1-23" tabindex="-1"></a><span class="co">#&gt; 5  Saxophone</span></span>
+<span id="cb1-24"><a href="#cb1-24" tabindex="-1"></a><span class="co">#&gt; 6  Skydiving</span></span>
+<span id="cb1-25"><a href="#cb1-25" tabindex="-1"></a><span class="co">#&gt; 7   Bullying</span></span>
+<span id="cb1-26"><a href="#cb1-26" tabindex="-1"></a><span class="co">#&gt; 8    Jogging</span></span></code></pre></div>
+<p>We would like a procedure that correctly identifies which records in
+<code>dfB</code> are likely matches for each record in <code>dfA</code>.
+The <code>fuzzylink()</code> function performs this record linkage with
+a single line of code.</p>
+<pre><code>library(fuzzylink)
+df &lt;- fuzzylink(dfA, dfB, by = &#39;name&#39;, record_type = &#39;person&#39;)
+df
+
+#&gt;                A
+#&gt; 1      Joe Biden
+#&gt; 2   Donald Trump
+#&gt; 3   Barack Obama
+#&gt; 4 George W. Bush
+#&gt; 5   Bill Clinton
+#&gt;                           B
+#&gt; 1    Joseph Robinette Biden
+#&gt; 2        Donald John Trump 
+#&gt; 3      Barack Hussein Obama
+#&gt; 4        George Walker Bush
+#&gt; 5 William Jefferson Clinton
+#&gt;         sim        jw match
+#&gt; 1 0.7661285 0.7673401   Yes
+#&gt; 2 0.8388663 0.9333333   Yes
+#&gt; 3 0.8457284 0.9200000   Yes
+#&gt; 4 0.8445312 0.9301587   Yes
+#&gt; 5 0.8730800 0.5788889   Yes
+#&gt;   match_probability age      hobby
+#&gt; 1                 1  81   Football
+#&gt; 2                 1  77       Golf
+#&gt; 3                 1  62 Basketball
+#&gt; 4                 1  77    Reading
+#&gt; 5                 1  77  Saxophone</code></pre>
+<p>The procedure works by using <em>pretrained text embeddings</em> to
+construct a measure of similarity for each pair of names. These
+similarity measures are then used as predictors in a statistical model
+to estimate the probability that two name pairs represent the same
+entity. See <a href="https://doi.org/10.1017/pan.2025.10016">Ornstein
+(2025)</a> for technical details.</p>
+<h2 id="installation">Installation</h2>
+<p>You can install <code>fuzzylink</code> from CRAN with:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a><span class="fu">install.packages</span>(<span class="st">&#39;fuzzylink&#39;</span>)</span></code></pre></div>
+<p>Or you can install the development version from <a href="https://github.com/">GitHub</a> with:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a><span class="co"># install.packages(&quot;devtools&quot;)</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>devtools<span class="sc">::</span><span class="fu">install_github</span>(<span class="st">&quot;joeornstein/fuzzylink&quot;</span>)</span></code></pre></div>
+<p>You will also need API access to a large language model (LLM). The
+<code>fuzzylink</code> package currently supports OpenAI, Mistral, and
+Anthropic Claude LLMs, but will default to using OpenAI unless specified
+by the user.</p>
+<h3 id="openai">OpenAI</h3>
+<p>Sign up for a developer account with OpenAI, then create an API key
+through your profile. For best performance, I <strong>strongly
+recommend</strong> purchasing at least $5 in API credits, which will
+significantly increase your API rate limits.</p>
+<p>Once your account is created, copy-paste your API key into the
+following line of R code.</p>
+<pre><code>library(fuzzylink)
+
+openai_api_key(&#39;YOUR API KEY GOES HERE&#39;, install = TRUE)</code></pre>
+<h3 id="mistral">Mistral</h3>
+<p>If you prefer to use language models from Mistral, you can sign up
+for an account <a href="https://mistral.ai/">here</a>. As of writing,
+Mistral requires you to purchase prepaid credits before you can access
+their language models through the API.</p>
+<p>Once you have a paid account, you can create an API key <a href="https://console.mistral.ai/api-keys/">here</a>, and copy-paste the
+API key into the following line of R code:</p>
+<pre><code>library(fuzzylink)
+
+mistral_api_key(&#39;YOUR API KEY GOES HERE&#39;, install = TRUE)</code></pre>
+<h3 id="anthropic">Anthropic</h3>
+<p>If you prefer to use Anthropic’s Claude models, you can sign up for
+an account <a href="https://www.anthropic.com/">here</a>. Once you have
+an API key, copy-paste it into the following line of R code:</p>
+<pre><code>library(fuzzylink)
+
+anthropic_api_key(&#39;YOUR API KEY GOES HERE&#39;, install = TRUE)</code></pre>
+<p>Now you’re all set up!</p>
+<h2 id="example">Example</h2>
+<p>Here is some code to reproduce the example above and make sure that
+everything is working on your computer.</p>
+<div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="fu">library</span>(fuzzylink)</span>
+<span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a>dfA <span class="ot">&lt;-</span> <span class="fu">tribble</span>(<span class="sc">~</span>name, <span class="sc">~</span>age,</span>
+<span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a>               <span class="st">&#39;Joe Biden&#39;</span>, <span class="dv">81</span>,</span>
+<span id="cb8-6"><a href="#cb8-6" tabindex="-1"></a>               <span class="st">&#39;Donald Trump&#39;</span>, <span class="dv">77</span>,</span>
+<span id="cb8-7"><a href="#cb8-7" tabindex="-1"></a>               <span class="st">&#39;Barack Obama&#39;</span>, <span class="dv">62</span>,</span>
+<span id="cb8-8"><a href="#cb8-8" tabindex="-1"></a>               <span class="st">&#39;George W. Bush&#39;</span>, <span class="dv">77</span>,</span>
+<span id="cb8-9"><a href="#cb8-9" tabindex="-1"></a>               <span class="st">&#39;Bill Clinton&#39;</span>, <span class="dv">77</span>)</span>
+<span id="cb8-10"><a href="#cb8-10" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" tabindex="-1"></a>dfB <span class="ot">&lt;-</span> <span class="fu">tribble</span>(<span class="sc">~</span>name, <span class="sc">~</span>hobby,</span>
+<span id="cb8-12"><a href="#cb8-12" tabindex="-1"></a>               <span class="st">&#39;Joseph Robinette Biden&#39;</span>, <span class="st">&#39;Football&#39;</span>,</span>
+<span id="cb8-13"><a href="#cb8-13" tabindex="-1"></a>               <span class="st">&#39;Donald John Trump &#39;</span>, <span class="st">&#39;Golf&#39;</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" tabindex="-1"></a>               <span class="st">&#39;Barack Hussein Obama&#39;</span>, <span class="st">&#39;Basketball&#39;</span>,</span>
+<span id="cb8-15"><a href="#cb8-15" tabindex="-1"></a>               <span class="st">&#39;George Walker Bush&#39;</span>, <span class="st">&#39;Reading&#39;</span>,</span>
+<span id="cb8-16"><a href="#cb8-16" tabindex="-1"></a>               <span class="st">&#39;William Jefferson Clinton&#39;</span>, <span class="st">&#39;Saxophone&#39;</span>,</span>
+<span id="cb8-17"><a href="#cb8-17" tabindex="-1"></a>               <span class="st">&#39;George Herbert Walker Bush&#39;</span>, <span class="st">&#39;Skydiving&#39;</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" tabindex="-1"></a>               <span class="st">&#39;Biff Tannen&#39;</span>, <span class="st">&#39;Bullying&#39;</span>,</span>
+<span id="cb8-19"><a href="#cb8-19" tabindex="-1"></a>               <span class="st">&#39;Joe Riley&#39;</span>, <span class="st">&#39;Jogging&#39;</span>)</span>
+<span id="cb8-20"><a href="#cb8-20" tabindex="-1"></a></span>
+<span id="cb8-21"><a href="#cb8-21" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">fuzzylink</span>(dfA, dfB, <span class="at">by =</span> <span class="st">&#39;name&#39;</span>, <span class="at">record_type =</span> <span class="st">&#39;person&#39;</span>)</span>
+<span id="cb8-22"><a href="#cb8-22" tabindex="-1"></a></span>
+<span id="cb8-23"><a href="#cb8-23" tabindex="-1"></a>df</span></code></pre></div>
+<p>If the <code>df</code> object links all the presidents to their
+correct name in <code>dfB</code>, everything is running smoothly! (Note
+that you may see a warning from <code>glm.fit</code>. This is normal.
+The <code>stats</code> package gets suspicious whenever the model fit is
+<em>too</em> perfect.)</p>
+<h3 id="arguments">Arguments</h3>
+<ul>
+<li><p>The <code>by</code> argument specifies the name of the fuzzy
+matching variable that you want to use to link records. The dataframes
+<code>dfA</code> and <code>dfB</code> must both have a column with this
+name.</p></li>
+<li><p>The <code>record_type</code> argument should be a singular noun
+describing the type of entity the <code>by</code> variable represents
+(e.g. “person”, “organization”, “interest group”, “city”). It is used as
+part of a language model prompt when training the statistical
+model.</p></li>
+<li><p>The <code>instructions</code> argument should be a string
+containing additional instructions to include in the language model
+prompt. Format these like you would format instructions to a human
+research assistant, including any relevant information that you think
+would help the model make accurate classifications.</p></li>
+<li><p>The <code>model</code> argument specifies which language model to
+prompt. It defaults to OpenAI’s <code>&#39;gpt-5.2&#39;</code>, but also accepts
+Mistral models (e.g. <code>&#39;mistral-large-latest&#39;</code>) and Anthropic
+Claude models (e.g. <code>&#39;claude-sonnet-4-5-20250929&#39;</code>). For
+simpler problems, you can try <code>&#39;gpt-3.5-turbo-instruct&#39;</code>,
+which will significantly reduce cost and runtime.</p></li>
+<li><p>The <code>embedding_model</code> argument specifies which
+pretrained text embeddings to use when modeling match probability. It
+defaults to OpenAI’s ‘text-embedding-3-large’, but will also accept
+‘text-embedding-3-small’ or Mistral’s ‘mistral-embed’.</p></li>
+<li><p>Several parameters—including <code>p</code>, <code>k</code>,
+<code>embedding_dimensions</code>, <code>max_validations</code>, and
+<code>parallel</code>—are for advanced users who wish to customize the
+behavior of the algorithm. See the package documentation for more
+details.</p></li>
+<li><p>If there are any variables that must match <em>exactly</em> in
+order to link two records, you will want to include them in the
+<code>blocking.variables</code> argument. As a practical matter, I
+<strong>strongly recommend</strong> including blocking variables
+wherever possible, as they reduce the time and cost necessary to compute
+pairwise distance metrics. Suppose, for example, that our two
+illustrative datasets have a column called <code>state</code>, and we
+want to instruct <code>fuzzylink()</code> to only link people who live
+within the same state.</p></li>
+</ul>
+<div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a>dfA <span class="ot">&lt;-</span> <span class="fu">tribble</span>(<span class="sc">~</span>name, <span class="sc">~</span>state, <span class="sc">~</span>age,</span>
+<span id="cb9-2"><a href="#cb9-2" tabindex="-1"></a>               <span class="st">&#39;Joe Biden&#39;</span>, <span class="st">&#39;Delaware&#39;</span>, <span class="dv">81</span>,</span>
+<span id="cb9-3"><a href="#cb9-3" tabindex="-1"></a>               <span class="st">&#39;Donald Trump&#39;</span>, <span class="st">&#39;New York&#39;</span>, <span class="dv">77</span>,</span>
+<span id="cb9-4"><a href="#cb9-4" tabindex="-1"></a>               <span class="st">&#39;Barack Obama&#39;</span>, <span class="st">&#39;Illinois&#39;</span>, <span class="dv">62</span>,</span>
+<span id="cb9-5"><a href="#cb9-5" tabindex="-1"></a>               <span class="st">&#39;George W. Bush&#39;</span>, <span class="st">&#39;Texas&#39;</span>, <span class="dv">77</span>,</span>
+<span id="cb9-6"><a href="#cb9-6" tabindex="-1"></a>               <span class="st">&#39;Bill Clinton&#39;</span>, <span class="st">&#39;Arkansas&#39;</span>, <span class="dv">77</span>)</span>
+<span id="cb9-7"><a href="#cb9-7" tabindex="-1"></a></span>
+<span id="cb9-8"><a href="#cb9-8" tabindex="-1"></a>dfB <span class="ot">&lt;-</span> <span class="fu">tribble</span>(<span class="sc">~</span>name, <span class="sc">~</span>state, <span class="sc">~</span>hobby,</span>
+<span id="cb9-9"><a href="#cb9-9" tabindex="-1"></a>               <span class="st">&#39;Joseph Robinette Biden&#39;</span>, <span class="st">&#39;Delaware&#39;</span>, <span class="st">&#39;Football&#39;</span>,</span>
+<span id="cb9-10"><a href="#cb9-10" tabindex="-1"></a>               <span class="st">&#39;Donald John Trump &#39;</span>, <span class="st">&#39;Florida&#39;</span>, <span class="st">&#39;Golf&#39;</span>,</span>
+<span id="cb9-11"><a href="#cb9-11" tabindex="-1"></a>               <span class="st">&#39;Barack Hussein Obama&#39;</span>, <span class="st">&#39;Illinois&#39;</span>, <span class="st">&#39;Basketball&#39;</span>,</span>
+<span id="cb9-12"><a href="#cb9-12" tabindex="-1"></a>               <span class="st">&#39;George Walker Bush&#39;</span>, <span class="st">&#39;Texas&#39;</span>, <span class="st">&#39;Reading&#39;</span>,</span>
+<span id="cb9-13"><a href="#cb9-13" tabindex="-1"></a>               <span class="st">&#39;William Jefferson Clinton&#39;</span>, <span class="st">&#39;Arkansas&#39;</span>, <span class="st">&#39;Saxophone&#39;</span>,</span>
+<span id="cb9-14"><a href="#cb9-14" tabindex="-1"></a>               <span class="st">&#39;George Herbert Walker Bush&#39;</span>, <span class="st">&#39;Texas&#39;</span>, <span class="st">&#39;Skydiving&#39;</span>,</span>
+<span id="cb9-15"><a href="#cb9-15" tabindex="-1"></a>               <span class="st">&#39;Biff Tannen&#39;</span>, <span class="st">&#39;California&#39;</span>, <span class="st">&#39;Bullying&#39;</span>,</span>
+<span id="cb9-16"><a href="#cb9-16" tabindex="-1"></a>               <span class="st">&#39;Joe Riley&#39;</span>, <span class="st">&#39;South Carolina&#39;</span>, <span class="st">&#39;Jogging&#39;</span>)</span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a>df <span class="ot">&lt;-</span> <span class="fu">fuzzylink</span>(dfA, dfB, </span>
+<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a>                <span class="at">by =</span> <span class="st">&#39;name&#39;</span>,</span>
+<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a>                <span class="at">blocking.variables =</span> <span class="st">&#39;state&#39;</span>,</span>
+<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a>                <span class="at">record_type =</span> <span class="st">&#39;person&#39;</span>)</span>
+<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a>df</span></code></pre></div>
+<pre><code>#&gt;                A
+#&gt; 1      Joe Biden
+#&gt; 2   Barack Obama
+#&gt; 3 George W. Bush
+#&gt; 4   Bill Clinton
+#&gt; 5   Donald Trump
+#&gt;                           B
+#&gt; 1    Joseph Robinette Biden
+#&gt; 2      Barack Hussein Obama
+#&gt; 3        George Walker Bush
+#&gt; 4 William Jefferson Clinton
+#&gt; 5                      &lt;NA&gt;
+#&gt;         sim block        jw match
+#&gt; 1 0.7661285     1 0.7673401   Yes
+#&gt; 2 0.8457284     3 0.9200000   Yes
+#&gt; 3 0.8445312     4 0.9301587   Yes
+#&gt; 4 0.8730800     5 0.5788889   Yes
+#&gt; 5        NA    NA        NA  &lt;NA&gt;
+#&gt;   match_probability    state age
+#&gt; 1                 1 Delaware  81
+#&gt; 2                 1 Illinois  62
+#&gt; 3                 1    Texas  77
+#&gt; 4                 1 Arkansas  77
+#&gt; 5                NA New York  77
+#&gt;        hobby
+#&gt; 1   Football
+#&gt; 2 Basketball
+#&gt; 3    Reading
+#&gt; 4  Saxophone
+#&gt; 5       &lt;NA&gt;</code></pre>
+<p>Note that because Donald Trump is listed under two different
+states—New York in <code>dfA</code> and Florida in <code>dfB</code>–the
+<code>fuzzylink()</code> function no longer returns a match for this
+record; all blocking variables must match exactly before the function
+will link two records together. You can specify as many blocking
+variables as needed by inputting their column names as a vector.</p>
+<p>The function returns a few additional columns along with the merged
+dataframe. The column <code>match_probability</code> reports the model’s
+estimated probability that the pair of records refer to the same entity.
+This column should be used to aid in validation and can be used for
+computing weighted averages if a record in <code>dfA</code> is matched
+to multiple records in <code>dFB</code>. The columns <code>sim</code>
+and <code>jw</code> are string distance measures that the model uses to
+predict whether two records are a match. And if you included
+<code>blocking.variables</code> in the function call, there will be a
+column called <code>block</code> with an ID variable denoting which
+block the records belong to.</p>
+<h2 id="a-note-on-cost">A Note On Cost</h2>
+<p>Because the <code>fuzzylink()</code> function makes several calls to
+the OpenAI API—which charges a per-token fee—there is a monetary cost
+associated with each use. Based on the package defaults and API pricing
+as of August 2025, here is a table of approximate costs for merging
+datasets of various sizes.</p>
+<table>
+<thead>
+<tr>
+<th align="left">dfA</th>
+<th align="left">dfB</th>
+<th align="left">Approximate Cost (Default Settings)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">10</td>
+<td align="left">10</td>
+<td align="left">$0</td>
+</tr>
+<tr>
+<td align="left">10</td>
+<td align="left">100</td>
+<td align="left">$0</td>
+</tr>
+<tr>
+<td align="left">10</td>
+<td align="left">1,000</td>
+<td align="left">$0</td>
+</tr>
+<tr>
+<td align="left">10</td>
+<td align="left">10,000</td>
+<td align="left">$0.01</td>
+</tr>
+<tr>
+<td align="left">10</td>
+<td align="left">100,000</td>
+<td align="left">$0.06</td>
+</tr>
+<tr>
+<td align="left">10</td>
+<td align="left">1,000,000</td>
+<td align="left">$0.59</td>
+</tr>
+<tr>
+<td align="left">100</td>
+<td align="left">10</td>
+<td align="left">$0.04</td>
+</tr>
+<tr>
+<td align="left">100</td>
+<td align="left">100</td>
+<td align="left">$0.04</td>
+</tr>
+<tr>
+<td align="left">100</td>
+<td align="left">1,000</td>
+<td align="left">$0.04</td>
+</tr>
+<tr>
+<td align="left">100</td>
+<td align="left">10,000</td>
+<td align="left">$0.04</td>
+</tr>
+<tr>
+<td align="left">100</td>
+<td align="left">100,000</td>
+<td align="left">$0.1</td>
+</tr>
+<tr>
+<td align="left">100</td>
+<td align="left">1,000,000</td>
+<td align="left">$0.62</td>
+</tr>
+<tr>
+<td align="left">1,000</td>
+<td align="left">10</td>
+<td align="left">$0.38</td>
+</tr>
+<tr>
+<td align="left">1,000</td>
+<td align="left">100</td>
+<td align="left">$0.38</td>
+</tr>
+<tr>
+<td align="left">1,000</td>
+<td align="left">1,000</td>
+<td align="left">$0.38</td>
+</tr>
+<tr>
+<td align="left">1,000</td>
+<td align="left">10,000</td>
+<td align="left">$0.38</td>
+</tr>
+<tr>
+<td align="left">1,000</td>
+<td align="left">100,000</td>
+<td align="left">$0.43</td>
+</tr>
+<tr>
+<td align="left">1,000</td>
+<td align="left">1,000,000</td>
+<td align="left">$0.96</td>
+</tr>
+<tr>
+<td align="left">10,000</td>
+<td align="left">10</td>
+<td align="left">$0.76</td>
+</tr>
+<tr>
+<td align="left">10,000</td>
+<td align="left">100</td>
+<td align="left">$0.76</td>
+</tr>
+<tr>
+<td align="left">10,000</td>
+<td align="left">1,000</td>
+<td align="left">$0.76</td>
+</tr>
+<tr>
+<td align="left">10,000</td>
+<td align="left">10,000</td>
+<td align="left">$0.76</td>
+</tr>
+<tr>
+<td align="left">10,000</td>
+<td align="left">100,000</td>
+<td align="left">$0.81</td>
+</tr>
+<tr>
+<td align="left">10,000</td>
+<td align="left">1,000,000</td>
+<td align="left">$1.34</td>
+</tr>
+<tr>
+<td align="left">100,000</td>
+<td align="left">10</td>
+<td align="left">$0.81</td>
+</tr>
+<tr>
+<td align="left">100,000</td>
+<td align="left">100</td>
+<td align="left">$0.81</td>
+</tr>
+<tr>
+<td align="left">100,000</td>
+<td align="left">1,000</td>
+<td align="left">$0.81</td>
+</tr>
+<tr>
+<td align="left">100,000</td>
+<td align="left">10,000</td>
+<td align="left">$0.81</td>
+</tr>
+<tr>
+<td align="left">100,000</td>
+<td align="left">100,000</td>
+<td align="left">$0.87</td>
+</tr>
+<tr>
+<td align="left">100,000</td>
+<td align="left">1,000,000</td>
+<td align="left">$1.39</td>
+</tr>
+<tr>
+<td align="left">1,000,000</td>
+<td align="left">10</td>
+<td align="left">$1.34</td>
+</tr>
+<tr>
+<td align="left">1,000,000</td>
+<td align="left">100</td>
+<td align="left">$1.34</td>
+</tr>
+<tr>
+<td align="left">1,000,000</td>
+<td align="left">1,000</td>
+<td align="left">$1.34</td>
+</tr>
+<tr>
+<td align="left">1,000,000</td>
+<td align="left">10,000</td>
+<td align="left">$1.34</td>
+</tr>
+<tr>
+<td align="left">1,000,000</td>
+<td align="left">100,000</td>
+<td align="left">$1.39</td>
+</tr>
+<tr>
+<td align="left">1,000,000</td>
+<td align="left">1,000,000</td>
+<td align="left">$1.92</td>
+</tr>
+</tbody>
+</table>
+<p>Note that cost scales more quickly with the size of <code>dfA</code>
+than with <code>dfB</code>, because it is more costly to complete LLM
+prompts for validation than it is to retrieve embeddings. With
+particularly large datasets, one can reduce costs by using GPT-3.5
+(<code>model = &#39;gpt-3.5-turbo-instruct&#39;</code>), blocking
+(<code>blocking.variables</code>), or reducing the maximum number of
+pairs labeled by the LLM (<code>max_labels</code>).</p>
+
+</body>
+</html>

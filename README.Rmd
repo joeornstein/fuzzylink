@@ -96,7 +96,7 @@ Or you can install the development version from [GitHub](https://github.com/) wi
 devtools::install_github("joeornstein/fuzzylink")
 ```
 
-You will also need API access to a large language model (LLM). The `fuzzylink` package currently supports both OpenAI and Mistral LLMs, but will default to using OpenAI unless specified by the user.
+You will also need API access to a large language model (LLM). The `fuzzylink` package currently supports OpenAI, Mistral, and Anthropic Claude LLMs, but will default to using OpenAI unless specified by the user.
 
 ### OpenAI
 
@@ -120,6 +120,16 @@ Once you have a paid account, you can create an API key [here](https://console.m
 library(fuzzylink)
 
 mistral_api_key('YOUR API KEY GOES HERE', install = TRUE)
+```
+
+### Anthropic
+
+If you prefer to use Anthropic's Claude models, you can sign up for an account [here](https://www.anthropic.com/). Once you have an API key, copy-paste it into the following line of R code:
+
+```
+library(fuzzylink)
+
+anthropic_api_key('YOUR API KEY GOES HERE', install = TRUE)
 ```
 
 Now you're all set up!
@@ -164,7 +174,7 @@ If the `df` object links all the presidents to their correct name in `dfB`, ever
 
 - The `instructions` argument should be a string containing additional instructions to include in the language model prompt. Format these like you would format instructions to a human research assistant, including any relevant information that you think would help the model make accurate classifications.
 
-- The `model` argument specifies which language model to prompt. It defaults to OpenAI's 'gpt-4o', but for simpler problems, you can try 'gpt-3.5-turbo-instruct', which will significantly reduce cost and runtime. If you prefer an open-source language model, try 'open-mixtral-8x22b'.
+- The `model` argument specifies which language model to prompt. It defaults to OpenAI's `'gpt-5.2'`, but also accepts Mistral models (e.g. `'mistral-large-latest'`) and Anthropic Claude models (e.g. `'claude-sonnet-4-5-20250929'`). For simpler problems, you can try `'gpt-3.5-turbo-instruct'`, which will significantly reduce cost and runtime.
 
 - The `embedding_model` argument specifies which pretrained text embeddings to use when modeling match probability. It defaults to OpenAI's 'text-embedding-3-large', but will also accept 'text-embedding-3-small' or Mistral's 'mistral-embed'. 
 
