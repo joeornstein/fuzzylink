@@ -1,5 +1,7 @@
 # fuzzylink 0.4.1
 
+* Fixed a redirecting URL in DESCRIPTION for CRAN resubmission
+
 # fuzzylink 0.4.0
 
 * `fuzzylink()` now supports Anthropic Claude (e.g. `'claude-sonnet-4-5-20250929'`) and Mistral (e.g. `'mistral-large-latest'`) models in addition to OpenAI.
