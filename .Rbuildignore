@@ -9,3 +9,5 @@ data-raw/
 ^pkgdown$
 ^cran-comments\.md$
 ^CRAN-SUBMISSION$
+^\.positai$
+^\.claude$

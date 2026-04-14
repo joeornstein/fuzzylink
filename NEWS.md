@@ -1,3 +1,7 @@
+# fuzzylink 0.4.2
+
+* Added a hex sticker logo.
+
 # fuzzylink 0.4.1
 
 * Fixed a redirecting URL in DESCRIPTION for CRAN resubmission
