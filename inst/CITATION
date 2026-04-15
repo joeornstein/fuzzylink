@@ -1,0 +1,17 @@
+citEntry(
+  entry = "Article",
+  title = "Probabilistic Record Linkage Using Pretrained Text Embeddings",
+  author = person("Joseph T.", "Ornstein"),
+  journal = "Political Analysis",
+  year = "2026",
+  volume = "34",
+  number = "2",
+  pages = "205--216",
+  doi = "10.1017/pan.2025.10016",
+  textVersion = paste0(
+    "Ornstein, J. T. (2026). ",
+    "Probabilistic Record Linkage Using Pretrained Text Embeddings. ",
+    "Political Analysis, 34(2), 205-216.",
+    "https://doi.org/10.1017/pan.2025.10016"
+  )
+)
