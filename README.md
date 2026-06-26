@@ -141,6 +141,14 @@ copy-paste it into the following line of R code:
 
     anthropic_api_key('YOUR API KEY GOES HERE', install = TRUE)
 
+### OpenRouter
+
+OpenRouter provides access to a large variety of text embedding and chat models. You can sign up for an account [here](https://openrouter.ai/). Once you have an API key, copy-paste it into the following line of R code:
+
+    library(fuzzylink)
+
+    openrouter_api_key('YOUR API KEY GOES HERE', install = TRUE)
+
 Now you’re all set up!
 
 ## Example
@@ -198,15 +206,18 @@ whenever the model fit is *too* perfect.)
 
 - The `model` argument specifies which language model to prompt. It
   defaults to OpenAI’s `'gpt-5.2'`, but also accepts Mistral models
-  (e.g. `'mistral-large-latest'`) and Anthropic Claude models
-  (e.g. `'claude-sonnet-4-5-20250929'`). For simpler problems, you can
+  (e.g. `'mistral-large-latest'`), Anthropic Claude models
+  (e.g. `'claude-sonnet-4-5-20250929'`), or OpenRouter models
+  (e.g. `'google/gemini-2.5-flash'`). For simpler problems, you can
   try `'gpt-3.5-turbo-instruct'`, which will significantly reduce cost
   and runtime.
 
 - The `embedding_model` argument specifies which pretrained text
   embeddings to use when modeling match probability. It defaults to
   OpenAI’s ‘text-embedding-3-large’, but will also accept
-  ‘text-embedding-3-small’ or Mistral’s ‘mistral-embed’.
+  ‘text-embedding-3-small’, Mistral’s ‘mistral-embed’, or any OpenRouter
+  embedding model. OpenRouter models are automatically detected if the model
+  name contains a slash (e.g. 'nvidia/llama-nemotron-embed-vl-1b-v2:free').
 
 - Several parameters—including `p`, `k`, `embedding_dimensions`,
   `max_validations`, and `parallel`—are for advanced users who wish to

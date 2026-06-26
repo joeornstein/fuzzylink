@@ -2,10 +2,10 @@
 #'
 #' @param string1 A string or vector of strings
 #' @param string2 A string or vector of strings
-#' @param model Which LLM to prompt; defaults to 'gpt-5.2'. Also accepts Mistral models (e.g. 'mistral-large-latest') and Anthropic Claude models (e.g. 'claude-sonnet-4-5-20250929').
+#' @param model Which LLM to prompt; defaults to 'gpt-5.2'. Also accepts Mistral models (e.g. 'mistral-large-latest'), Anthropic Claude models (e.g. 'claude-sonnet-4-5-20250929'), and OpenRouter models (e.g. 'google/gemini-2.5-flash'). OpenRouter models are detected if the model string contains a slash.
 #' @param record_type A character describing what type of entity `string1` and `string2` represent. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
 #' @param instructions A string containing additional instructions to include in the LLM prompt.
-#' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
+#' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument. If this is not set but an OPENROUTER_API_KEY is available, it will automatically fall back to OpenRouter.
 #' @param parallel TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.
 #'
 #' @return A vector the same length as `string1` and `string2`. "Yes" if the pair of strings match, "No" otherwise.
@@ -29,16 +29,22 @@ check_match <- function(string1, string2,
     stop('Inputs must have the same number of elements.')
   }
 
-  if(openai_api_key == ''){
-    stop("No API key detected in system environment. You can add one using the 'openai_api_key()' function.")
-  }
-
   # encode strings as characters
   string1 <- as.character(string1)
   string2 <- as.character(string2)
 
   # use the Completions endpoint if the model is a "Legacy" model
   if(model %in% c('gpt-3.5-turbo-instruct', 'davinci-002', 'babbage-002')){
+    if(openai_api_key == ''){
+      if(Sys.getenv("OPENROUTER_API_KEY") != '') {
+        openai_api_key <- Sys.getenv("OPENROUTER_API_KEY")
+        base_url <- "https://openrouter.ai/api/v1/completions"
+      } else {
+        stop("No API key detected in system environment. You can add one using the 'openai_api_key()' function.")
+      }
+    } else {
+      base_url <- "https://api.openai.com/v1/completions"
+    }
 
     # if non-NULL, pad the instructions
     if(!is.null(instructions)){
@@ -60,9 +66,6 @@ check_match <- function(string1, string2,
 
     # don't submit prompts for exact string matches
     p <- p[string1 != string2]
-
-    # build path parameters
-    base_url <- "https://api.openai.com/v1/completions"
 
     headers <- c(
       "Authorization" = paste("Bearer", openai_api_key),
@@ -162,13 +165,46 @@ check_match <- function(string1, string2,
 
     return(labels)
 
+  } else if(stringr::str_detect(model, '/')){
+    # detect that a model is from OpenRouter API by looking for a slash in model name string
+
+    if(Sys.getenv('OPENROUTER_API_KEY') == ''){
+      stop("No OpenRouter API key detected in system environment. You can add one using the 'openrouter_api_key()' function.")
+    }
+    if(is.null(instructions)){
+      instructions <- ''
+    }
+    chat <- ellmer::chat_openai('Respond with "Yes" or "No".',
+                                model = model,
+                                base_url = "https://openrouter.ai/api/v1",
+                                credentials = function(){Sys.getenv('OPENROUTER_API_KEY')})
+
+    prompts <- ellmer::interpolate('Decide if the following two names refer to the same {{record_type}}. {{instructions}}\n\nName A: {{string1}}\nName B: {{string2}}')
+
+    labels <- ellmer::parallel_chat_text(chat, prompts)
+    labels <- stringr::str_to_title(stringr::str_extract(labels, '^\\w+'))
+
+    return(labels)
+
   } else{ # OpenAI chat models
+
+    if(openai_api_key == ''){
+      if(Sys.getenv("OPENROUTER_API_KEY") != '') {
+        openai_api_key <- Sys.getenv("OPENROUTER_API_KEY")
+        base_url <- "https://openrouter.ai/api/v1"
+      } else {
+        stop("No API key detected in system environment. You can add one using the 'openai_api_key()' function.")
+      }
+    } else {
+      base_url <- "https://api.openai.com/v1"
+    }
 
     if(is.null(instructions)){
       instructions <- ''
     }
     chat <- ellmer::chat_openai('Respond with "Yes" or "No".',
                                 model = model,
+                                base_url = base_url,
                                 credentials = function(){openai_api_key})
 
     prompts <- ellmer::interpolate('Decide if the following two names refer to the same {{record_type}}. {{instructions}}\n\nName A: {{string1}}\nName B: {{string2}}')
