@@ -25,7 +25,7 @@ check_match(
 
 \item{instructions}{A string containing additional instructions to include in the LLM prompt.}
 
-\item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument. If this is not set but an OPENROUTER_API_KEY is available, it will automatically fall back to OpenRouter.}
+\item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
 
 \item{parallel}{TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.}
 }

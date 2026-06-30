@@ -107,14 +107,7 @@ get_embeddings <- function(text,
 
   } else {
     if (openai_api_key == '') {
-      if (Sys.getenv("OPENROUTER_API_KEY") != '') {
-        openai_api_key <- Sys.getenv("OPENROUTER_API_KEY")
-        base_url <- "https://openrouter.ai/api/v1/embeddings"
-      } else {
-        stop("No API key detected. Set OPENAI_API_KEY in .Renviron or pass openai_api_key as argument.")
-      }
-    } else {
-      base_url <- "https://api.openai.com/v1/embeddings"
+      stop("No API key detected. Set OPENAI_API_KEY in .Renviron or pass openai_api_key as argument.")
     }
 
     # format an API request to embeddings endpoint
@@ -123,14 +116,8 @@ get_embeddings <- function(text,
         "Authorization" = paste("Bearer", openai_api_key),
         "Content-Type" = "application/json"
       )
-      if (grepl("openrouter", base_url)) {
-        headers <- c(headers,
-          "HTTP-Referer" = "https://github.com/joeornstein/fuzzylink",
-          "X-Title" = "fuzzylink"
-        )
-      }
 
-      httr2::request(base_url) |>
+      httr2::request("https://api.openai.com/v1/embeddings") |>
         httr2::req_headers(!!!headers) |>
         httr2::req_body_json(list(
           model = model,

@@ -38,7 +38,7 @@ fuzzylink(
 
 \item{model}{Which LLM to prompt when validating matches; defaults to 'gpt-5.2'. Also accepts Mistral models (e.g. 'mistral-large-latest'), Anthropic Claude models (e.g. 'claude-sonnet-4-5-20250929'), and OpenRouter models (e.g. 'google/gemini-2.5-flash').}
 
-\item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument. If this is not set but an OPENROUTER_API_KEY is available, it will automatically fall back to OpenRouter.}
+\item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
 
 \item{embedding_dimensions}{The dimension of the embedding vectors to retrieve. Defaults to 256}
 
