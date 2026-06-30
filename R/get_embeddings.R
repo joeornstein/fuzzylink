@@ -1,10 +1,10 @@
 #' Get pretrained text embeddings
 #'
 #' @description
-#' Get pretrained text embeddings from the OpenAI or Mistral API. Automatically batches requests to handle rate limits.
+#' Get pretrained text embeddings from the OpenAI, Mistral, or OpenRouter API. Automatically batches requests to handle rate limits.
 #'
 #' @param text A character vector
-#' @param model Which embedding model to use. Defaults to 'text-embedding-3-large'.
+#' @param model Which embedding model to use. Defaults to 'text-embedding-3-large'. OpenRouter models are detected if they contain a slash (e.g. 'nvidia/llama-nemotron-embed-vl-1b-v2:free').
 #' @param dimensions The dimension of the embedding vectors to return. Defaults to 256. Note that the 'mistral-embed' model will always return 1024 vectors.
 #' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY".
 #' @param parallel TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.
@@ -23,6 +23,27 @@ get_embeddings <- function(text,
                            dimensions = 256,
                            openai_api_key = Sys.getenv("OPENAI_API_KEY"),
                            parallel = TRUE) {
+  if (grepl("/", model)) {
+    api_key <- Sys.getenv("OPENROUTER_API_KEY")
+    if (api_key == '') {
+      stop("No API key detected for OpenRouter. You can add one using the 'openrouter_api_key()' function.")
+    }
+
+    # check whether the provided model string is indeed an OpenRouter embeddings model
+    check_req <- httr2::request("https://openrouter.ai/api/v1/embeddings/models") |>
+      httr2::req_headers(
+        "Authorization" = paste("Bearer", api_key),
+        "HTTP-Referer" = "https://github.com/joeornstein/fuzzylink",
+        "X-Title" = "fuzzylink"
+      )
+    check_resp <- httr2::req_perform(check_req)
+    models_data <- httr2::resp_body_json(check_resp)$data
+    available_models <- sapply(models_data, function(x) x$id)
+    if (!model %in% available_models) {
+      stop(paste("Model", model, "is not available on OpenRouter or is not a text embedding model."))
+    }
+  }
+
   if (model == 'mistral-embed') {
     if (Sys.getenv('MISTRAL_API_KEY') == '') {
       stop("No API key detected in system environment. Add to Renviron as MISTRAL_API_KEY.")
@@ -53,17 +74,61 @@ get_embeddings <- function(text,
     # Split the vector based on the calculated indices
     chunks <- split(text, split_indices)
 
+  } else if (grepl("/", model)) {
+    api_key <- Sys.getenv("OPENROUTER_API_KEY")
+    base_url <- "https://openrouter.ai/api/v1/embeddings"
+    
+    # format an API request to embeddings endpoint
+    format_openrouter_request <- function(chunk) {
+      headers <- c(
+        "Authorization" = paste("Bearer", api_key),
+        "Content-Type" = "application/json",
+        "HTTP-Referer" = "https://github.com/joeornstein/fuzzylink",
+        "X-Title" = "fuzzylink"
+      )
+
+      httr2::request(base_url) |>
+        httr2::req_headers(!!!headers) |>
+        httr2::req_body_json(list(
+          model = model,
+          input = chunk,
+          dimensions = dimensions
+        )) |>
+        httr2::req_retry(max_tries = 5,
+                         is_transient = \(resp) httr2::resp_status(resp) %in% c(429, 500:504))
+    }
+
+    # max tokens per request
+    tpr <- 8192
+    max_characters <- tpr * 2
+    cumulative_length <- cumsum(nchar(text))
+    split_indices <- cumulative_length %/% max_characters
+    chunks <- split(text, split_indices)
+
   } else {
     if (openai_api_key == '') {
-      stop("No API key detected. Set OPENAI_API_KEY in .Renviron or pass as argument.")
+      if (Sys.getenv("OPENROUTER_API_KEY") != '') {
+        openai_api_key <- Sys.getenv("OPENROUTER_API_KEY")
+        base_url <- "https://openrouter.ai/api/v1/embeddings"
+      } else {
+        stop("No API key detected. Set OPENAI_API_KEY in .Renviron or pass openai_api_key as argument.")
+      }
+    } else {
+      base_url <- "https://api.openai.com/v1/embeddings"
     }
 
     # format an API request to embeddings endpoint
-    format_request <- function(chunk, base_url = "https://api.openai.com/v1/embeddings") {
+    format_request <- function(chunk) {
       headers <- c(
         "Authorization" = paste("Bearer", openai_api_key),
         "Content-Type" = "application/json"
       )
+      if (grepl("openrouter", base_url)) {
+        headers <- c(headers,
+          "HTTP-Referer" = "https://github.com/joeornstein/fuzzylink",
+          "X-Title" = "fuzzylink"
+        )
+      }
 
       httr2::request(base_url) |>
         httr2::req_headers(!!!headers) |>
@@ -95,6 +160,8 @@ get_embeddings <- function(text,
   # format list of requests
   if(model == 'mistral-embed'){
     reqs <- lapply(chunks, format_mistral_request)
+  } else if (grepl("/", model)){
+    reqs <- lapply(chunks, format_openrouter_request)
   } else{
     reqs <- lapply(chunks, format_request)
   }

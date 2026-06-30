@@ -36,13 +36,13 @@ fuzzylink(
 
 \item{instructions}{A string containing additional instructions to include in the LLM prompt during validation.}
 
-\item{model}{Which LLM to prompt when validating matches; defaults to 'gpt-5.2'. Also accepts Mistral models (e.g. 'mistral-large-latest') and Anthropic Claude models (e.g. 'claude-sonnet-4-5-20250929').}
+\item{model}{Which LLM to prompt when validating matches; defaults to 'gpt-5.2'. Also accepts Mistral models (e.g. 'mistral-large-latest'), Anthropic Claude models (e.g. 'claude-sonnet-4-5-20250929'), and OpenRouter models (e.g. 'google/gemini-2.5-flash').}
 
-\item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.}
+\item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument. If this is not set but an OPENROUTER_API_KEY is available, it will automatically fall back to OpenRouter.}
 
 \item{embedding_dimensions}{The dimension of the embedding vectors to retrieve. Defaults to 256}
 
-\item{embedding_model}{Which pretrained embedding model to use; defaults to 'text-embedding-3-large' (OpenAI), but will also accept 'mistral-embed' (Mistral).}
+\item{embedding_model}{Which pretrained embedding model to use; defaults to 'text-embedding-3-large' (OpenAI), but will also accept 'mistral-embed' (Mistral), or any OpenRouter embedding model.}
 
 \item{learner}{Which supervised learner should be used to predict match probabilities. Defaults to logistic regression ('glm'), but will also accept random forest ('ranger').}
 

@@ -6,10 +6,10 @@
 #' @param verbose TRUE to print progress updates, FALSE for no output
 #' @param record_type A character describing what type of entity the `by` variable represents. Should be a singular noun (e.g. "person", "organization", "interest group", "city").
 #' @param instructions A string containing additional instructions to include in the LLM prompt during validation.
-#' @param model Which LLM to prompt when validating matches; defaults to 'gpt-5.2'. Also accepts Mistral models (e.g. 'mistral-large-latest') and Anthropic Claude models (e.g. 'claude-sonnet-4-5-20250929').
-#' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument.
+#' @param model Which LLM to prompt when validating matches; defaults to 'gpt-5.2'. Also accepts Mistral models (e.g. 'mistral-large-latest'), Anthropic Claude models (e.g. 'claude-sonnet-4-5-20250929'), and OpenRouter models (e.g. 'google/gemini-2.5-flash').
+#' @param openai_api_key Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY" (recommended option). Otherwise, it will prompt you to enter the API key as an argument. If this is not set but an OPENROUTER_API_KEY is available, it will automatically fall back to OpenRouter.
 #' @param embedding_dimensions The dimension of the embedding vectors to retrieve. Defaults to 256
-#' @param embedding_model Which pretrained embedding model to use; defaults to 'text-embedding-3-large' (OpenAI), but will also accept 'mistral-embed' (Mistral).
+#' @param embedding_model Which pretrained embedding model to use; defaults to 'text-embedding-3-large' (OpenAI), but will also accept 'mistral-embed' (Mistral), or any OpenRouter embedding model.
 #' @param learner Which supervised learner should be used to predict match probabilities. Defaults to logistic regression ('glm'), but will also accept random forest ('ranger').
 #' @param fmla By default, logistic regression model predicts whether two records match as a linear combination of embedding similarity and Jaro-Winkler similarity (`match ~ sim + jw`). Change this input for alternate specifications.
 #' @param max_labels The maximum number of LLM prompts to submit when labeling record pairs. Defaults to 10,000
@@ -51,8 +51,12 @@ fuzzylink <- function(dfA, dfB,
   if(is.null(dfB[[by]])){
     stop("There is no variable called \'", by, "\' in dfB.")
   }
-  if(openai_api_key == ''){
-    stop("No API key detected in system environment. You can enter it manually using the 'openai_api_key' argument.")
+  
+  # if not using Mistral or OpenRouter and api key is empty, stop
+  if(openai_api_key == '' && !grepl("/", model) && model != 'mistral-embed' && !grepl("/", embedding_model) && embedding_model != 'mistral-embed'){
+    if(Sys.getenv('OPENROUTER_API_KEY') == '') {
+      stop("No API key detected in system environment. You can enter it manually using the 'openai_api_key' argument or standard environment variables.")
+    }
   }
   missing_dfA <- sum(!stats::complete.cases(dfA[,c(by, blocking.variables), drop = FALSE]))
   if(missing_dfA > 0){

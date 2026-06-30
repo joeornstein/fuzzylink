@@ -15,7 +15,7 @@ get_embeddings(
 \arguments{
 \item{text}{A character vector}
 
-\item{model}{Which embedding model to use. Defaults to 'text-embedding-3-large'.}
+\item{model}{Which embedding model to use. Defaults to 'text-embedding-3-large'. OpenRouter models are detected if they contain a slash (e.g. 'nvidia/llama-nemotron-embed-vl-1b-v2:free').}
 
 \item{dimensions}{The dimension of the embedding vectors to return. Defaults to 256. Note that the 'mistral-embed' model will always return 1024 vectors.}
 
@@ -27,7 +27,7 @@ get_embeddings(
 A matrix of embedding vectors (one per row).
 }
 \description{
-Get pretrained text embeddings from the OpenAI or Mistral API. Automatically batches requests to handle rate limits.
+Get pretrained text embeddings from the OpenAI, Mistral, or OpenRouter API. Automatically batches requests to handle rate limits.
 }
 \examples{
 \dontrun{
