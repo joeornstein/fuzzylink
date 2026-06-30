@@ -1,6 +1,6 @@
 Package: fuzzylink
 Title: Probabilistic Record Linkage Using Pretrained Text Embeddings
-Version: 0.4.2
+Version: 0.5.0
 Authors@R: 
     person("Joe", "Ornstein", , "jornstein@uga.edu", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0002-5704-2098"))
@@ -8,7 +8,6 @@ Description: Links datasets through fuzzy string matching using pretrained text 
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Imports: 
     stats,
     utils,
@@ -27,3 +26,4 @@ Depends:
 LazyData: true
 URL: https://joeornstein.github.io/software/fuzzylink/
 BugReports: https://github.com/joeornstein/fuzzylink/issues
+Config/roxygen2/version: 8.0.0
