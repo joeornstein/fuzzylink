@@ -1,3 +1,7 @@
+# fuzzylink 0.5.0
+
+* Added support for OpenRouter models and embeddings
+
 # fuzzylink 0.4.2
 
 * Added a hex sticker logo.
