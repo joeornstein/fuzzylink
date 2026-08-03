@@ -9,7 +9,8 @@ get_embeddings(
   model = "text-embedding-3-large",
   dimensions = 256,
   openai_api_key = Sys.getenv("OPENAI_API_KEY"),
-  parallel = TRUE
+  parallel = TRUE,
+  cache = TRUE
 )
 }
 \arguments{
@@ -22,12 +23,16 @@ get_embeddings(
 \item{openai_api_key}{Your OpenAI API key. By default, looks for a system environment variable called "OPENAI_API_KEY".}
 
 \item{parallel}{TRUE to submit API requests in parallel. Setting to FALSE can reduce rate limit errors at the expense of longer runtime.}
+
+\item{cache}{Controls on-disk caching of embeddings. \code{TRUE} (the default) caches to a default file under \code{tools::R_user_dir("fuzzylink", "cache")}. Pass a file path to use a specific cache file, or \code{FALSE}/\code{NULL} to disable caching entirely.}
 }
 \value{
 A matrix of embedding vectors (one per row).
 }
 \description{
 Get pretrained text embeddings from the OpenAI, Mistral, or OpenRouter API. Automatically batches requests to handle rate limits.
+
+Embeddings are cached to disk so that repeated calls only send API requests for strings that have not been embedded before. Cache entries are keyed by the text string together with the \code{model} and \code{dimensions}, so switching models or dimension settings will never return mismatched vectors.
 }
 \examples{
 \dontrun{
