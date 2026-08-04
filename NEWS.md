@@ -1,3 +1,5 @@
+# fuzzylink 0.5.1
+
 # fuzzylink 0.5.0
 
 * Added support for OpenRouter models and embeddings
