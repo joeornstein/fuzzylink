@@ -12,7 +12,7 @@ fuzzylink(
   verbose = TRUE,
   record_type = "entity",
   instructions = NULL,
-  model = "gpt-5.2",
+  model = "gpt-5.6-sol",
   openai_api_key = Sys.getenv("OPENAI_API_KEY"),
   embedding_dimensions = 256,
   embedding_model = "text-embedding-3-large",
