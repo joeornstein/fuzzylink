@@ -444,10 +444,10 @@ fuzzylink <- function(dfA, dfB,
     )
 
     # merge into df, updating match values where they differ
-    to_search <- dplyr::select(to_search, A, B, match)
+    to_search <- dplyr::select(to_search, A, B, block, match)
     df <- df |>
       dplyr::left_join(to_search,
-                       by = c("A", "B"),
+                       by = c("A", "B", "block"),
                        suffix = c(".1", ".2")) |>
       dplyr::mutate(match = dplyr::coalesce(match.1, match.2)) |>
       dplyr::select(-match.1, -match.2)
