@@ -1,5 +1,8 @@
 # fuzzylink 0.5.1
 
+* Patched bug during recall search that caused merge error when dfA contained duplicate names across multiple blocks
+* Updated default labelling model to `gpt-5.6-sol`
+
 # fuzzylink 0.5.0
 
 * Added support for OpenRouter models and embeddings
